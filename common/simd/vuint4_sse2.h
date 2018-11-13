@@ -242,12 +242,14 @@ namespace embree
   __forceinline vuint4 operator ^(const vuint4& a, unsigned int  b) { return a ^ vuint4(b); }
   __forceinline vuint4 operator ^(unsigned int  a, const vuint4& b) { return vuint4(a) ^ b; }
 
+#if !defined(__ARM_NEON)
   __forceinline vuint4 operator <<(const vuint4& a, unsigned int n) { return _mm_slli_epi32(a, n); }
   __forceinline vuint4 operator >>(const vuint4& a, unsigned int n) { return _mm_srli_epi32(a, n); }
 
   __forceinline vuint4 sll (const vuint4& a, unsigned int b) { return _mm_slli_epi32(a, b); }
   __forceinline vuint4 sra (const vuint4& a, unsigned int b) { return _mm_srai_epi32(a, b); }
   __forceinline vuint4 srl (const vuint4& a, unsigned int b) { return _mm_srli_epi32(a, b); }
+#endif
   
   ////////////////////////////////////////////////////////////////////////////////
   /// Assignment Operators
@@ -270,8 +272,10 @@ namespace embree
   __forceinline vuint4& operator |=(vuint4& a, const vuint4& b) { return a = a | b; }
   __forceinline vuint4& operator |=(vuint4& a, unsigned int  b) { return a = a | b; }
   
+#if !defined(__ARM_NEON)
   __forceinline vuint4& operator <<=(vuint4& a, unsigned int  b) { return a = a << b; }
   __forceinline vuint4& operator >>=(vuint4& a, unsigned int  b) { return a = a >> b; }
+#endif
 
   ////////////////////////////////////////////////////////////////////////////////
   /// Comparison Operators + Select

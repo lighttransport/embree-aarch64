@@ -22,7 +22,11 @@
 #include <intrin.h>
 #endif
 
+#if defined(__ARM_NEON)
+#include "../math/SSE2NEON.h"
+#else
 #include <immintrin.h>
+#endif
 
 #if defined(__BMI__) && defined(__GNUC__)
   #if !defined(_tzcnt_u32)
@@ -217,26 +221,45 @@ namespace embree
 #else
   
   __forceinline void __cpuid(int out[4], int op) {
+#if defined(__ARM_NEON)
+    if (op == 0) { // Get CPU name
+      out[0] = 0x41524d20;
+      out[1] = 0x41524d20;
+      out[2] = 0x41524d20;
+      out[3] = 0x41524d20;
+    }
+#else
     asm volatile ("cpuid" : "=a"(out[0]), "=b"(out[1]), "=c"(out[2]), "=d"(out[3]) : "a"(op)); 
+#endif
   }
   
+#if !defined(__ARM_NEON)
   __forceinline void __cpuid_count(int out[4], int op1, int op2) {
     asm volatile ("cpuid" : "=a"(out[0]), "=b"(out[1]), "=c"(out[2]), "=d"(out[3]) : "a"(op1), "c"(op2)); 
   }
+#endif
   
 #endif
   
   __forceinline uint64_t read_tsc()  {
+#if defined(__ARM_NEON)
+    return 0; // FIXME(LTE): mimic rdtsc
+#else 
     uint32_t high,low;
     asm volatile ("rdtsc" : "=d"(high), "=a"(low));
     return (((uint64_t)high) << 32) + (uint64_t)low;
+#endif
   }
   
   __forceinline int bsf(int v) {
+#if defined(__ARM_NEON)
+    return __builtin_ctz(v);
+#else
 #if defined(__AVX2__) 
     return _tzcnt_u32(v);
 #else
     int r = 0; asm ("bsf %1,%0" : "=r"(r) : "r"(v)); return r;
+#endif
 #endif
   }
   
@@ -289,6 +312,8 @@ namespace embree
   __forceinline int bsr(int v) {
 #if defined(__AVX2__) 
     return 31 - _lzcnt_u32(v);
+#elif defined(__ARM_NEON)
+    return __builtin_clz(v)^31;
 #else
     int r = 0; asm ("bsr %1,%0" : "=r"(r) : "r"(v)); return r;
 #endif
@@ -343,27 +368,75 @@ namespace embree
   }
   
   __forceinline int btc(int v, int i) {
+#if defined(__ARM_NEON)
+    unsigned int mask = 1 << i;
+    
+    int r = (v & mask) ? 0xffffffff : 0;
+    v ^= mask;
+    return r;
+#else
     int r = 0; asm ("btc %1,%0" : "=r"(r) : "r"(i), "0"(v) : "flags" ); return r;
+#endif
   }
   
   __forceinline int bts(int v, int i) {
+#if defined(__ARM_NEON)
+    unsigned int mask = 1 << i;
+    
+    int r = (v & mask) ? 0xffffffff : 0;
+    v |= mask;
+    return r;
+#else
     int r = 0; asm ("bts %1,%0" : "=r"(r) : "r"(i), "0"(v) : "flags"); return r;
+#endif
   }
   
   __forceinline int btr(int v, int i) {
+#if defined(__ARM_NEON)
+    unsigned int mask = 1 << i;
+    
+    int r = (v & mask) ? 0xffffffff : 0;
+    v ^= ~mask;
+    return r;
+#else
     int r = 0; asm ("btr %1,%0" : "=r"(r) : "r"(i), "0"(v) : "flags"); return r;
+#endif
   }
   
   __forceinline size_t btc(size_t v, size_t i) {
+#if defined(__ARM_NEON)
+    size_t mask = 1 << i;
+    
+    int r = (v & mask) ? 0xffffffff : 0;
+    v ^= mask;
+    return r;
+#else
     size_t r = 0; asm ("btc %1,%0" : "=r"(r) : "r"(i), "0"(v) : "flags" ); return r;
+#endif
   }
   
   __forceinline size_t bts(size_t v, size_t i) {
+#if defined(__ARM_NEON)
+    size_t mask = 1 << i;
+    
+    int r = (v & mask) ? 0xffffffff : 0;
+    v |= mask;
+    return r;
+#else
     size_t r = 0; asm ("bts %1,%0" : "=r"(r) : "r"(i), "0"(v) : "flags"); return r;
+#endif
   }
   
   __forceinline size_t btr(size_t v, size_t i) {
+#if defined(__ARM_NEON)
+    size_t mask = 1 << i;
+    
+    int r = (v & mask) ? 0xffffffff : 0;
+    v &= ~mask;
+    return r;
+#else
     size_t r = 0; asm ("btr %1,%0" : "=r"(r) : "r"(i), "0"(v) : "flags"); return r;
+#endif
   }
 
   __forceinline int32_t atomic_cmpxchg(int32_t volatile* value, int32_t comparand, const int32_t input) {

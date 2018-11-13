@@ -19,7 +19,11 @@
 #include "string.h"
 
 #include <iostream>
+#if defined(__ARM_NEON)
+#include "../math/SSE2NEON.h"
+#else
 #include <xmmintrin.h>
+#endif
 
 #if defined(PTHREADS_WIN32)
 #pragma comment (lib, "pthreadVC.lib")
@@ -173,6 +177,10 @@ namespace embree
 #include <sstream>
 #include <algorithm>
 
+#if defined(__ANDROID__)
+#include <pthread.h>
+#endif
+
 namespace embree
 {
   static MutexSys mutex;
@@ -230,12 +238,16 @@ namespace embree
   /*! set affinity of the calling thread */
   void setAffinity(ssize_t affinity)
   {
+#if defined(__ARM_NEON)
+    // TODO(LTE): Implement
+#else
     cpu_set_t cset;
     CPU_ZERO(&cset);
     CPU_SET(mapThreadID(affinity), &cset);
 
     if (pthread_setaffinity_np(pthread_self(), sizeof(cset), &cset) != 0)
       WARNING("pthread_setaffinity_np failed"); // on purpose only a warning
+#endif
   }
 }
 #endif
@@ -345,7 +357,7 @@ namespace embree
     pthread_attr_destroy(&attr);
 
     /* set affinity */
-#if defined(__LINUX__)
+#if defined(__LINUX__) && !defined(__ANDROID__)
     if (threadID >= 0) {
       cpu_set_t cset;
       CPU_ZERO(&cset);

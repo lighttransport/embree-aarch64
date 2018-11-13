@@ -21,9 +21,13 @@
 #include "constants.h"
 #include <cmath>
 
+#if defined(__ARM_NEON)
+#include "SSE2NEON.h"
+#else
 #include <emmintrin.h>
 #include <xmmintrin.h>
 #include <immintrin.h>
+#endif
 
 #if defined(__WIN32__)
 #if (__MSV_VER <= 1700)

@@ -406,6 +406,13 @@ IF (TASKING_TBB)
   INCLUDE_DIRECTORIES(${TBB_INCLUDE_DIRS})
 ENDIF()
 
+# Android specific. Only supports 64bit archtecture.
+IF (${ANDROID_ABI} STREQUAL "x86_64")
+  INCLUDE_DIRECTORIES(${ANDROID_SYSROOT}/usr/include/x86_64-linux-android)
+ELSEIF (${ANDROID_ABI} STREQUAL "arm64-v8a")
+  INCLUDE_DIRECTORIES(${ANDROID_SYSROOT}/usr/include/aarch64-linux-android)
+ENDIF ()
+
 ##############################################################
 # Output paths
 ##############################################################

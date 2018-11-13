@@ -136,6 +136,7 @@ namespace embree
     }
   }
 
+#if !defined(__ARM_NEON)
   /* constants to access destination registers of CPUID instruction */
   static const int EAX = 0;
   static const int EBX = 1;
@@ -178,7 +179,9 @@ namespace embree
   
   /* cpuid[eax=7,ecx=0].ecx */
   static const int CPU_FEATURE_BIT_AVX512VBMI = 1 << 1;   // AVX512VBMI (vector bit manipulation instructions)
+#endif
 
+#if !defined(__ARM_NEON)
   __noinline int64_t get_xcr0() 
   {
 #if defined (__WIN32__)
@@ -191,9 +194,13 @@ namespace embree
     return xcr0;
 #endif
   }
+#endif
 
   int getCPUFeatures()
   {
+#if defined(__ARM_NEON)
+    return CPU_FEATURE_NEON|CPU_FEATURE_SSE2|CPU_FEATURE_SSE;
+#else
     /* cache CPU features access */
     static int cpu_features = 0;
     if (cpu_features) 
@@ -266,6 +273,7 @@ namespace embree
     if (cpuid_leaf_7[ECX] & CPU_FEATURE_BIT_AVX512VBMI) cpu_features |= CPU_FEATURE_AVX512VBMI;
 
     return cpu_features;
+#endif
   }
 
   std::string stringOfCPUFeatures(int features)
@@ -298,6 +306,7 @@ namespace embree
     if (features & CPU_FEATURE_AVX512VL) str += "AVX512VL ";
     if (features & CPU_FEATURE_AVX512IFMA) str += "AVX512IFMA ";
     if (features & CPU_FEATURE_AVX512VBMI) str += "AVX512VBMI ";
+    if (features & CPU_FEATURE_NEON) str += "NEON ";
     return str;
   }
   
@@ -313,6 +322,7 @@ namespace embree
     if (isa == AVX2) return "AVX2";
     if (isa == AVX512KNL) return "AVX512KNL";
     if (isa == AVX512SKX) return "AVX512SKX";
+    if (isa == NEON) return "NEON";
     return "UNKNOWN";
   }
 
@@ -334,6 +344,7 @@ namespace embree
     if (hasISA(features,AVX2)) v += "AVX2 ";
     if (hasISA(features,AVX512KNL)) v += "AVX512KNL ";
     if (hasISA(features,AVX512SKX)) v += "AVX512SKX ";
+    if (hasISA(features,AVX512SKX)) v += "NEON ";
     return v;
   }
 }

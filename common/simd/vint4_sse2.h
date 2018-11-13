@@ -53,7 +53,9 @@ namespace embree
     __forceinline explicit vint(const vboolf4& a) : v(_mm_castps_si128((__m128)a)) {}
 #endif
 
+#if !defined(__ARM_NEON)
     __forceinline vint(long long a, long long b) : v(_mm_set_epi64x(b,a)) {}
+#endif
 
     ////////////////////////////////////////////////////////////////////////////////
     /// Constants
@@ -295,12 +297,14 @@ namespace embree
   __forceinline vint4 operator ^(const vint4& a, int          b) { return a ^ vint4(b); }
   __forceinline vint4 operator ^(int          a, const vint4& b) { return vint4(a) ^ b; }
 
-  __forceinline vint4 operator <<(const vint4& a, int n) { return _mm_slli_epi32(a, n); }
-  __forceinline vint4 operator >>(const vint4& a, int n) { return _mm_srai_epi32(a, n); }
+#if !defined(__ARM_NEON)
+  __forceinline vint4 operator <<(const vint4& a, const int n) { return _mm_slli_epi32(a, n); }
+  __forceinline vint4 operator >>(const vint4& a, const int n) { return _mm_srai_epi32(a, n); }
 
   __forceinline vint4 sll (const vint4& a, int b) { return _mm_slli_epi32(a, b); }
   __forceinline vint4 sra (const vint4& a, int b) { return _mm_srai_epi32(a, b); }
   __forceinline vint4 srl (const vint4& a, int b) { return _mm_srli_epi32(a, b); }
+#endif
   
   ////////////////////////////////////////////////////////////////////////////////
   /// Assignment Operators
@@ -323,8 +327,10 @@ namespace embree
   __forceinline vint4& operator |=(vint4& a, const vint4& b) { return a = a | b; }
   __forceinline vint4& operator |=(vint4& a, int          b) { return a = a | b; }
   
+#if !defined(__ARM_NEON)
   __forceinline vint4& operator <<=(vint4& a, int b) { return a = a << b; }
   __forceinline vint4& operator >>=(vint4& a, int b) { return a = a >> b; }
+#endif
 
   ////////////////////////////////////////////////////////////////////////////////
   /// Comparison Operators + Select
@@ -456,6 +462,8 @@ namespace embree
 
   __forceinline size_t toSizeT(const vint4& v) { 
 #if defined(__WIN32__) && !defined(__X86_64__) // win32 workaround
+    return toScalar(v);
+#elif defined(__ARM_NEON)
     return toScalar(v);
 #else
     return _mm_cvtsi128_si64(v); 
