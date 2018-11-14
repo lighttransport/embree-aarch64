@@ -21,6 +21,7 @@ Then,
 ```
 $ cd $EMBREE_ANDROID_REPO
 $ ./scripts/bootstrap-android-cmake-linux.sh
+$ cd build-android
 $ make  # or ninja
 ```
 
