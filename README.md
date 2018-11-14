@@ -29,7 +29,7 @@ Status
 ------
 
 * [x] Confirmed the build for arm64 target.
-* [ ] Implement some disabled functions(to pass the build)
+* [ ] Implement some disabled functions(which was required to pass the build)
   * [ ] pthread_cancel(destroyThread)
 * [ ] Run sample on actual Android device.
 
