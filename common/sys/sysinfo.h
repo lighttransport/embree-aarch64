@@ -73,7 +73,8 @@
 #  define ISA SSE
 #  define ISA_STR "SSE"
 #elif defined(__ARM_NEON)
-#define isa neon
+// Use `sse2` for SELECT_SYMBOL_* macros
+#define isa sse2
 #define ISA NEON
 #define ISA_STR "NEON"
 #else 

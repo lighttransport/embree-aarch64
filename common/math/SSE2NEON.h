@@ -716,13 +716,60 @@ FORCE_INLINE __m128i _mm_shufflehi_epi16_function(__m128i a)
 #define _mm_shufflehi_epi16(a,i) _mm_shufflehi_epi16_function<i>(a)
 
 // Shifts the 4 signed or unsigned 32-bit integers in a left by count bits while shifting in zeros. : https://msdn.microsoft.com/en-us/library/z2k3bbtb%28v=vs.90%29.aspx
-#define _mm_slli_epi32(a, imm) (__m128i)vshlq_n_s32(a,imm)
+//#define _mm_slli_epi32(a, imm) (__m128i)vshlq_n_s32(a,imm)
+
+// Based on SIMDe
+FORCE_INLINE __m128i _mm_slli_epi32(__m128i a, const int imm8)
+{
+	int32_t __attribute__((aligned(16))) data[4];
+	vst1q_s32(data, a);
+  const int s = (imm8 > 31) ? 0 : imm8;
+  data[0] = data[0] << s;
+  data[1] = data[1] << s;
+  data[2] = data[2] << s;
+  data[3] = data[3] << s;
+
+  return vld1q_s32(data);
+}
+
 
 //Shifts the 4 signed or unsigned 32-bit integers in a right by count bits while shifting in zeros.  https://msdn.microsoft.com/en-us/library/w486zcfa(v=vs.100).aspx
-#define _mm_srli_epi32( a, imm ) (__m128i)vshrq_n_u32((uint32x4_t)a, imm)
+//#define _mm_srli_epi32( a, imm ) (__m128i)vshrq_n_u32((uint32x4_t)a, imm)
+
+// Based on SIMDe
+FORCE_INLINE __m128i _mm_srli_epi32(__m128i a, const int imm8)
+{
+	int32_t __attribute__((aligned(16))) data[4];
+	vst1q_s32(data, a);
+
+  const int s = (imm8 > 31) ? 0 : imm8;
+
+  data[0] = data[0] >> s;
+  data[1] = data[1] >> s;
+  data[2] = data[2] >> s;
+  data[3] = data[3] >> s;
+
+  return vld1q_s32(data);
+}
+
 
 // Shifts the 4 signed 32 - bit integers in a right by count bits while shifting in the sign bit.  https://msdn.microsoft.com/en-us/library/z1939387(v=vs.100).aspx
-#define _mm_srai_epi32( a, imm ) vshrq_n_s32(a, imm)
+//#define _mm_srai_epi32( a, imm ) vshrq_n_s32(a, imm)
+
+// Based on SIMDe
+FORCE_INLINE __m128i _mm_srai_epi32(__m128i a, const int imm8)
+{
+	int32_t __attribute__((aligned(16))) data[4];
+	vst1q_s32(data, a);
+  const uint32_t m = (uint32_t) ((~0U) << (32 - imm8));
+
+  for (int i = 0; i < 4; i++) {
+    uint32_t is_neg = ((uint32_t) (((data[i]) >> 31)));
+    data[i] = (data[i] >> imm8) | (m * is_neg);
+  }
+
+  return vld1q_s32(data);
+}
 
 // Shifts the 128 - bit value in a right by imm bytes while shifting in zeros.imm must be an immediate. https://msdn.microsoft.com/en-us/library/305w28yz(v=vs.100).aspx
 //#define _mm_srli_si128( a, imm ) (__m128i)vmaxq_s8((int8x16_t)a, vextq_s8((int8x16_t)a, vdupq_n_s8(0), imm))
@@ -1323,6 +1370,15 @@ FORCE_INLINE void _mm_stream_si128(__m128i *p, __m128i a)
 FORCE_INLINE void _mm_clflush(void const*p) 
 {
 	// no corollary for Neon?
+}
+
+//
+// NOTE(LTE): Missing SSE2 functions in original SSE2NEON.h
+//
+FORCE_INLINE __m128i _mm_set_epi64x(int64_t a, int64_t b)
+{
+	int64_t __attribute__((aligned(16))) data[2] = { a, b };
+	return vld1q_s64(data);
 }
 
 #endif

@@ -59,10 +59,11 @@ namespace embree
 	
 	for (size_t i=0; i<width*height; i++)
 	{
-	  grid_x[i]  = local_grid_x[i];
-	  grid_y[i]  = local_grid_y[i];
-	  grid_z[i]  = local_grid_z[i];
-	  grid_uv[i] = local_grid_uv[i];
+      // Assume width*height < 2G
+	  grid_x[i]  = local_grid_x[int(i)];
+	  grid_y[i]  = local_grid_y[int(i)];
+	  grid_z[i]  = local_grid_z[int(i)];
+	  grid_uv[i] = local_grid_uv[int(i)];
 	}
       }
 

@@ -7,8 +7,6 @@ Embree-Android Overview
 Embree-Android is a port of Embree library(version 3.x) to Android platform(especially, AARCH64).
 Porting was done using similar approach by existing embree-arm effort. https://mightynotes.wordpress.com/2017/01/24/porting-intel-embree-to-arm/
 
-You'll need Android(or ARM) version of Intel TBB library to compile Embree-Android.
-
 How to build on Linux
 ---------------------
 
@@ -16,7 +14,7 @@ Download & Setup Android NDK(or install NDK through Android Studio). NDK r16b or
 
 CMake 3.6 or later is required.
 
-Edit Android SDK/NDK path in `scripts/bootstrap-android-cmake-linux.sh`
+Edit Android NDK path in `scripts/bootstrap-android-cmake-linux.sh`
 
 Then,
 
@@ -26,15 +24,22 @@ $ ./scripts/bootstrap-android-cmake-linux.sh
 $ make  # or ninja
 ```
 
+Status
+------
+
+* [x] Confirmed the build for arm64 target.
+* [ ] Implement some disabled functions(to pass the build)
+  * [ ] pthread_cancel(destroyThread)
+* [ ] Run sample on actual Android device.
+
 TODO
 ----
 
-* [ ] Support build on Windows and macOS
-* [ ] Provide build script for gradle
+* [ ] Support the build on Windows and macOS
+* [ ] Provide a build script for gradle
 * [ ] Support ISPC(generate code for arm target)
 * [ ] non-Android ARM support(e.g. HPC ARM for raytraced visualization on HPC)
-* [ ] Support build with Android version of TBB.
-* [ ] EMBREE_RAY_PACKETS
+* [ ] Support the build with Android version of TBB.
 
 Third party licenses
 --------------------

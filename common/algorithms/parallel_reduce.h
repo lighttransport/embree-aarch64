@@ -42,18 +42,14 @@ namespace embree
     /* parallel invokation of all tasks */
     dynamic_large_stack_array(Value,values,taskCount,4096); // consumes at most 4096 bytes on the stack
     parallel_for(taskCount, [&](const Index taskIndex) {
-        // HACK
-        //const Index k0 = first+(taskIndex+0)*(last-first)/taskCount;
-        //const Index k1 = first+(taskIndex+1)*(last-first)/taskCount;
-        assert(0);
-        //values[taskIndex] = func(range<Index>(k0,k1));
+        const Index k0 = first+(taskIndex+0)*(last-first)/taskCount;
+        const Index k1 = first+(taskIndex+1)*(last-first)/taskCount;
+        values[int(taskIndex)] = func(range<Index>(k0,k1));
       });
 
     /* perform reduction over all tasks */
     Value v = identity;
-    // HACK
-    assert(0);
-    //for (Index i=0; i<taskCount; i++) v = reduction(v,values[i]);
+    for (Index i=0; i<taskCount; i++) v = reduction(v,values[int(i)]);
     return v;
   }
 

@@ -20,12 +20,16 @@ MACRO(_SET_IF_EMPTY VAR VALUE)
   ENDIF()
 ENDMACRO()
 
-_SET_IF_EMPTY(FLAGS_SSE2  "-msse2")
-_SET_IF_EMPTY(FLAGS_SSE42 "-msse4.2")
-_SET_IF_EMPTY(FLAGS_AVX   "-mavx")
-_SET_IF_EMPTY(FLAGS_AVX2  "-mf16c -mavx2 -mfma -mlzcnt -mbmi -mbmi2")
-_SET_IF_EMPTY(FLAGS_AVX512KNL "-march=knl")
-_SET_IF_EMPTY(FLAGS_AVX512SKX "-march=skx")
+IF (${ANDROID_ABI} STREQUAL "arm64-v8a")
+  # No thing to declare
+ELSE ()
+  _SET_IF_EMPTY(FLAGS_SSE2  "-msse2")
+  _SET_IF_EMPTY(FLAGS_SSE42 "-msse4.2")
+  _SET_IF_EMPTY(FLAGS_AVX   "-mavx")
+  _SET_IF_EMPTY(FLAGS_AVX2  "-mf16c -mavx2 -mfma -mlzcnt -mbmi -mbmi2")
+  _SET_IF_EMPTY(FLAGS_AVX512KNL "-march=knl")
+  _SET_IF_EMPTY(FLAGS_AVX512SKX "-march=skx")
+ENDIF ()
 
 IF (WIN32)
 

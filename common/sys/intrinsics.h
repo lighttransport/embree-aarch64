@@ -281,6 +281,8 @@ namespace embree
 #else
     return _tzcnt_u32(v);
 #endif
+#elif defined(__ARM_NEON)
+    return __builtin_ctzl(v);
 #else
     size_t r = 0; asm ("bsf %1,%0" : "=r"(r) : "r"(v)); return r;
 #endif
@@ -336,6 +338,8 @@ namespace embree
 #else
     return 31 - _lzcnt_u32(v);
 #endif
+#elif defined(__ARM_NEON)
+    return sizeof(v)*8 - 1 - __builtin_clz(v);
 #else
     size_t r = 0; asm ("bsr %1,%0" : "=r"(r) : "r"(v)); return r;
 #endif
