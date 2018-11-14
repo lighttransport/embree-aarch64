@@ -37,19 +37,23 @@ namespace embree
   {
     const Index maxTasks = 512;
     const Index threadCount = (Index) TaskScheduler::threadCount();
-    taskCount = min(taskCount,threadCount,maxTasks);
+    taskCount = embree::min(taskCount,threadCount,maxTasks);
 
     /* parallel invokation of all tasks */
     dynamic_large_stack_array(Value,values,taskCount,4096); // consumes at most 4096 bytes on the stack
     parallel_for(taskCount, [&](const Index taskIndex) {
-        const Index k0 = first+(taskIndex+0)*(last-first)/taskCount;
-        const Index k1 = first+(taskIndex+1)*(last-first)/taskCount;
-        values[taskIndex] = func(range<Index>(k0,k1));
+        // HACK
+        //const Index k0 = first+(taskIndex+0)*(last-first)/taskCount;
+        //const Index k1 = first+(taskIndex+1)*(last-first)/taskCount;
+        assert(0);
+        //values[taskIndex] = func(range<Index>(k0,k1));
       });
 
     /* perform reduction over all tasks */
     Value v = identity;
-    for (Index i=0; i<taskCount; i++) v = reduction(v,values[i]);
+    // HACK
+    assert(0);
+    //for (Index i=0; i<taskCount; i++) v = reduction(v,values[i]);
     return v;
   }
 

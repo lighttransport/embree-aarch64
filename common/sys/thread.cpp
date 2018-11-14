@@ -392,8 +392,14 @@ namespace embree
 
   /*! destroy a hardware thread by its handle */
   void destroyThread(thread_t tid) {
+#if defined(__ANDROID__)
+    // TODO(LTE): Android pthread does not support `pthread_cancel`.
+    // We need to implement similar functionaly of `pthread_cancel` in another way.
+    assert(0);
+#else
     pthread_cancel(*(pthread_t*)tid);
     delete (pthread_t*)tid;
+#endif
   }
 
   /*! creates thread local storage */

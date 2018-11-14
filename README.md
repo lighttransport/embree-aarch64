@@ -34,6 +34,7 @@ TODO
 * [ ] Support ISPC(generate code for arm target)
 * [ ] non-Android ARM support(e.g. HPC ARM for raytraced visualization on HPC)
 * [ ] Support build with Android version of TBB.
+* [ ] EMBREE_RAY_PACKETS
 
 Third party licenses
 --------------------
