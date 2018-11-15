@@ -1378,7 +1378,7 @@ FORCE_INLINE void _mm_clflush(void const*p)
 FORCE_INLINE __m128i _mm_set_epi64x(int64_t a, int64_t b)
 {
 	int64_t __attribute__((aligned(16))) data[2] = { a, b };
-	return vld1q_s64(data);
+	return (__m128i)vld1q_s64(data);
 }
 
 #endif

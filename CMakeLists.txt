@@ -113,6 +113,7 @@ ENDIF()
 
 OPTION(EMBREE_ISPC_SUPPORT "Build Embree with support for ISPC applications." ON)
 OPTION(EMBREE_TUTORIALS    "Enable to build Embree tutorials" ON)
+SET(EMBREE_TARGET_ARCH  "arm" CACHE STRING "Target archtecture.")
 
 ##############################################################################
 # Configurations (add configurations also to common/cmake/embree-config-default.cmake)
@@ -407,10 +408,12 @@ IF (TASKING_TBB)
 ENDIF()
 
 # Android specific. Only supports 64bit archtecture.
-IF (${ANDROID_ABI} STREQUAL "x86_64")
-  INCLUDE_DIRECTORIES(${ANDROID_SYSROOT}/usr/include/x86_64-linux-android)
-ELSEIF (${ANDROID_ABI} STREQUAL "arm64-v8a")
-  INCLUDE_DIRECTORIES(${ANDROID_SYSROOT}/usr/include/aarch64-linux-android)
+IF (${ANDROID_ABI})
+  IF (${ANDROID_ABI} STREQUAL "x86_64")
+    INCLUDE_DIRECTORIES(${ANDROID_SYSROOT}/usr/include/x86_64-linux-android)
+  ELSEIF (${ANDROID_ABI} STREQUAL "arm64-v8a")
+    INCLUDE_DIRECTORIES(${ANDROID_SYSROOT}/usr/include/aarch64-linux-android)
+  ENDIF ()
 ENDIF ()
 
 ##############################################################
