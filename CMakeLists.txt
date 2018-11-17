@@ -113,6 +113,7 @@ ENDIF()
 
 OPTION(EMBREE_ISPC_SUPPORT "Build Embree with support for ISPC applications." ON)
 OPTION(EMBREE_TUTORIALS    "Enable to build Embree tutorials" ON)
+OPTION(EMBREE_BUILD_VERIFY "Build verify program for testing" ON)
 SET(EMBREE_TARGET_ARCH  "arm" CACHE STRING "Target archtecture.")
 
 ##############################################################################
@@ -431,6 +432,10 @@ ADD_SUBDIRECTORY(common)
 ADD_SUBDIRECTORY(kernels)
 IF (EMBREE_TUTORIALS)
   ADD_SUBDIRECTORY(tutorials)
+ENDIF()
+IF (EMBREE_BUILD_VERIFY)
+  ADD_SUBDIRECTORY(tutorials/common)
+  ADD_SUBDIRECTORY(tutorials/verify)
 ENDIF()
 
 ##############################################################

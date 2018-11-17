@@ -15,8 +15,11 @@
 ## ======================================================================== ##
 
 ADD_SUBDIRECTORY(image)
-ADD_SUBDIRECTORY(tutorial)
 ADD_SUBDIRECTORY(scenegraph)
 ADD_SUBDIRECTORY(lights)
 ADD_SUBDIRECTORY(texture)
-ADD_SUBDIRECTORY(imgui)
+
+IF (NOT EMBREE_BUILD_VERIFY)
+  ADD_SUBDIRECTORY(tutorial)
+  ADD_SUBDIRECTORY(imgui)
+ENDIF()
