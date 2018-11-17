@@ -29,6 +29,7 @@ Status
 ------
 
 * [x] Confirmed the build for arm64 target.
+* [x] Confirmed the simple test render(Triangle + rtcIntersect1) runs well on aarch64 linux with the debug build of Embree.
 * [ ] Implement some disabled functions(which was required to pass the build)
   * [ ] pthread_cancel(destroyThread)
 * [ ] Run sample on actual Android device.
@@ -36,10 +37,12 @@ Status
 TODO
 ----
 
+* [ ] Run & test on Android arm64-v8a device.
 * [ ] Support the build on Windows and macOS
 * [ ] Provide a build script for gradle
 * [ ] Support ISPC(generate code for arm target)
 * [ ] non-Android ARM support(e.g. HPC ARM for raytraced visualization on HPC)
+  * [x] Raspberry Pi3 with 64bit kernel(HypriotOS)
 * [ ] Support the build with Android version of TBB.
 
 Third party licenses
