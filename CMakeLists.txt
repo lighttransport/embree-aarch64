@@ -408,7 +408,7 @@ IF (TASKING_TBB)
 ENDIF()
 
 # Android specific. Only supports 64bit archtecture.
-IF (${ANDROID_ABI})
+IF (DEFINED ANDROID_ABI)
   IF (${ANDROID_ABI} STREQUAL "x86_64")
     INCLUDE_DIRECTORIES(${ANDROID_SYSROOT}/usr/include/x86_64-linux-android)
   ELSEIF (${ANDROID_ABI} STREQUAL "arm64-v8a")
