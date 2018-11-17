@@ -53,6 +53,8 @@ namespace embree
     return "Unix (32bit)";
 #elif defined(__UNIX__) && defined(__X86_64__)
     return "Unix (64bit)";
+#elif defined(__LINUX__) && defined(__ARM_NEON)
+    return "Linux ARM";
 #else
     return "Unknown";
 #endif
@@ -132,6 +134,7 @@ namespace embree
     case CPU_HASWELL         : return "Haswell";
     case CPU_KNIGHTS_LANDING : return "Knights Landing";
     case CPU_SKYLAKE         : return "Skylake";
+    case CPU_ARM             : return "Arm";
     default                  : return "Unknown CPU";
     }
   }

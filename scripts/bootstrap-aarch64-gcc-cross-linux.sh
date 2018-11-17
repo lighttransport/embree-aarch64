@@ -5,9 +5,12 @@ CMAKE_BIN=cmake
 rm -rf build-aarch64-cross
 
 $CMAKE_BIN \
+  -DCMAKE_BUILD_TYPE=RelWithDebInfo \
   -DEMBREE_TARGET_ARCH=aarch64 \
-  -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc-5 \
-  -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++-5 \
+  -DEMBREE_ADDRESS_SANITIZER=On \
+  -DCMAKE_INSTALL_PREFIX=$HOME/local/embree3 \
+  -DCMAKE_C_COMPILER=clang \
+  -DCMAKE_CXX_COMPILER=clang++ \
   -DEMBREE_ISPC_SUPPORT=Off \
   -DEMBREE_TASKING_SYSTEM=Internal \
   -DEMBREE_TUTORIALS=Off \

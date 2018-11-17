@@ -20,8 +20,10 @@ MACRO(_SET_IF_EMPTY VAR VALUE)
   ENDIF()
 ENDMACRO()
 
-IF (${ANDROID_ABI} STREQUAL "arm64-v8a")
-  # No thing to declare
+IF (ANDROID_ABI)
+ IF (${ANDROID_ABI} STREQUAL "arm64-v8a")
+   # No thing to declare
+ ENDIF ()
 ELSE ()
   _SET_IF_EMPTY(FLAGS_SSE2  "-msse2")
   _SET_IF_EMPTY(FLAGS_SSE42 "-msse4.2")
