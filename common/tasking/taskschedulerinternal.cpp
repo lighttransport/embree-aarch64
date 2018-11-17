@@ -161,7 +161,7 @@ namespace embree
   {
     Lock<MutexSys> lock(g_mutex);
     assert(newNumThreads);
-    newNumThreads = std::min(newNumThreads, (size_t) getNumberOfLogicalThreads());
+    newNumThreads = min(newNumThreads, (size_t) getNumberOfLogicalThreads());
 
     numThreads = newNumThreads;
     if (!startThreads && !running) return;
