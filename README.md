@@ -30,6 +30,7 @@ Status
 
 * [x] Confirmed the build for arm64 target.
 * [x] Confirmed the simple test render(Triangle + rtcIntersect1) runs well on aarch64 linux with the debug build of Embree.
+* [x] `verify` tutorial app allegedly pass on aarch64 linux.
 * [ ] Implement some disabled functions(which was required to pass the build)
   * [ ] pthread_cancel(destroyThread)
 * [ ] Run sample on actual Android device.
