@@ -7,6 +7,11 @@ Currently only arm64-v8a architecture is supported.
 
 This sample uses the new [Android Studio CMake plugin](http://tools.android.com/tech-docs/external-c-builds) with C++ support.
 
+Setup
+-----
+
+Put arm64-v8a version of `libembree3.so` to `app/src/main/jniLibs/arm64-v8a`.
+
 Pre-requisites
 --------------
 - Android Studio 2.2+ with [NDK](https://developer.android.com/ndk/) bundle.

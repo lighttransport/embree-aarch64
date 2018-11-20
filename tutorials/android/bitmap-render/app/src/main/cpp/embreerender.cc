@@ -147,6 +147,20 @@ static void stats_endFrame(Stats* s) {
 	s->lastTime = now;
 }
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+JNIEXPORT void JNICALL
+Java_com_example_embreerender_EmbreeRenderView_renderScene(JNIEnv* env,
+							   jobject obj,
+							   jobject bitmap,
+							   jlong time_ms);
+
+#ifdef __cplusplus
+}
+#endif
+
 JNIEXPORT void JNICALL
 Java_com_example_embreerender_EmbreeRenderView_renderScene(JNIEnv* env,
 							   jobject obj,

@@ -15,7 +15,8 @@ android {
         // TODO(LTE): Support specify per-ABI embree path
         externalNativeBuild {
             cmake {
-                arguments '-DEMBREE_ANDROID_PATH=' + System.getenv("HOME") + '/local/cross/embree3'
+                arguments '-DANDROID_STL=c++_shared',
+                          '-DEMBREE_ANDROID_PATH=' + System.getenv("HOME") + '/local/android/embree3'
             }
         }
 
