@@ -15,8 +15,8 @@
 ## ======================================================================== ##
 
 SET(EMBREE_VERSION_MAJOR 3)
-SET(EMBREE_VERSION_MINOR 2)
-SET(EMBREE_VERSION_PATCH 4)
+SET(EMBREE_VERSION_MINOR 3)
+SET(EMBREE_VERSION_PATCH 0)
 SET(EMBREE_VERSION_NOTE "")
 
 SET(EMBREE_VERSION ${EMBREE_VERSION_MAJOR}.${EMBREE_VERSION_MINOR}.${EMBREE_VERSION_PATCH})
@@ -75,7 +75,7 @@ IF(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
   endif()
   if (POLICY CMP0042)
-    cmake_policy(SET CMP0042 OLD)
+    cmake_policy(SET CMP0042 NEW)
   endif()
 ENDIF(COMMAND cmake_policy)
 
