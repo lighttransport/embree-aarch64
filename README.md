@@ -1,14 +1,26 @@
 % Embree: High Performance Ray Tracing Kernels 3.3.0
 % Intel Corporation
 
-Embree-Android Overview
+Embree-aarch64 Overview
 =======================
 
-Embree-Android is a port of Embree library(version 3.x) to Android platform(especially, AARCH64).
+Embree-aarch64 is a port of Embree library(version 3.x) to AARCH64 platform(includes Android arm64-v8a).
 Porting was done using similar approach by existing embree-arm effort. https://mightynotes.wordpress.com/2017/01/24/porting-intel-embree-to-arm/
 
-How to build on Linux
----------------------
+How to cross-compile for AARCH64 Linux
+----------------------------------
+
+Edit compiler and cmake path in `./scripts/bootstrap-aarch64-gcc-cross-linux.sh`, then
+
+```
+$ cd $EMBREE_AARCH64_REPO
+$ ./scripts/bootstrap-aarch64-gcc-cross-linux.sh
+$ cd build-aarch64-cross
+$ make
+```
+
+How to build for Android arm64-v8a
+----------------------------------
 
 Download & Setup Android NDK(or install NDK through Android Studio). NDK r16b or later are supported.
 
@@ -19,7 +31,7 @@ Edit Android NDK path in `scripts/bootstrap-android-cmake-linux.sh`
 Then,
 
 ```
-$ cd $EMBREE_ANDROID_REPO
+$ cd $EMBREE_AARCH64_REPO
 $ ./scripts/bootstrap-android-cmake-linux.sh
 $ cd build-android
 $ make  # or ninja
@@ -28,7 +40,7 @@ $ make  # or ninja
 Status
 ------
 
-* [x] Confirmed the build for arm64 target.
+* [x] Confirmed the build for arm64-v8a Android target.
 * [x] Confirmed the simple test render(Triangle + rtcIntersect1) runs well on aarch64 linux with the debug build of Embree.
 * [x] `verify` tutorial app allegedly pass on aarch64 linux.
 * [ ] Implement some disabled functions(which was required to pass the build)
@@ -42,8 +54,7 @@ TODO
 * [ ] Support the build on Windows and macOS
 * [ ] Provide a build script for gradle
 * [ ] Support ISPC(generate code for arm target)
-* [ ] non-Android ARM support(e.g. HPC ARM for raytraced visualization on HPC)
-  * [x] Raspberry Pi3 with 64bit kernel(HypriotOS)
+* [x] Raspberry Pi3 with 64bit kernel(HypriotOS)
 * [ ] Support the build with Android version of TBB.
 
 Third party licenses
