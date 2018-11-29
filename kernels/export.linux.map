@@ -1,0 +1,7 @@
+{
+global: 
+  rtc*;
+  _ZN6embree13TaskScheduler*;
+local: 
+  *;
+};
