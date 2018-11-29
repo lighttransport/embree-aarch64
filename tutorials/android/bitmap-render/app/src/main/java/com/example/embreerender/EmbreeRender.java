@@ -28,6 +28,32 @@ import android.view.WindowManager;
 
 public class EmbreeRender extends Activity
 {
+    private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 7;
+    private boolean okToGo = false;
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+    	String permissions[], int[] grantResults) {
+        switch (requestCode) {
+    	case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
+    	    // If request is cancelled, the result arrays are empty.
+    	    if (grantResults.length > 0
+    		&& grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+    		// permission was granted, yay! Do the
+    		// contacts-related task you need to do.
+                okToGo = true;
+    	    } else {
+    		// permission denied, boo! Disable the
+    		// functionality that depends on this permission.
+    	    }
+    	    return;
+    	}
+    
+    	// other 'case' lines to check for other
+    	// permissions this app might request.
+        }
+    }
+
     // Called when the activity is first created.
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -59,7 +85,7 @@ class EmbreeRenderView extends View {
 
     public EmbreeRenderView(Context context, int width, int height) {
         super(context);
-        mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+        mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGBA_8888);
         mStartTime = System.currentTimeMillis();
     }
 
