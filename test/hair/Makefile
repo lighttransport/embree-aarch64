@@ -15,7 +15,7 @@
 SHELL := /bin/bash
 
 CXX=g++
-CXX_FLAGS=-Wall -pedantic -std=c++11 -O0 -g
+CXX_FLAGS=-Wall -Wno-pedantic -std=c++11 -O0 -g -DTASKING_INTERNAL
 EMBREE_INC_PATH=../../include
 EMBREE_LIB_PATH=../../build-aarch64
 

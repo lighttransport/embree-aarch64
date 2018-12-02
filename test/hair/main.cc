@@ -12,6 +12,8 @@
 
 #include <embree3/rtcore.h>
 
+#include "../../kernels/bvh/bvh.h"
+
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
@@ -573,6 +575,46 @@ static void error_handler(void* userPtr, const RTCError code, const char* str = 
   exit(1);
 }
 
+static void print_bvh4(embree::BVH4::NodeRef node, size_t depth)
+{
+  if (node.isAlignedNode())
+  { 
+    embree::BVH4::AlignedNode* n = node.alignedNode();
+    
+    std::cout << "AlignedNode {" << std::endl;
+    for (size_t i=0; i<4; i++)
+    { 
+      for (size_t k=0; k<depth; k++) std::cout << "  ";
+      std::cout << "  bounds" << i << " = " << n->bounds(i) << std::endl;
+    }
+    
+    for (size_t i=0; i<4; i++)
+    { 
+      if (n->child(i) == embree::BVH4::emptyNode)
+        continue;
+      
+      for (size_t k=0; k<depth; k++) std::cout << "  ";
+      std::cout << "  child" << i << " = ";
+      print_bvh4(n->child(i),depth+1);
+    }
+    for (size_t k=0; k<depth; k++) std::cout << "  ";
+    std::cout << "}" << std::endl;
+  } else {
+    // dump leaf.
+  }
+}
+
+void DumpScene(RTCScene scene)
+{
+  embree::AccelData *accel = ((embree::Accel*)scene)->intersectors.ptr;
+  std::cout << "ty = " << accel->type << std::endl;
+  if (accel->type == embree::AccelData::TY_BVH4) {
+    std::cout << "got it" << std::endl;
+     embree::BVH4 *bvh4 = (embree::BVH4*)accel;
+    print_bvh4(bvh4->root, 0);
+  }
+} 
+
 int main(int argc, char **argv) {
   (void)argc;
   (void)argv;
@@ -625,6 +667,8 @@ int main(int argc, char **argv) {
   rtcReleaseGeometry(geom);
 
   rtcCommitScene(scene);
+
+  DumpScene(scene);
 
   int width = 512;
   int height = 512;
