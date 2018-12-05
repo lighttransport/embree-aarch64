@@ -581,7 +581,7 @@ static void print_bvh4(embree::BVH4::NodeRef node, size_t depth)
   { 
     embree::BVH4::AlignedNode* n = node.alignedNode();
     
-    std::cout << "AlignedNode {" << std::endl;
+    std::cout << "AlignedNode(" << node << ") {" << std::endl;
     for (size_t i=0; i<4; i++)
     { 
       for (size_t k=0; k<depth; k++) std::cout << "  ";
@@ -594,7 +594,7 @@ static void print_bvh4(embree::BVH4::NodeRef node, size_t depth)
         continue;
       
       for (size_t k=0; k<depth; k++) std::cout << "  ";
-      std::cout << "  child" << i << " = ";
+      std::cout << "  child(" << n->child(i) << ") " << i << " = ";
       print_bvh4(n->child(i),depth+1);
     }
     for (size_t k=0; k<depth; k++) std::cout << "  ";
@@ -614,6 +614,10 @@ void DumpScene(RTCScene scene)
     print_bvh4(bvh4->root, 0);
   }
 } 
+
+static void bora() {
+  std::cout << "bora" << std::endl;
+}
 
 int main(int argc, char **argv) {
   (void)argc;
@@ -679,6 +683,11 @@ int main(int argc, char **argv) {
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
       // Simple camera. change eye pos and direction fit to .obj model.
+      std::cout << "x, y = " << x << ", " << y << std::endl;
+      if ((x == 128) && (y == 0)) {
+        bora();
+      }
+
       RTCRayHit ray;
       ray.ray.flags = 0;
       ray.ray.org_x = 0.0f;
