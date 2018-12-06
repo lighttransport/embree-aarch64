@@ -56,8 +56,8 @@ namespace embree
     __forceinline operator unsigned int      ( ) const { return 0; }
     __forceinline operator          short    ( ) const { return 0; }
     __forceinline operator unsigned short    ( ) const { return 0; }
-    __forceinline operator          char     ( ) const { return 0; }
-    __forceinline operator unsigned char     ( ) const { return 0; }
+    __forceinline operator          int8_t     ( ) const { return 0; }
+    __forceinline operator uint8_t     ( ) const { return 0; }
   }; 
 
   extern MAYBE_UNUSED ZeroTy zero;
@@ -74,8 +74,8 @@ namespace embree
     __forceinline operator unsigned int      ( ) const { return 1; }
     __forceinline operator          short    ( ) const { return 1; }
     __forceinline operator unsigned short    ( ) const { return 1; }
-    __forceinline operator          char     ( ) const { return 1; }
-    __forceinline operator unsigned char     ( ) const { return 1; }
+    __forceinline operator          int8_t     ( ) const { return 1; }
+    __forceinline operator uint8_t     ( ) const { return 1; }
   };
 
   extern MAYBE_UNUSED OneTy one;
@@ -92,8 +92,8 @@ namespace embree
     __forceinline operator unsigned int      ( ) const { return std::numeric_limits<unsigned int>::min(); }
     __forceinline operator          short    ( ) const { return std::numeric_limits<short>::min(); }
     __forceinline operator unsigned short    ( ) const { return std::numeric_limits<unsigned short>::min(); }
-    __forceinline operator          char     ( ) const { return std::numeric_limits<char>::min(); }
-    __forceinline operator unsigned char     ( ) const { return std::numeric_limits<unsigned char>::min(); }
+    __forceinline operator          int8_t     ( ) const { return std::numeric_limits<int8_t>::min(); }
+    __forceinline operator uint8_t     ( ) const { return std::numeric_limits<uint8_t>::min(); }
 
   };
 
@@ -111,8 +111,8 @@ namespace embree
     __forceinline operator unsigned int      ( ) const { return std::numeric_limits<unsigned int>::max(); }
     __forceinline operator          short    ( ) const { return std::numeric_limits<short>::max(); }
     __forceinline operator unsigned short    ( ) const { return std::numeric_limits<unsigned short>::max(); }
-    __forceinline operator          char     ( ) const { return std::numeric_limits<char>::max(); }
-    __forceinline operator unsigned char     ( ) const { return std::numeric_limits<unsigned char>::max(); }
+    __forceinline operator          int8_t     ( ) const { return std::numeric_limits<int8_t>::max(); }
+    __forceinline operator uint8_t     ( ) const { return std::numeric_limits<uint8_t>::max(); }
   };
 
   extern MAYBE_UNUSED PosInfTy inf;

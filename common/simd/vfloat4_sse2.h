@@ -118,21 +118,21 @@ namespace embree
   }
 
 #if defined(__SSE4_1__)
-    static __forceinline vfloat4 load(const char* ptr) {
+    static __forceinline vfloat4 load(const int8_t* ptr) {
       return _mm_cvtepi32_ps(_mm_cvtepi8_epi32(_mm_loadu_si128((__m128i*)ptr)));
     }
 #else
-    static __forceinline vfloat4 load(const char* ptr) {
+    static __forceinline vfloat4 load(const int8_t* ptr) {
       return vfloat4(ptr[0],ptr[1],ptr[2],ptr[3]);
     }
 #endif
 
 #if defined(__SSE4_1__)
-    static __forceinline vfloat4 load(const unsigned char* ptr) {
+    static __forceinline vfloat4 load(const uint8_t* ptr) {
       return _mm_cvtepi32_ps(_mm_cvtepu8_epi32(_mm_loadu_si128((__m128i*)ptr)));
     }
 #else
-    static __forceinline vfloat4 load(const unsigned char* ptr) {
+    static __forceinline vfloat4 load(const uint8_t* ptr) {
       //return _mm_cvtpu8_ps(*(__m64*)ptr); // don't enable, will use MMX instructions
       return vfloat4(ptr[0],ptr[1],ptr[2],ptr[3]);
     }
@@ -167,10 +167,10 @@ namespace embree
       return _mm_i32gather_ps(ptr, index, scale);
 #else
       return vfloat4(
-        *(float*)(((char*)ptr)+scale*index[0]),
-        *(float*)(((char*)ptr)+scale*index[1]),
-        *(float*)(((char*)ptr)+scale*index[2]),
-        *(float*)(((char*)ptr)+scale*index[3]));
+        *(float*)(((int8_t*)ptr)+scale*index[0]),
+        *(float*)(((int8_t*)ptr)+scale*index[1]),
+        *(float*)(((int8_t*)ptr)+scale*index[2]),
+        *(float*)(((int8_t*)ptr)+scale*index[3]));
 #endif
     }
 
@@ -182,10 +182,10 @@ namespace embree
 #elif defined(__AVX2__)
       return _mm_mask_i32gather_ps(r, ptr, index, mask, scale);
 #else
-      if (likely(mask[0])) r[0] = *(float*)(((char*)ptr)+scale*index[0]);
-      if (likely(mask[1])) r[1] = *(float*)(((char*)ptr)+scale*index[1]);
-      if (likely(mask[2])) r[2] = *(float*)(((char*)ptr)+scale*index[2]);
-      if (likely(mask[3])) r[3] = *(float*)(((char*)ptr)+scale*index[3]);
+      if (likely(mask[0])) r[0] = *(float*)(((int8_t*)ptr)+scale*index[0]);
+      if (likely(mask[1])) r[1] = *(float*)(((int8_t*)ptr)+scale*index[1]);
+      if (likely(mask[2])) r[2] = *(float*)(((int8_t*)ptr)+scale*index[2]);
+      if (likely(mask[3])) r[3] = *(float*)(((int8_t*)ptr)+scale*index[3]);
       return r;
 #endif
     }
@@ -196,10 +196,10 @@ namespace embree
 #if defined(__AVX512VL__)
       _mm_i32scatter_ps((float*)ptr, index, v, scale);
 #else
-      *(float*)(((char*)ptr)+scale*index[0]) = v[0];
-      *(float*)(((char*)ptr)+scale*index[1]) = v[1];
-      *(float*)(((char*)ptr)+scale*index[2]) = v[2];
-      *(float*)(((char*)ptr)+scale*index[3]) = v[3];
+      *(float*)(((int8_t*)ptr)+scale*index[0]) = v[0];
+      *(float*)(((int8_t*)ptr)+scale*index[1]) = v[1];
+      *(float*)(((int8_t*)ptr)+scale*index[2]) = v[2];
+      *(float*)(((int8_t*)ptr)+scale*index[3]) = v[3];
 #endif
     }
 
@@ -209,14 +209,14 @@ namespace embree
 #if defined(__AVX512VL__)
       _mm_mask_i32scatter_ps((float*)ptr ,mask, index, v, scale);
 #else
-      if (likely(mask[0])) *(float*)(((char*)ptr)+scale*index[0]) = v[0];
-      if (likely(mask[1])) *(float*)(((char*)ptr)+scale*index[1]) = v[1];
-      if (likely(mask[2])) *(float*)(((char*)ptr)+scale*index[2]) = v[2];
-      if (likely(mask[3])) *(float*)(((char*)ptr)+scale*index[3]) = v[3];
+      if (likely(mask[0])) *(float*)(((int8_t*)ptr)+scale*index[0]) = v[0];
+      if (likely(mask[1])) *(float*)(((int8_t*)ptr)+scale*index[1]) = v[1];
+      if (likely(mask[2])) *(float*)(((int8_t*)ptr)+scale*index[2]) = v[2];
+      if (likely(mask[3])) *(float*)(((int8_t*)ptr)+scale*index[3]) = v[3];
 #endif
     }
 
-    static __forceinline void store(const vboolf4& mask, char* ptr, const vint4& ofs, const vfloat4& v) {
+    static __forceinline void store(const vboolf4& mask, int8_t* ptr, const vint4& ofs, const vfloat4& v) {
       scatter<1>(mask,ptr,ofs,v);
     }
     static __forceinline void store(const vboolf4& mask, float* ptr, const vint4& ofs, const vfloat4& v) {

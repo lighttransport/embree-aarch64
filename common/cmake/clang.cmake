@@ -24,6 +24,8 @@ IF (DEFINED ANDROID_ABI)
  IF (${ANDROID_ABI} STREQUAL "arm64-v8a")
    # No thing to declare
  ENDIF ()
+ELSEIF (${EMBREE_TARGET_ARCH} STREQUAL "aarch64")
+   # No thing to declare
 ELSE ()
   _SET_IF_EMPTY(FLAGS_SSE2  "-msse2")
   _SET_IF_EMPTY(FLAGS_SSE42 "-msse4.2")

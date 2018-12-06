@@ -110,20 +110,20 @@ namespace embree
 
 
 #if defined(__SSE4_1__)
-    static __forceinline vint4 load(const unsigned char* ptr) {
+    static __forceinline vint4 load(const uint8_t* ptr) {
       return _mm_cvtepu8_epi32(_mm_loadl_epi64((__m128i*)ptr));
     }
 
-    static __forceinline vint4 loadu(const unsigned char* ptr) {
+    static __forceinline vint4 loadu(const uint8_t* ptr) {
       return  _mm_cvtepu8_epi32(_mm_loadl_epi64((__m128i*)ptr));
     }
 #else
 
-    static __forceinline vint4 load(const unsigned char* ptr) {
+    static __forceinline vint4 load(const uint8_t* ptr) {
       return vint4(ptr[0],ptr[1],ptr[2],ptr[3]);
     } 
 
-    static __forceinline vint4 loadu(const unsigned char* ptr) {
+    static __forceinline vint4 loadu(const uint8_t* ptr) {
       return vint4(ptr[0],ptr[1],ptr[2],ptr[3]);
     }
 
@@ -137,7 +137,7 @@ namespace embree
 #endif
     } 
 
-    static __forceinline void store(unsigned char* ptr, const vint4& v) {
+    static __forceinline void store(uint8_t* ptr, const vint4& v) {
 #if defined(__SSE4_1__)
       __m128i x = v;
       x = _mm_packus_epi32(x, x);
@@ -145,7 +145,7 @@ namespace embree
       *(int*)ptr = _mm_cvtsi128_si32(x);
 #else
       for (size_t i=0;i<4;i++)
-        ptr[i] = (unsigned char)v[i];
+        ptr[i] = (uint8_t)v[i];
 #endif
     }
 
@@ -176,10 +176,10 @@ namespace embree
       return _mm_i32gather_epi32(ptr, index, scale);
 #else
       return vint4(
-          *(int*)(((char*)ptr)+scale*index[0]),
-          *(int*)(((char*)ptr)+scale*index[1]),
-          *(int*)(((char*)ptr)+scale*index[2]),
-          *(int*)(((char*)ptr)+scale*index[3]));
+          *(int*)(((int8_t*)ptr)+scale*index[0]),
+          *(int*)(((int8_t*)ptr)+scale*index[1]),
+          *(int*)(((int8_t*)ptr)+scale*index[2]),
+          *(int*)(((int8_t*)ptr)+scale*index[3]));
 #endif
     }
 
@@ -191,10 +191,10 @@ namespace embree
 #elif defined(__AVX2__)
       return _mm_mask_i32gather_epi32(r, ptr, index, mask, scale);
 #else
-      if (likely(mask[0])) r[0] = *(int*)(((char*)ptr)+scale*index[0]);
-      if (likely(mask[1])) r[1] = *(int*)(((char*)ptr)+scale*index[1]);
-      if (likely(mask[2])) r[2] = *(int*)(((char*)ptr)+scale*index[2]);
-      if (likely(mask[3])) r[3] = *(int*)(((char*)ptr)+scale*index[3]);
+      if (likely(mask[0])) r[0] = *(int*)(((int8_t*)ptr)+scale*index[0]);
+      if (likely(mask[1])) r[1] = *(int*)(((int8_t*)ptr)+scale*index[1]);
+      if (likely(mask[2])) r[2] = *(int*)(((int8_t*)ptr)+scale*index[2]);
+      if (likely(mask[3])) r[3] = *(int*)(((int8_t*)ptr)+scale*index[3]);
       return r;
 #endif
     }
@@ -205,10 +205,10 @@ namespace embree
 #if defined(__AVX512VL__)
       _mm_i32scatter_epi32((int*)ptr, index, v, scale);
 #else
-      *(int*)(((char*)ptr)+scale*index[0]) = v[0];
-      *(int*)(((char*)ptr)+scale*index[1]) = v[1];
-      *(int*)(((char*)ptr)+scale*index[2]) = v[2];
-      *(int*)(((char*)ptr)+scale*index[3]) = v[3];
+      *(int*)(((int8_t*)ptr)+scale*index[0]) = v[0];
+      *(int*)(((int8_t*)ptr)+scale*index[1]) = v[1];
+      *(int*)(((int8_t*)ptr)+scale*index[2]) = v[2];
+      *(int*)(((int8_t*)ptr)+scale*index[3]) = v[3];
 #endif
     }
 
@@ -218,10 +218,10 @@ namespace embree
 #if defined(__AVX512VL__)
       _mm_mask_i32scatter_epi32((int*)ptr, mask, index, v, scale);
 #else
-      if (likely(mask[0])) *(int*)(((char*)ptr)+scale*index[0]) = v[0];
-      if (likely(mask[1])) *(int*)(((char*)ptr)+scale*index[1]) = v[1];
-      if (likely(mask[2])) *(int*)(((char*)ptr)+scale*index[2]) = v[2];
-      if (likely(mask[3])) *(int*)(((char*)ptr)+scale*index[3]) = v[3];
+      if (likely(mask[0])) *(int*)(((int8_t*)ptr)+scale*index[0]) = v[0];
+      if (likely(mask[1])) *(int*)(((int8_t*)ptr)+scale*index[1]) = v[1];
+      if (likely(mask[2])) *(int*)(((int8_t*)ptr)+scale*index[2]) = v[2];
+      if (likely(mask[3])) *(int*)(((int8_t*)ptr)+scale*index[3]) = v[3];
 #endif
     }
 

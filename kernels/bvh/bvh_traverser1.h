@@ -20,7 +20,7 @@
 #include "node_intersector1.h"
 #include "../common/stack_item.h"
 
-#if defined(__ARM_NEON)
+#if defined(__aarch64__)
 // FIXME(LTE): Enabling `NEW_SORTING_CODE` will generate corrupted BVH node.
 // toSizeT in traverseClosestHit() passes invalid node(ptr) value and isAlignedNode() assertion will be triggered in later intersect() function.
 #define NEW_SORTING_CODE 0

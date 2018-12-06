@@ -89,6 +89,7 @@ namespace embree
   }
   __forceinline float rsqrt( const float x )
   {
+#if 0
     const __m128 a = _mm_set_ss(x);
 #if defined(__AVX512VL__)
     const __m128 r = _mm_rsqrt14_ss(_mm_set_ss(0.0f),a);
@@ -98,6 +99,13 @@ namespace embree
     const __m128 c = _mm_add_ss(_mm_mul_ss(_mm_set_ss(1.5f), r),
                                 _mm_mul_ss(_mm_mul_ss(_mm_mul_ss(a, _mm_set_ss(-0.5f)), r), _mm_mul_ss(r, r)));
     return _mm_cvtss_f32(c);
+#else
+    if (x > 0.0f) {
+      return 1.0f / std::sqrt(x);
+    } else {
+      return 0.0f;
+    }
+#endif
   }
 
 #if defined(__WIN32__) && (__MSC_VER <= 1700)
