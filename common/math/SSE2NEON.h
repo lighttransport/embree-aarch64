@@ -198,11 +198,22 @@ FORCE_INLINE void _mm_prefetch(const void* ptr, unsigned int level)
 
 FORCE_INLINE void* _mm_malloc(int size, int align)
 {
-	      void *ptr;
+    void *ptr;
+    // align must be multiple of sizeof(void *) for posix_memalign.
+    if (align < sizeof(void *)) {
+        align = sizeof(void *);
+    }
+
+    if ((align % sizeof(void *)) != 0) {
+        // fallback to malloc
+        ptr = malloc(size);
+    } else {
         if (posix_memalign(&ptr, align, size)) {
           return 0;
         } 
-        return ptr;
+    }
+
+    return ptr;
 }
 
 FORCE_INLINE void _mm_free(void* ptr)
