@@ -318,7 +318,7 @@ namespace embree
           assert(items == 1);
           const size_t patchIndexMB = prims[current.prims.begin()].ID();
           SubdivPatch1Base& patch = subdiv_patches[patchIndexMB+0];
-          NodeRef node = bvh->encodeLeaf((char*)&patch,1);
+          NodeRef node = bvh->encodeLeaf((int8_t*)&patch,1);
           size_t patchNumTimeSteps = scene->get<SubdivMesh>(patch.geomID())->numTimeSteps;
           const LBBox3fa lbounds = LBBox3fa([&] (size_t itime) { return bounds[patchIndexMB+itime]; }, current.prims.time_range, (float)(patchNumTimeSteps-1));
           return NodeRecordMB4D(node,lbounds,current.prims.time_range);

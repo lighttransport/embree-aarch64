@@ -273,7 +273,7 @@ namespace embree
 
       /*! Sets the barrier bit. */
       __forceinline void setBarrier() {
-#if defined(__X86_64__)
+#if defined(__X86_64__) || defined(__aarch64__)
         assert(!isBarrier());
         ptr |= barrier_mask;
 #else
@@ -283,7 +283,7 @@ namespace embree
 
       /*! Clears the barrier bit. */
       __forceinline void clearBarrier() {
-#if defined(__X86_64__)
+#if defined(__X86_64__) || defined(__aarch64__)
         ptr &= ~barrier_mask;
 #else
         assert(false);

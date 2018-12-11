@@ -45,7 +45,7 @@ namespace embree
       : lbounds(lbounds_i)
     {
       assert(activeTimeSegments > 0);
-#if defined(__X86_64__)
+#if defined(__X86_64__) || defined(__aarch64__)
       lbounds.bounds0.lower.u = id & 0xFFFFFFFF;
       lbounds.bounds0.upper.u = (id >> 32) & 0xFFFFFFFF;
 #else
@@ -94,7 +94,7 @@ namespace embree
 
     /*! returns an size_t sized ID */
     __forceinline size_t ID() const {
-#if defined(__X86_64__)
+#if defined(__X86_64__) || defined(__aarch64__)
       return size_t(lbounds.bounds0.lower.u) + (size_t(lbounds.bounds0.upper.u) << 32);
 #else
       return size_t(lbounds.bounds0.lower.u);
@@ -141,7 +141,7 @@ namespace embree
       : bbox(bounds.interpolate(0.5f)), _activeTimeSegments(activeTimeSegments), _totalTimeSegments(totalTimeSegments), time_range(time_range)
     {
       assert(activeTimeSegments > 0);
-#if defined(__X86_64__)
+#if defined(__X86_64__) || defined(__aarch64__)
       bbox.lower.u = id & 0xFFFFFFFF;
       bbox.upper.u = (id >> 32) & 0xFFFFFFFF;
 #else
@@ -207,7 +207,7 @@ namespace embree
 
     /*! returns an size_t sized ID */
     __forceinline size_t ID() const { 
-#if defined(__X86_64__)
+#if defined(__X86_64__) || defined(__aarch64__)
       return size_t(bbox.lower.u) + (size_t(bbox.upper.u) << 32);
 #else
       return size_t(bbox.lower.u);

@@ -30,7 +30,7 @@
 #include "../geometry/quadi.h"
 #include "../geometry/object.h"
 
-#if defined(__X86_64__)
+#if defined(__X86_64__) || defined(__aarch64__)
 #  define ROTATE_TREE 1 // specifies number of tree rotation rounds to perform
 #else
 #  define ROTATE_TREE 0 // do not use tree rotations on 32 bit platforms, barrier bit in NodeRef will cause issues

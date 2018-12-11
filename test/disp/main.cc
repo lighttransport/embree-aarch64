@@ -410,7 +410,7 @@ int main(int argc, char **argv) {
       ray.ray.flags = 0;
       ray.ray.org_x = 0.0f;
       ray.ray.org_y = 0.0f;
-      ray.ray.org_z = 10.0f;
+      ray.ray.org_z = 3.0f;
 
       float dir[3], ndir[3];
       dir[0] = (x / float(width)) - 0.5f;
