@@ -40,6 +40,14 @@ $ make  # or ninja
 Status
 ------
 
+* [x] Triangle
+* [x] Hair(curve)
+* [x] Displacement
+* [x] Subdivision surface
+* [x] Intersection filter
+* [ ] Motion blur
+* [ ] Custom geometry
+* [ ] Grid geometry
 * [x] Confirmed the build for arm64-v8a Android target.
 * [x] Confirmed the simple test render(Triangle + rtcIntersect1) runs well on aarch64 linux with the debug build of Embree.
 * [x] `verify` tutorial app allegedly pass on aarch64 linux.
