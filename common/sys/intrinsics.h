@@ -372,60 +372,54 @@ namespace embree
   }
   
   __forceinline int btc(int v, int i) {
-#if defined(__ARM_NEON)
-    unsigned int mask = 1 << i;
+#if defined(__aarch64__)
+    // _bittestandcomplement(long *a, long b) {
+    // unsigned char x = (*a >> b) & 1;
+    // *a = *a ^ (1 << b);
+    // return x;
     
-    int r = (v & mask) ? 0xffffffff : 0;
-    v ^= mask;
-    return r;
+    // We only need `*a`
+    return (v ^ (1 << i));
 #else
     int r = 0; asm ("btc %1,%0" : "=r"(r) : "r"(i), "0"(v) : "flags" ); return r;
 #endif
   }
   
   __forceinline int bts(int v, int i) {
-#if defined(__ARM_NEON)
-    unsigned int mask = 1 << i;
-    
-    int r = (v & mask) ? 0xffffffff : 0;
-    v |= mask;
-    return r;
+#if defined(__aarch64__)
+    // _bittestandset(long *a, long b) {
+    // unsigned char x = (*a >> b) & 1;
+    //  *a = *a | (1 << b);
+    //  return x;
+    return (v | (v << i));
 #else
     int r = 0; asm ("bts %1,%0" : "=r"(r) : "r"(i), "0"(v) : "flags"); return r;
 #endif
   }
   
   __forceinline int btr(int v, int i) {
-#if defined(__ARM_NEON)
-    unsigned int mask = 1 << i;
-    
-    int r = (v & mask) ? 0xffffffff : 0;
-    v ^= ~mask;
-    return r;
+#if defined(__aarch64__)
+    // _bittestandreset(long *a, long b) {
+    // unsigned char x = (*a >> b) & 1;
+    //  *a = *a & ~(1 << b);
+    //  return x;
+    return (v & ~(v << i));
 #else
     int r = 0; asm ("btr %1,%0" : "=r"(r) : "r"(i), "0"(v) : "flags"); return r;
 #endif
   }
   
   __forceinline size_t btc(size_t v, size_t i) {
-#if defined(__ARM_NEON)
-    size_t mask = 1 << i;
-    
-    int r = (v & mask) ? 0xffffffff : 0;
-    v ^= mask;
-    return r;
+#if defined(__aarch64__)
+    return (v ^ (1 << i));
 #else
     size_t r = 0; asm ("btc %1,%0" : "=r"(r) : "r"(i), "0"(v) : "flags" ); return r;
 #endif
   }
   
   __forceinline size_t bts(size_t v, size_t i) {
-#if defined(__ARM_NEON)
-    size_t mask = 1 << i;
-    
-    int r = (v & mask) ? 0xffffffff : 0;
-    v |= mask;
-    return r;
+#if defined(__aarch64__)
+    return (v | (v << i));
 #else
     size_t r = 0; asm ("bts %1,%0" : "=r"(r) : "r"(i), "0"(v) : "flags"); return r;
 #endif
@@ -433,11 +427,7 @@ namespace embree
   
   __forceinline size_t btr(size_t v, size_t i) {
 #if defined(__ARM_NEON)
-    size_t mask = 1 << i;
-    
-    int r = (v & mask) ? 0xffffffff : 0;
-    v &= ~mask;
-    return r;
+    return (v & ~(v << i));
 #else
     size_t r = 0; asm ("btr %1,%0" : "=r"(r) : "r"(i), "0"(v) : "flags"); return r;
 #endif
