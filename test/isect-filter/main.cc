@@ -10,12 +10,22 @@
 #pragma warning(disable : 4456)
 #endif
 
-#include <embree3/rtcore.h>
+//#include "embree3/rtcore.h"
 
 //#include "../../kernels/bvh/bvh.h"
 
-#include "../../tutorials/common/tutorial/noise.h"
+/* include embree API */
+#include "../../include/embree3/rtcore.h"
+
+/* include optional vector library */
+#include "../../tutorials/common/math/math.h"
+#include "../../tutorials/common/math/vec.h"
+#include "../../tutorials/common/math/affinespace.h"
 #include "../../tutorials/common/core/ray.h"
+//#include "camera.h"
+//#include "scene_device.h"
+//#include "noise.h"
+//#include "../../tutorials/common/core/ray.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
@@ -180,6 +190,7 @@ void InitRay(Ray &ray,
 
 
 /*! intersection context passed to intersect/occluded calls */
+#if 0
 struct IntersectContextIF
 {
   RTCIntersectContext context;
@@ -191,6 +202,7 @@ __forceinline void InitIntersectionContextIF(struct IntersectContextIF* context)
   rtcInitIntersectContext(&context->context);
   context->userRayExt = NULL;
 }
+#endif
 
 using namespace embree;
 
@@ -312,7 +324,7 @@ void intersectionFilter(const RTCFilterFunctionNArguments* args)
 
   assert(args->N == 1);
   int* valid = args->valid;
-  const IntersectContextIF* context = (const IntersectContextIF*) args->context;
+  const IntersectContext* context = (const IntersectContext*) args->context;
   Ray* ray = (Ray*)args->ray;
   //RTCHit* hit = (RTCHit*)args->hit;
 
@@ -342,7 +354,7 @@ void occlusionFilter(const RTCFilterFunctionNArguments* args)
 
   assert(args->N == 1);
   int* valid = args->valid;
-  const IntersectContextIF* context = (const IntersectContextIF*) args->context;
+  const IntersectContext* context = (const IntersectContext*) args->context;
   Ray* ray = (Ray*)args->ray;
   RTCHit* hit = (RTCHit*)args->hit;
 
@@ -532,8 +544,8 @@ Vec3fa renderPixelStandard(RTCScene scene, float x, float y, const Vec3fa &camer
   float weight = 1.0f;
   Vec3fa color = Vec3fa(0.0f);
 
-  IntersectContextIF context;
-  InitIntersectionContextIF(&context);
+  IntersectContext context;
+  InitIntersectionContext(&context);
   
   /* initialize ray */
   Ray2 primary;
@@ -562,7 +574,7 @@ Vec3fa renderPixelStandard(RTCScene scene, float x, float y, const Vec3fa &camer
 
     /* initialize shadow ray */
     Ray2 shadow;
-    InitRay(shadow.ray, primary.ray.org + primary.ray.tfar*primary.ray.dir, neg(lightDir), 0.001f, 1.0e+10f);
+    init_Ray(shadow.ray, primary.ray.org + primary.ray.tfar*primary.ray.dir, neg(lightDir), 0.001f, 1.0e+10f);
     shadow.ray.mask = 0; // needs to encode rayID for filter
     shadow.transparency = 1.0f;
     shadow.firstHit = 0;
@@ -630,7 +642,7 @@ static void SaveImagePNG(const char *filename, const float *rgb, int width,
   delete[] bytes;
 }
 
-static void error_handler(void* userPtr, const RTCError code, const char* str = nullptr)
+void error_handler(void* userPtr, RTCError code, const char* str = nullptr)
 {
   if (code == RTC_ERROR_NONE)
     return;
@@ -733,71 +745,22 @@ int main(int argc, char **argv) {
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
       // Simple camera. change eye pos and direction fit to .obj model.
-      std::cout << "x, y = " << x << ", " << y << std::endl;
-      if ((x == 128) && (y == 0)) {
-        bora();
-      }
-
-      RTCRayHit ray;
-      ray.ray.flags = 0;
-      ray.ray.org_x = 0.0f;
-      ray.ray.org_y = 0.0f;
-      ray.ray.org_z = 3.0f;
 
       float dir[3], ndir[3];
       dir[0] = (x / float(width)) - 0.5f;
       dir[1] = (y / float(height)) - 0.5f;
       dir[2] = -1.0f;
       vnormalize(ndir, dir);
-      ray.ray.dir_x = ndir[0];
-      ray.ray.dir_y = ndir[1];
-      ray.ray.dir_z = ndir[2];
 
-      float kFar = 1.0e+14f;
-      ray.ray.tnear = 0.0f;
-      ray.ray.tfar = kFar;
-      ray.ray.mask = 0xffffffff;
-      ray.ray.flags = 0;
+      Vec3fa camorg(0.0f, 0.0f, 8.0f);
+      Vec3fa camdir(ndir[0], ndir[1], ndir[2]);
 
-      ray.hit.primID = RTC_INVALID_GEOMETRY_ID;
-      ray.hit.geomID = RTC_INVALID_GEOMETRY_ID;
-      ray.hit.instID[0] = RTC_INVALID_GEOMETRY_ID;
+      Vec3fa col = renderPixelStandard(scene, x, y, camorg, camdir);
 
-      {
-        RTCIntersectContext context;
-        rtcInitIntersectContext(&context);
-        rtcIntersect1(scene,&context,&ray);
-      }
-      if ((ray.ray.tfar < kFar) && (ray.hit.geomID != RTC_INVALID_GEOMETRY_ID) &&
-          (ray.hit.primID != RTC_INVALID_GEOMETRY_ID)) {
-
-        Vec3fa Ng = normalize(Vec3fa(ray.hit.Ng_x, ray.hit.Ng_y, ray.hit.Ng_z));
-#if 0
-        
-        Vec3fa P;
-        P.x = ray.ray.org_x + ray.ray.tfar*ray.ray.dir_x;
-        P.y = ray.ray.org_y + ray.ray.tfar*ray.ray.dir_y;
-        P.z = ray.ray.org_z + ray.ray.tfar*ray.ray.dir_z;
-
-        if (ray.hit.geomID > 0) {
-          Vec3fa dPdu,dPdv;
-          unsigned int geomID = ray.hit.geomID; {
-            rtcInterpolate1(rtcGetGeometry(scene,geomID),ray.hit.primID,ray.hit.u,ray.hit.v,RTC_BUFFER_TYPE_VERTEX,0,nullptr,&dPdu.x,&dPdv.x,3);
-          }
-          Ng = normalize(cross(dPdu,dPdv));
-          dPdu = dPdu + Ng*displacement_du(P,dPdu);
-          dPdv = dPdv + Ng*displacement_dv(P,dPdv);
-          Ng = normalize(cross(dPdu,dPdv));
-        }
-#endif
-        // Flip Y
-        rgb[3 * size_t((height - y - 1) * width + x) + 0] =
-            0.5f * Ng.x + 0.5f;
-        rgb[3 * size_t((height - y - 1) * width + x) + 1] =
-            0.5f * Ng.y + 0.5f;
-        rgb[3 * size_t((height - y - 1) * width + x) + 2] =
-            0.5f * Ng.z + 0.5f;
-      }
+      // Flip Y
+      rgb[3 * size_t((height - y - 1) * width + x) + 0] = col[0];
+      rgb[3 * size_t((height - y - 1) * width + x) + 1] = col[1];
+      rgb[3 * size_t((height - y - 1) * width + x) + 2] = col[2];
     }
   }
   auto t_end = std::chrono::high_resolution_clock::now();

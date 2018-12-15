@@ -14,13 +14,13 @@
 
 SHELL := /bin/bash
 
-CXX=clang++
-CXX_FLAGS=-fsanitize=address -std=c++11 -O0 -g -DTASKING_INTERNAL
-LINK_FLAGS=-fsanitize=address
+CXX=clang++ -fsanitize=address
+CXX_FLAGS=-std=c++11 -fsanitize=address -O0 -g -DTASKING_INTERNAL -DEMBREE_TARGET_SSE2 
+LINK_FLAGS=
 EMBREE_INC_PATH=../../include
 EMBREE_LIB_PATH=../../build
 
-all: test_disp
+all: test_isectfilter
 
 main.o: main.cc
 	$(CXX) $(CXX_FLAGS) -c $^ -I ${EMBREE_INC_PATH} -I. -o $@
@@ -29,7 +29,7 @@ noise.o: ../../tutorials/common/tutorial/noise.cpp
 constants.o: ../../common/math/constants.cpp
 	$(CXX) $(CXX_FLAGS) -c $^ -I ${EMBREE_INC_PATH} -I. -o $@
 
-test_disp: main.o noise.o constants.o
+test_isectfilter: main.o noise.o constants.o
 	$(CXX) $^ -L ${EMBREE_LIB_PATH} ${LINK_FLAGS} -lembree3 -o $@
 
 clean:
