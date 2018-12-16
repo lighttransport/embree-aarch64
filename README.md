@@ -41,11 +41,13 @@ Status
 ------
 
 * [x] Triangle
-* [x] Hair(curve)
+* [x] Curve
+* [x] Hair(ribbon)
 * [x] Displacement
 * [x] Subdivision surface
 * [x] Intersection filter
-* [ ] Motion blur
+* [x] Motion blur
+* [x] Instanced geometry
 * [ ] Custom geometry
 * [ ] Grid geometry
 * [x] Confirmed the build for arm64-v8a Android target.
