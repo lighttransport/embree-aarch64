@@ -48,6 +48,7 @@ Status
 * [x] Intersection filter
 * [x] Motion blur
 * [x] Instanced geometry
+* [x] Interpolation
 * [ ] Custom geometry
 * [ ] Grid geometry
 * [x] Confirmed the build for arm64-v8a Android target.
