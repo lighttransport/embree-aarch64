@@ -14,8 +14,49 @@
 // limitations under the License.                                           //
 // ======================================================================== //
 
-#define RTC_VERSION_MAJOR 3
-#define RTC_VERSION_MINOR 4
-#define RTC_VERSION_PATCH 0
-#define RTC_VERSION 30400
-#define RTC_VERSION_STRING "3.4.0"
+#pragma once
+
+#include "../common/geometry.h"
+#include "../common/ray.h"
+
+namespace embree
+{
+  namespace isa
+  {
+    struct SpherePrecalculations1
+    {
+      float one_over_raydir2;
+
+      __forceinline SpherePrecalculations1() {}
+
+      __forceinline SpherePrecalculations1(const Ray& ray, const void* ptr)
+      {
+        one_over_raydir2 = rcp(dot(ray.dir, ray.dir));
+      }
+    };
+
+    template<int K>
+    struct SpherePrecalculationsK
+    {
+      vfloat<K> one_over_raydir2;
+
+      __forceinline SpherePrecalculationsK(const vbool<K>& valid, const RayK<K>& ray)
+      {
+        one_over_raydir2 = rsqrt(dot(ray.dir, ray.dir));
+      }
+    };
+
+    struct DiscPrecalculations1
+    {
+      __forceinline DiscPrecalculations1() {}
+
+      __forceinline DiscPrecalculations1(const Ray& ray, const void* ptr) {}
+    };
+
+    template<int K>
+    struct DiscPrecalculationsK
+    {
+      __forceinline DiscPrecalculationsK(const vbool<K>& valid, const RayK<K>& ray) {}
+    };
+  }  // namespace isa
+}  // namespace embree

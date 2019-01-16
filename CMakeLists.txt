@@ -15,7 +15,7 @@
 ## ======================================================================== ##
 
 SET(EMBREE_VERSION_MAJOR 3)
-SET(EMBREE_VERSION_MINOR 3)
+SET(EMBREE_VERSION_MINOR 4)
 SET(EMBREE_VERSION_PATCH 0)
 SET(EMBREE_VERSION_NOTE "")
 
@@ -137,6 +137,7 @@ OPTION(EMBREE_GEOMETRY_SUBDIVISION "Enables support for subdiv geometries." ON)
 OPTION(EMBREE_GEOMETRY_USER "Enables support for user geometries." ON)
 OPTION(EMBREE_GEOMETRY_INSTANCE "Enables support for instances." ON)
 OPTION(EMBREE_GEOMETRY_GRID "Enables support for grid geometries." ON)
+OPTION(EMBREE_GEOMETRY_POINT "Enables support for point geometries." ON)
 OPTION(EMBREE_RAY_PACKETS "Enabled support for ray packets." ON)
 
 SET(EMBREE_CURVE_SELF_INTERSECTION_AVOIDANCE_FACTOR 2.0 CACHE STRING "Self intersection avoidance factor for flat curves. Specify floating point value in range 0 to inf.")
@@ -379,6 +380,7 @@ IF (EMBREE_ISA_AVX512KNL)
   LIST(APPEND ISPC_TARGETS "avx512knl-i32x16")
   IF(NOT FLAGS_LOWEST)
     SET(ISA_LOWEST ${AVX512KNL})
+    SET(ISA_LOWEST_AVX ${AVX512KNL})
     SET(FLAGS_LOWEST ${FLAGS_AVX512KNL})
   ENDIF()
 ENDIF ()

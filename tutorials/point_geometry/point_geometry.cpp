@@ -14,8 +14,23 @@
 // limitations under the License.                                           //
 // ======================================================================== //
 
-#define RTC_VERSION_MAJOR 3
-#define RTC_VERSION_MINOR 4
-#define RTC_VERSION_PATCH 0
-#define RTC_VERSION 30400
-#define RTC_VERSION_STRING "3.4.0"
+#include "../common/tutorial/tutorial.h"
+
+namespace embree
+{
+  struct Tutorial : public TutorialApplication
+  {
+    Tutorial()
+      : TutorialApplication("point_geometry",FEATURE_RTCORE)
+    {
+      /* set default camera */
+      camera.from = Vec3fa(0.0f, 2.0f, 7.0f);
+      camera.to   = Vec3fa(0.0f,0.0f,0.0f);
+    }
+  };
+
+}
+
+int main(int argc, char** argv) {
+  return embree::Tutorial().main(argc,argv);
+}

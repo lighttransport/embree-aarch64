@@ -212,7 +212,9 @@ def runConfig(config):
       conf.append("-D EMBREE_TASKING_SYSTEM=TBB")
 
       if OS == "linux":
-        if tasking == "TBB2017":
+        if tasking == "TBB2019.2":
+          conf.append("-D EMBREE_TBB_ROOT=/NAS/packages/apps/tbb/tbb-2019.2-linux")
+        elif tasking == "TBB2017":
           conf.append("-D EMBREE_TBB_ROOT=/NAS/packages/apps/tbb/tbb-2017-linux")
         elif tasking == "TBB":
           conf.append("-D EMBREE_TBB_ROOT=/usr")
@@ -220,7 +222,9 @@ def runConfig(config):
           raise ValueError('unknown tasking system: ' + tasking + '')
       
       elif OS == "macosx":
-        if tasking == "TBB2017":
+        if tasking == "TBB2019.2":
+          conf.append("-D EMBREE_TBB_ROOT=/Network/nfs/NAS/packages/apps/tbb/tbb-2019.2-osx")
+        elif tasking == "TBB2017":
           conf.append("-D EMBREE_TBB_ROOT=/Network/nfs/NAS/packages/apps/tbb/tbb-2017-osx")
         elif tasking == "TBB":
           conf.append("-D EMBREE_TBB_ROOT=/opt/local")
@@ -228,7 +232,9 @@ def runConfig(config):
           raise ValueError('unknown tasking system: ' + tasking + '')
       
       elif OS == "windows":
-        if tasking == "TBB2017": 
+        if tasking == "TBB2019.2": 
+          tbb_path = "\\\\sdvis-nas\\NAS\\packages\\apps\\tbb\\tbb-2019.2-windows"
+        elif tasking == "TBB2017": 
           tbb_path = "\\\\sdvis-nas\\NAS\\packages\\apps\\tbb\\tbb-2017-windows"
           conf.append("-D EMBREE_TBB_ROOT="+tbb_path)
         else:
@@ -278,6 +284,8 @@ def runConfig(config):
     conf.append("-D EMBREE_GEOMETRY_USER="+config["USERGEOM"])
   if "INSTANCE" in config:
     conf.append("-D EMBREE_GEOMETRY_INSTANCE="+config["INSTANCE"])
+  if "POINT" in config:
+    conf.append("-D EMBREE_GEOMETRY_POINT="+config["POINT"])
 
   if "package" in config:
     conf.append("-D EMBREE_TESTING_PACKAGE=ON")
@@ -318,8 +326,8 @@ def runConfig(config):
       conf.append("-D CMAKE_INSTALL_PREFIX=/opt/local")
       conf.append("-D CMAKE_INSTALL_INCLUDEDIR=include")
       conf.append("-D CMAKE_INSTALL_LIBDIR=lib")
-      conf.append("-D CMAKE_INSTALL_DOCDIR=../../Applications/Embree2/doc")
-      conf.append("-D CMAKE_INSTALL_BINDIR=../../Applications/Embree2/bin")
+      conf.append("-D CMAKE_INSTALL_DOCDIR=../../Applications/Embree3/doc")
+      conf.append("-D CMAKE_INSTALL_BINDIR=../../Applications/Embree3/bin")
       conf.append("-D EMBREE_TBB_ROOT=/opt/local")
     elif OS == "windows" and config["package"] == "ZIP":
       conf.append("-D EMBREE_SIGN_FILE=\\\\sdvis-nas\\NAS\\packages\\apps\\signfile\\windows\\SignFile.exe")

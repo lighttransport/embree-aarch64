@@ -44,8 +44,8 @@ namespace embree
       }, "--time-steps2 <int>: number of time steps to use");
     
       /* set default camera */
-      camera.from = Vec3fa(6,11,0);
-      camera.to   = Vec3fa(0,0,0);
+      camera.from = Vec3fa(8,13,2.5);
+      camera.to   = Vec3fa(0,0,2.5);
     }
   };
 }
