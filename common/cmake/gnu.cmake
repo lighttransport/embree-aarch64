@@ -33,7 +33,7 @@ ELSE ()
   _SET_IF_EMPTY(FLAGS_AVX512SKX "-mavx512f -mavx512dq -mavx512cd -mavx512bw -mavx512vl -mf16c -mavx2 -mfma -mlzcnt -mbmi -mbmi2")
 ENDIF ()
 
-OPTION(EMBREE_IGNORE_CMAKE_CXX_FLAGS "When enabled Embree ignores default CMAKE_CXX_FLAGS." ON)
+OPTION(EMBREE_IGNORE_CMAKE_CXX_FLAGS "When enabled Embree ignores default CMAKE_CXX_FLAGS." OFF)
 IF (EMBREE_IGNORE_CMAKE_CXX_FLAGS)
   SET(CMAKE_CXX_FLAGS "")
 ENDIF()
