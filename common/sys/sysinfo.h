@@ -77,7 +77,7 @@
 #define isa sse2
 #define ISA NEON
 #define ISA_STR "NEON"
-#else 
+#else
 #error Unknown ISA
 #endif
 
@@ -91,7 +91,7 @@ namespace embree
     CPU_CORE_SANDYBRIDGE,
     CPU_HASWELL,
     CPU_KNIGHTS_LANDING,
-    CPU_SKYLAKE,
+    CPU_SKYLAKE_SERVER,
     CPU_ARM
   };
 
@@ -108,7 +108,7 @@ namespace embree
   std::string getCPUVendor();
 
   /*! get microprocessor model */
-  CPUModel getCPUModel(); 
+  CPUModel getCPUModel();
 
   /*! converts CPU model into string */
   std::string stringOfCPUModel(CPUModel model);
@@ -119,7 +119,7 @@ namespace embree
   static const int CPU_FEATURE_SSE3   = 1 << 2;
   static const int CPU_FEATURE_SSSE3  = 1 << 3;
   static const int CPU_FEATURE_SSE41  = 1 << 4;
-  static const int CPU_FEATURE_SSE42  = 1 << 5; 
+  static const int CPU_FEATURE_SSE42  = 1 << 5;
   static const int CPU_FEATURE_POPCNT = 1 << 6;
   static const int CPU_FEATURE_AVX    = 1 << 7;
   static const int CPU_FEATURE_F16C   = 1 << 8;
@@ -130,7 +130,7 @@ namespace embree
   static const int CPU_FEATURE_BMI1   = 1 << 13;
   static const int CPU_FEATURE_BMI2   = 1 << 14;
   static const int CPU_FEATURE_AVX512F = 1 << 16;
-  static const int CPU_FEATURE_AVX512DQ = 1 << 17;    
+  static const int CPU_FEATURE_AVX512DQ = 1 << 17;
   static const int CPU_FEATURE_AVX512PF = 1 << 18;
   static const int CPU_FEATURE_AVX512ER = 1 << 19;
   static const int CPU_FEATURE_AVX512CD = 1 << 20;
@@ -142,8 +142,9 @@ namespace embree
   static const int CPU_FEATURE_YMM_ENABLED = 1 << 26;
   static const int CPU_FEATURE_ZMM_ENABLED = 1 << 27;
   static const int CPU_FEATURE_NEON = 1 << 30;
- 
-  
+
+  static const int CPU_FEATURE_PSEUDO_HIFREQ256BIT = 1 << 30;
+
   /*! get CPU features */
   int getCPUFeatures();
 
@@ -154,7 +155,7 @@ namespace embree
   std::string supportedTargetList (int isa);
 
   /*! ISAs */
-  static const int SSE    = CPU_FEATURE_SSE | CPU_FEATURE_XMM_ENABLED; 
+  static const int SSE    = CPU_FEATURE_SSE | CPU_FEATURE_XMM_ENABLED;
   static const int SSE2   = SSE | CPU_FEATURE_SSE2;
   static const int SSE3   = SSE2 | CPU_FEATURE_SSE3;
   static const int SSSE3  = SSE3 | CPU_FEATURE_SSSE3;
@@ -167,12 +168,15 @@ namespace embree
   static const int AVX512SKX = AVX2 | CPU_FEATURE_AVX512F | CPU_FEATURE_AVX512DQ | CPU_FEATURE_AVX512CD | CPU_FEATURE_AVX512BW | CPU_FEATURE_AVX512VL | CPU_FEATURE_ZMM_ENABLED;
   static const int NEON = CPU_FEATURE_NEON | CPU_FEATURE_SSE | CPU_FEATURE_SSE2;
 
+  static const int AVX_FAST = AVX | CPU_FEATURE_PSEUDO_HIFREQ256BIT;
+  static const int AVX2_FAST = AVX2 | CPU_FEATURE_PSEUDO_HIFREQ256BIT;
+
   /*! converts ISA bitvector into a string */
   std::string stringOfISA(int features);
 
   /*! return the number of logical threads of the system */
   unsigned int getNumberOfLogicalThreads();
-  
+
   /*! returns the size of the terminal window in characters */
   int getTerminalWidth();
 

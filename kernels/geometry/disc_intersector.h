@@ -17,7 +17,7 @@
 #pragma once
 
 #include "../common/ray.h"
-#include "point_precalculations.h"
+#include "curve_intersector_precalculations.h"
 
 namespace embree
 {
@@ -58,7 +58,7 @@ namespace embree
     template<int M>
     struct DiscIntersector1
     {
-      typedef DiscPrecalculations1 Precalculations;
+      typedef CurvePrecalculations1 Precalculations;
 
       template<typename Epilog>
       static __forceinline bool intersect(
@@ -77,10 +77,10 @@ namespace embree
 
         valid &= (vfloat<M>(ray.tnear()) < projC0) & (projC0 <= vfloat<M>(ray.tfar));
         if (EMBREE_CURVE_SELF_INTERSECTION_AVOIDANCE_FACTOR != 0.0f)
-          valid &= projC0 > float(EMBREE_CURVE_SELF_INTERSECTION_AVOIDANCE_FACTOR) * radius;  // ignore self intersections
+          valid &= projC0 > float(EMBREE_CURVE_SELF_INTERSECTION_AVOIDANCE_FACTOR) * radius * pre.depth_scale;  // ignore self intersections
         if (unlikely(none(valid)))
           return false;
-
+        
         const Vec3vf<M> perp   = c0 - projC0 * ray_dir;
         const vfloat<M> l2     = dot(perp, perp);
         const vfloat<M> r2     = radius * radius;
@@ -129,7 +129,7 @@ namespace embree
     template<int M, int K>
     struct DiscIntersectorK
     {
-      typedef DiscPrecalculationsK<K> Precalculations;
+      typedef CurvePrecalculationsK<K> Precalculations;
 
       template<typename Epilog>
       static __forceinline bool intersect(const vbool<M>& valid_i,
@@ -152,7 +152,7 @@ namespace embree
 
         valid &= (vfloat<M>(ray.tnear()[k]) < projC0) & (projC0 <= vfloat<M>(ray.tfar[k]));
         if (EMBREE_CURVE_SELF_INTERSECTION_AVOIDANCE_FACTOR != 0.0f)
-          valid &= projC0 > float(EMBREE_CURVE_SELF_INTERSECTION_AVOIDANCE_FACTOR) * radius;  // ignore self intersections
+          valid &= projC0 > float(EMBREE_CURVE_SELF_INTERSECTION_AVOIDANCE_FACTOR) * radius * pre.depth_scale[k];  // ignore self intersections
         if (unlikely(none(valid)))
           return false;
 

@@ -16,7 +16,7 @@
 
 SET(EMBREE_VERSION_MAJOR 3)
 SET(EMBREE_VERSION_MINOR 5)
-SET(EMBREE_VERSION_PATCH 0)
+SET(EMBREE_VERSION_PATCH 2)
 SET(EMBREE_VERSION_NOTE "")
 
 SET(EMBREE_VERSION ${EMBREE_VERSION_MAJOR}.${EMBREE_VERSION_MINOR}.${EMBREE_VERSION_PATCH})
@@ -32,12 +32,12 @@ MACRO (SIGN_TARGET target)
     IF (WIN32)
       # on Windows we only strip as debug symbols not included in binary
       ADD_CUSTOM_COMMAND(TARGET ${target} POST_BUILD
-        COMMAND ${EMBREE_SIGN_FILE} -vv -c embree $<TARGET_FILE:${target}>)
+        COMMAND ${EMBREE_SIGN_FILE} $<TARGET_FILE:${target}>)
     ELSEIF (APPLE)
       # on MacOSX we strip and sign
       ADD_CUSTOM_COMMAND(TARGET ${target} POST_BUILD
         COMMAND ${CMAKE_STRIP} -x $<TARGET_FILE:${target}>
-        COMMAND ${EMBREE_SIGN_FILE} -vv -c embree $<TARGET_FILE:${target}>)
+        COMMAND ${EMBREE_SIGN_FILE} $<TARGET_FILE:${target}>)
     ELSE()
       # on Linux just strip as signing not supported
       ADD_CUSTOM_COMMAND(TARGET ${target} POST_BUILD
@@ -68,6 +68,14 @@ CONFIGURE_FILE(
 CONFIGURE_FILE(
   "${PROJECT_SOURCE_DIR}/kernels/hash.h.in"
   "${PROJECT_SOURCE_DIR}/kernels/hash.h"
+)
+CONFIGURE_FILE(
+  "${PROJECT_SOURCE_DIR}/kernels/export.linux.map.in"
+  "${PROJECT_SOURCE_DIR}/kernels/export.linux.map"
+)
+CONFIGURE_FILE(
+  "${PROJECT_SOURCE_DIR}/kernels/export.macosx.map.in"
+  "${PROJECT_SOURCE_DIR}/kernels/export.macosx.map"
 )
 
 IF(COMMAND cmake_policy)
@@ -106,7 +114,6 @@ ELSE()
 ENDIF()
 IF (EMBREE_STATIC_LIB)
   SET(EMBREE_LIB_TYPE STATIC)
-  ADD_DEFINITIONS(-DEMBREE_STATIC_LIB)
 ELSE()
   SET(EMBREE_LIB_TYPE SHARED)
 ENDIF()
@@ -115,6 +122,12 @@ OPTION(EMBREE_ISPC_SUPPORT "Build Embree with support for ISPC applications." ON
 OPTION(EMBREE_TUTORIALS    "Enable to build Embree tutorials" ON)
 OPTION(EMBREE_BUILD_VERIFY "Build verify program for testing" ON)
 SET(EMBREE_TARGET_ARCH  "arm" CACHE STRING "Target archtecture.")
+SET(EMBREE_API_NAMESPACE "" CACHE STRING "C++ namespace to put API symbols into.")
+SET(EMBREE_LIBRARY_NAME  "embree${EMBREE_VERSION_MAJOR}" CACHE STRING "Name of the embree library file (default is embree${EMBREE_VERSION_MAJOR})")
+
+IF (EMBREE_API_NAMESPACE AND EMBREE_ISPC_SUPPORT)
+   MESSAGE(FATAL_ERROR "You cannot enable ISPC when EMBREE_API_NAMESPACE is used.")
+ENDIF()
 
 ##############################################################################
 # Configurations (add configurations also to common/cmake/embree-config-default.cmake)
@@ -238,7 +251,11 @@ IF (EMBREE_MAX_ISA STREQUAL "NONE")
   TRY_COMPILE(COMPILER_SUPPORTS_AVX2      ${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/common/cmake/check_isa.cpp COMPILE_DEFINITIONS ${FLAGS_AVX2})
   TRY_COMPILE(COMPILER_SUPPORTS_AVX512KNL ${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/common/cmake/check_isa.cpp COMPILE_DEFINITIONS ${FLAGS_AVX512KNL})
   TRY_COMPILE(COMPILER_SUPPORTS_AVX512SKX ${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/common/cmake/check_isa.cpp COMPILE_DEFINITIONS ${FLAGS_AVX512SKX})
-  
+
+  IF (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
+    SET(COMPILER_SUPPORTS_AVX512SKX OFF)  # we disable this by default as GCC agressively produces AVX512 heavy instructions which reduce CPU frequency
+  ENDIF()
+
   OPTION(EMBREE_ISA_SSE2 "Enables SSE2 ISA." ON)
   OPTION(EMBREE_ISA_SSE42 "Enables SSE4.2 ISA." ON)
   OPTION(EMBREE_ISA_AVX "Enables AVX ISA." ${COMPILER_SUPPORTS_AVX})
@@ -321,6 +338,44 @@ ENDIF()
 
 IF(CMAKE_CXX_COMPILER_WRAPPER STREQUAL "CrayPrgEnv")
   SET(EMBREE_ISA_SSE42 OFF)
+ENDIF()
+
+IF (APPLE AND EMBREE_STATIC_LIB)
+
+  # count number of set ISAs
+  SET(NUMISA 0)
+  IF (EMBREE_ISA_SSE2)
+    MATH(EXPR NUMISA "${NUMISA}+1")
+  ENDIF()
+  IF (EMBREE_ISA_SSE42)
+    MATH(EXPR NUMISA "${NUMISA}+1")
+  ENDIF()
+  IF (EMBREE_ISA_AVX)
+    MATH(EXPR NUMISA "${NUMISA}+1")
+  ENDIF()
+  IF (EMBREE_ISA_AVX2)
+    MATH(EXPR NUMISA "${NUMISA}+1")
+  ENDIF()
+  IF (EMBREE_ISA_AVX512KNL)
+    MATH(EXPR NUMISA "${NUMISA}+1")
+  ENDIF()
+  IF (EMBREE_ISA_AVX512SKX)
+    MATH(EXPR NUMISA "${NUMISA}+1")
+  ENDIF()
+
+  IF (NUMISA GREATER 1)
+    IF (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+      IF (${CMAKE_CXX_COMPILER_VERSION} MATCHES "^9\\..*")
+        MESSAGE(FATAL_ERROR "Using Embree as static library is not supported with AppleClang 9.X when multiple ISAs are selected. Please either build a shared library or enable only one ISA.")
+      ENDIF()
+    ENDIF()
+  ENDIF()
+ENDIF()
+
+IF (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
+  IF (EMBREE_ISA_AVX512SKX)
+    MESSAGE(WARNING "Enabling AVX512SKX on GCC may reduce CPU frequency.")
+  ENDIF()
 ENDIF()
 
 ##############################################################

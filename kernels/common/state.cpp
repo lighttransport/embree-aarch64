@@ -49,7 +49,8 @@ namespace embree
 
   State::State () 
     : enabled_cpu_features(getCPUFeatures()),
-      enabled_builder_cpu_features(enabled_cpu_features)
+      enabled_builder_cpu_features(enabled_cpu_features),
+      frequency_level(FREQUENCY_SIMD256)
   {
     tri_accel = "default";
     tri_builder = "default";
@@ -94,6 +95,7 @@ namespace embree
     object_accel_mb_max_leaf_size = 1;
 
     max_spatial_split_replications = 2.0f;
+    useSpatialPreSplits = false;
 
     tessellation_cache_size = 128*1024*1024;
 
@@ -274,6 +276,13 @@ namespace embree
         enabled_builder_cpu_features &= string_to_cpufeatures(isa);
       }
 
+      else if (tok == Token::Id("frequency_level") && cin->trySymbol("=")) {
+        std::string freq = cin->get().Identifier();
+        if      (freq == "simd128") frequency_level = FREQUENCY_SIMD128;
+        else if (freq == "simd256") frequency_level = FREQUENCY_SIMD256;
+        else if (freq == "simd512") frequency_level = FREQUENCY_SIMD512;
+      }
+
       else if (tok == Token::Id("enable_selockmemoryprivilege") && cin->trySymbol("=")) {
         enable_selockmemoryprivilege = cin->get().Int();
       }
@@ -414,6 +423,9 @@ namespace embree
       else if (tok == Token::Id("max_spatial_split_replications") && cin->trySymbol("="))
         max_spatial_split_replications = cin->get().Float();
 
+      else if (tok == Token::Id("presplits") && cin->trySymbol("="))
+        useSpatialPreSplits = cin->get().Int() != 0 ? true : false;
+
       else if (tok == Token::Id("tessellation_cache_size") && cin->trySymbol("="))
         tessellation_cache_size = size_t(cin->get().Float()*1024.0f*1024.0f);
       else if (tok == Token::Id("cache_size") && cin->trySymbol("="))
@@ -442,6 +454,13 @@ namespace embree
     std::cout << "  build threads = " << numThreads   << std::endl;
     std::cout << "  start_threads = " << start_threads << std::endl;
     std::cout << "  affinity      = " << set_affinity << std::endl;
+    std::cout << "  frequency_level = ";
+    switch (frequency_level) {
+    case FREQUENCY_SIMD128: std::cout << "simd128" << std::endl; break;
+    case FREQUENCY_SIMD256: std::cout << "simd256" << std::endl; break;
+    case FREQUENCY_SIMD512: std::cout << "simd512" << std::endl; break;
+    default: std::cout << "error" << std::endl; break;
+    }
     
     std::cout << "  hugepages     = ";
     if (!hugepages) std::cout << "disabled" << std::endl;
