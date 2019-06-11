@@ -458,7 +458,7 @@ namespace embree
 #if defined(__WIN32__) && !defined(__X86_64__) // win32 workaround
     return toScalar(v);
 #elif defined(__ARM_NEON)
-    return vgetq_lane_s32(v, 0);
+    return vgetq_lane_u64(v, 0);
 #else
     return _mm_cvtsi128_si64(v); 
 #endif

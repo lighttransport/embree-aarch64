@@ -1383,12 +1383,10 @@ FORCE_INLINE void _mm_clflush(void const*p)
 	// no corollary for Neon?
 }
 
-//
-// NOTE(LTE): Missing SSE2 functions in original SSE2NEON.h
-//
 FORCE_INLINE __m128i _mm_set_epi64x(int64_t a, int64_t b)
 {
-	int64_t __attribute__((aligned(16))) data[2] = { a, b };
+	// Stick to the flipped behavior of x86.
+	int64_t __attribute__((aligned(16))) data[2] = { b, a };
 	return (__m128i)vld1q_s64(data);
 }
 
