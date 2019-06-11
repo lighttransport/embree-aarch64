@@ -893,12 +893,31 @@ FORCE_INLINE __m128 _mm_mul_ss(__m128 a, __m128 b)
 	return vmulq_f32(a, b);
 }
 
+// Computes the approximations of reciprocals of the four single-precision, floating-point values of a. https://msdn.microsoft.com/en-us/library/vstudio/796k1tty(v=vs.100).aspx
+FORCE_INLINE __m128 _mm_rcp_ps(__m128 in)
+{
+	// Get an initial estimate of 1/in.
+	float32x4_t reciprocal = vrecpeq_f32(in);
+	reciprocal = vmulq_f32(vrecpsq_f32(in, reciprocal), reciprocal);
+	reciprocal = vmulq_f32(vrecpsq_f32(in, reciprocal), reciprocal);
+
+	return reciprocal;
+}
+
+FORCE_INLINE __m128 _mm_rcp_ss(__m128 in)
+{
+	float32x4_t value;
+	float32x4_t result = in;
+
+	value = _mm_rcp_ps(in);
+	return vsetq_lane_f32(vgetq_lane_f32(value, 0), result, 0);
+}
+
 // Divides the four single-precision, floating-point values of a and b. https://msdn.microsoft.com/en-us/library/edaw8147(v=vs.100).aspx
 FORCE_INLINE __m128 _mm_div_ps(__m128 a, __m128 b)
 {
-    __m128 recip = vrecpeq_f32(b);
-    recip = vmulq_f32(recip, vrecpsq_f32(recip, b));
-    return vmulq_f32(a, recip);
+	float32x4_t reciprocal = _mm_rcp_ps(b);
+  return vmulq_f32(a, reciprocal);
 }
 
 // Divides the scalar single-precision floating point value of a by b.  https://msdn.microsoft.com/en-us/library/4y73xa49(v=vs.100).aspx
@@ -910,42 +929,29 @@ FORCE_INLINE __m128 _mm_div_ss(__m128 a, __m128 b)
 	return vsetq_lane_f32(vgetq_lane_f32(value, 0), result, 0);
 }
 
-// This version does additional iterations to improve accuracy.  Between 1 and 4 recommended.
-// Computes the approximations of reciprocals of the four single-precision, floating-point values of a. https://msdn.microsoft.com/en-us/library/vstudio/796k1tty(v=vs.100).aspx
-FORCE_INLINE __m128 recipq_newton(__m128 in, int n)
+// Computes the approximations of the reciprocal square roots of the four single-precision floating point values of in.  https://msdn.microsoft.com/en-us/library/22hfsh53(v=vs.100).aspx
+FORCE_INLINE __m128 _mm_rsqrt_ps(__m128 in)
 {
-	__m128 recip = vrecpeq_f32(in);
-	for (int i = 0; i<n; ++i)
-	{
-		recip = vmulq_f32(recip, vrecpsq_f32(recip, in));
-	}
-	return recip;
+	float32x4_t value = vrsqrteq_f32(in);
+	value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
+	value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
+
+	return value;
 }
 
-// Computes the approximations of reciprocals of the four single-precision, floating-point values of a. https://msdn.microsoft.com/en-us/library/vstudio/796k1tty(v=vs.100).aspx
-FORCE_INLINE __m128 _mm_rcp_ps(__m128 in)
+FORCE_INLINE __m128 _mm_rsqrt_ss(__m128 in)
 {
-	__m128 recip = vrecpeq_f32(in);
-	recip = vmulq_f32(recip, vrecpsq_f32(recip, in));
-	return recip;
-}
-
-// TODO(LTE): Only compute rcp for the first element.
-FORCE_INLINE __m128 _mm_rcp_ss(__m128 in)
-{
-	__m128 recip = vrecpeq_f32(in);
-	recip = vmulq_f32(recip, vrecpsq_f32(recip, in));
-	return recip;
+	float32x4_t result = in;
+	float32x4_t value = _mm_rsqrt_ps(in);
+	return vsetq_lane_f32(vgetq_lane_f32(value, 0), result, 0);
 }
 
 
 // Computes the approximations of square roots of the four single-precision, floating-point values of a. First computes reciprocal square roots and then reciprocals of the four values. https://msdn.microsoft.com/en-us/library/vstudio/8z67bwwk(v=vs.100).aspx
 FORCE_INLINE __m128 _mm_sqrt_ps(__m128 in)
 {
-	__m128 recipsq = vrsqrteq_f32(in);
-	__m128 sq = vrecpeq_f32(recipsq);
-	// ??? use step versions of both sqrt and recip for better accuracy?
-	return sq;
+	float32x4_t reciprocal = _mm_rsqrt_ps(in);
+	return vmulq_f32(in, reciprocal);
 }
 
 // Computes the approximation of the square root of the scalar single-precision floating point value of in.  https://msdn.microsoft.com/en-us/library/ahfsc22d(v=vs.100).aspx
@@ -956,17 +962,6 @@ FORCE_INLINE __m128 _mm_sqrt_ss(__m128 in)
 
 	value = _mm_sqrt_ps(in);
 	return vsetq_lane_f32(vgetq_lane_f32(value, 0), result, 0);
-}
-
-// Computes the approximations of the reciprocal square roots of the four single-precision floating point values of in.  https://msdn.microsoft.com/en-us/library/22hfsh53(v=vs.100).aspx
-FORCE_INLINE __m128 _mm_rsqrt_ps(__m128 in)
-{
-	return vrsqrteq_f32(in);
-}
-
-FORCE_INLINE __m128 _mm_rsqrt_ss(__m128 in)
-{
-	return vrsqrteq_f32(in);
 }
 
 // Computes the maximums of the four single-precision, floating-point values of a and b. https://msdn.microsoft.com/en-us/library/vstudio/ff5d607a(v=vs.100).aspx
