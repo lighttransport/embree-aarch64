@@ -137,12 +137,6 @@ namespace embree
     CloseHandle(HANDLE(tid));
   }
 
-  /*! destroy a hardware thread by its handle */
-  void destroyThread(thread_t tid) {
-    TerminateThread(HANDLE(tid),0);
-    CloseHandle(HANDLE(tid));
-  }
-
   /*! creates thread local storage */
   tls_t createTls() {
     return tls_t(size_t(TlsAlloc()));
@@ -238,7 +232,7 @@ namespace embree
   /*! set affinity of the calling thread */
   void setAffinity(ssize_t affinity)
   {
-#if defined(__ARM_NEON)
+#if defined(__ANDROID__)
     // TODO(LTE): Implement
 #else
     cpu_set_t cset;
@@ -388,18 +382,6 @@ namespace embree
     if (pthread_join(*(pthread_t*)tid, nullptr) != 0)
       FATAL("pthread_join failed");
     delete (pthread_t*)tid;
-  }
-
-  /*! destroy a hardware thread by its handle */
-  void destroyThread(thread_t tid) {
-#if defined(__ANDROID__)
-    // TODO(LTE): Android pthread does not support `pthread_cancel`.
-    // We need to implement similar functionaly of `pthread_cancel` in another way.
-    assert(0);
-#else
-    pthread_cancel(*(pthread_t*)tid);
-    delete (pthread_t*)tid;
-#endif
   }
 
   /*! creates thread local storage */

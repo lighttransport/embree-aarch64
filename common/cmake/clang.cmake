@@ -20,12 +20,8 @@ MACRO(_SET_IF_EMPTY VAR VALUE)
   ENDIF()
 ENDMACRO()
 
-IF (DEFINED ANDROID_ABI)
- IF (${ANDROID_ABI} STREQUAL "arm64-v8a")
-   # No thing to declare
- ENDIF ()
-ELSEIF (${EMBREE_TARGET_ARCH} STREQUAL "aarch64")
-   # No thing to declare
+IF (EMBREE_ARM)
+   # No thing to declare.
 ELSE ()
   _SET_IF_EMPTY(FLAGS_SSE2  "-msse2")
   _SET_IF_EMPTY(FLAGS_SSE42 "-msse4.2")
@@ -139,8 +135,10 @@ ELSE()
   SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -D_FORTIFY_SOURCE=2")         # perform extra security checks for some standard library calls
 
   IF (APPLE)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.7")   # makes sure code runs on older MacOSX versions
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")             # link against libc++ which supports C++11 features
+    IF (NOT IOS)
+      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.7")   # makes sure code runs on older MacOSX versions
+    ENDIF()
+	  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")             # link against libc++ which supports C++11 features
   ELSE(APPLE)
     IF (NOT EMBREE_ADDRESS_SANITIZER) # for address sanitizer this causes link errors
       SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined") # issues link error for undefined symbols in shared library

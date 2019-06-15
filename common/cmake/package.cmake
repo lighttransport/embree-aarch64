@@ -27,7 +27,12 @@ ENDIF()
 
 # use full absolute path as install name
 IF (NOT EMBREE_ZIP_MODE)
-  SET(CMAKE_INSTALL_NAME_DIR ${CMAKE_INSTALL_FULL_LIBDIR})
+  IF(APPLE AND IOS)
+    # For iOS we want to absolute path.
+    SET(CMAKE_INSTALL_NAME_DIR "@rpath")
+  ELSE()
+    SET(CMAKE_INSTALL_NAME_DIR ${CMAKE_INSTALL_FULL_LIBDIR})
+  ENDIF()
 ELSE()
   IF(APPLE)
     SET(CMAKE_INSTALL_RPATH "@loader_path/../lib")
@@ -109,7 +114,7 @@ ELSE()
   ENDIF()
 ENDIF()
 
-IF (WIN32 OR EMBREE_ZIP_MODE)
+IF (WIN32 OR EMBREE_ZIP_MODE OR ANDROID)
   # for local "installs" and on Windows we want the cmake config files placed
   # in the install root, such that users can point the CMake variable
   # embree_DIR just to the install folder
