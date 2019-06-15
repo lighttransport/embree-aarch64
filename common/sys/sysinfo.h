@@ -141,7 +141,7 @@ namespace embree
   static const int CPU_FEATURE_XMM_ENABLED = 1 << 25;
   static const int CPU_FEATURE_YMM_ENABLED = 1 << 26;
   static const int CPU_FEATURE_ZMM_ENABLED = 1 << 27;
-  static const int CPU_FEATURE_NEON = 1 << 30;
+  static const int CPU_FEATURE_NEON = 1 << 28;
 
   static const int CPU_FEATURE_PSEUDO_HIFREQ256BIT = 1 << 30;
 
