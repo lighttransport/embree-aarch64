@@ -642,8 +642,8 @@ namespace embree
     std::atomic<int> passed(true);
 
 #if defined(__WIN32__) && !defined(__X86_64__)
-	/* deactivating parallel test execution on win32 platforms due to out-of-memory exceptions */
-	parallel = false;
+  /* deactivating parallel test execution on win32 platforms due to out-of-memory exceptions */
+  parallel = false;
 #endif
 
     if (state->parallel && parallel && leaftest) 
@@ -2474,6 +2474,10 @@ namespace embree
       rtcSetGeometryMask(hgeom1,2);
       rtcSetGeometryMask(hgeom2,4);
       rtcSetGeometryMask(hgeom3,8);
+      rtcCommitGeometry(hgeom0);
+      rtcCommitGeometry(hgeom1);
+      rtcCommitGeometry(hgeom2);
+      rtcCommitGeometry(hgeom3);
       rtcCommitScene (scene);
       AssertNoError(device);
       
@@ -2585,7 +2589,7 @@ namespace embree
 
       for (unsigned int i=0; i<args->N; i++)
       {
-	if (args->valid[i] != -1) continue;
+        if (args->valid[i] != -1) continue;
 
         /* reject hit */
         if (RTCHitN_primID(args->hit,args->N,i) & 2) {
@@ -3152,18 +3156,18 @@ namespace embree
     {
       for (unsigned int i=0; i<task->sceneCount; i++) 
       {
-	task->barrier.wait();
-	if (thread->threadIndex < task->numActiveThreads) 
-	{
+  task->barrier.wait();
+  if (thread->threadIndex < task->numActiveThreads) 
+  {
           rtcJoinCommitScene(*task->scene);
-	  //if (rtcGetDeviceError(thread->device) != RTC_ERROR_NONE) task->errorCounter++;;
+    //if (rtcGetDeviceError(thread->device) != RTC_ERROR_NONE) task->errorCounter++;;
           if (rtcGetDeviceError(thread->device) != RTC_ERROR_NONE) {
             task->errorCounter++;
           }
           else {
             shootRandomRays(i,thread->intersectModes,thread->state->intersectVariants,*task->scene);
           }
-	}
+  }
         task->barrier.wait();
       }
       delete thread; thread = nullptr;
@@ -3187,36 +3191,38 @@ namespace embree
       for (unsigned int j=0; j<10; j++) 
       {
         Vec3fa pos = 100.0f*RandomSampler_get3D(task->sampler);
-	int type = RandomSampler_getInt(task->sampler)%11;
+        int type = RandomSampler_getInt(task->sampler)%11;
         switch (RandomSampler_getInt(task->sampler)%16) {
         case 0: pos = Vec3fa(nan); break;
         case 1: pos = Vec3fa(inf); break;
         case 2: pos = Vec3fa(1E30f); break;
         default: break;
         };
-	size_t numPhi = RandomSampler_getInt(task->sampler)%50;
-	if (type == 2) numPhi = RandomSampler_getInt(task->sampler)%10;
-        size_t numTriangles = 2*2*numPhi*(numPhi-1);
-	numTriangles = RandomSampler_getInt(task->sampler)%(numTriangles+1);
-        switch (type) {
-        case 0: task->scene->addSphere(task->sampler,RTC_BUILD_QUALITY_MEDIUM,pos,2.0f,numPhi,numTriangles); break;
-	case 1: task->scene->addSphere(task->sampler,RTC_BUILD_QUALITY_MEDIUM,pos,2.0f,numPhi,numTriangles,task->test->random_motion_vector(1.0f)); break;
-        case 2: task->scene->addQuadSphere(task->sampler,RTC_BUILD_QUALITY_MEDIUM,pos,2.0f,numPhi,numTriangles); break;
-	case 3: task->scene->addQuadSphere(task->sampler,RTC_BUILD_QUALITY_MEDIUM,pos,2.0f,numPhi,numTriangles,task->test->random_motion_vector(1.0f)); break;
-        case 4: task->scene->addGridSphere(task->sampler,RTC_BUILD_QUALITY_MEDIUM,pos,2.0f,numPhi,numTriangles); break;
-	case 5: task->scene->addGridSphere(task->sampler,RTC_BUILD_QUALITY_MEDIUM,pos,2.0f,numPhi,numTriangles,task->test->random_motion_vector(1.0f)); break;
-	case 6: task->scene->addSubdivSphere(task->sampler,RTC_BUILD_QUALITY_MEDIUM,pos,2.0f,numPhi,4,numTriangles); break;
-        case 7: task->scene->addSubdivSphere(task->sampler,RTC_BUILD_QUALITY_MEDIUM,pos,2.0f,numPhi,4,numTriangles,task->test->random_motion_vector(1.0f)); break;
-	case 8: task->scene->addHair  (task->sampler,RTC_BUILD_QUALITY_MEDIUM,pos,1.0f,2.0f,numTriangles); break;
-	case 9: task->scene->addHair  (task->sampler,RTC_BUILD_QUALITY_MEDIUM,pos,1.0f,2.0f,numTriangles,task->test->random_motion_vector(1.0f)); break; 
+        size_t numPhi = RandomSampler_getInt(task->sampler) % 50;
+        if (type == 2) numPhi = RandomSampler_getInt(task->sampler) % 10;
+        size_t numTriangles = 2 * 2 * numPhi*(numPhi - 1);
+        numTriangles = RandomSampler_getInt(task->sampler) % (numTriangles + 1);
+        switch (type)
+        {
+          case 0: task->scene->addSphere(task->sampler, RTC_BUILD_QUALITY_MEDIUM, pos, 2.0f, numPhi, numTriangles); break;
+          case 1: task->scene->addSphere(task->sampler, RTC_BUILD_QUALITY_MEDIUM, pos, 2.0f, numPhi, numTriangles, task->test->random_motion_vector(1.0f)); break;
+          case 2: task->scene->addQuadSphere(task->sampler, RTC_BUILD_QUALITY_MEDIUM, pos, 2.0f, numPhi, numTriangles); break;
+          case 3: task->scene->addQuadSphere(task->sampler, RTC_BUILD_QUALITY_MEDIUM, pos, 2.0f, numPhi, numTriangles, task->test->random_motion_vector(1.0f)); break;
+          case 4: task->scene->addGridSphere(task->sampler, RTC_BUILD_QUALITY_MEDIUM, pos, 2.0f, numPhi, numTriangles); break;
+          case 5: task->scene->addGridSphere(task->sampler, RTC_BUILD_QUALITY_MEDIUM, pos, 2.0f, numPhi, numTriangles, task->test->random_motion_vector(1.0f)); break;
+          case 6: task->scene->addSubdivSphere(task->sampler, RTC_BUILD_QUALITY_MEDIUM, pos, 2.0f, numPhi, 4, numTriangles); break;
+          case 7: task->scene->addSubdivSphere(task->sampler, RTC_BUILD_QUALITY_MEDIUM, pos, 2.0f, numPhi, 4, numTriangles, task->test->random_motion_vector(1.0f)); break;
+          case 8: task->scene->addHair(task->sampler, RTC_BUILD_QUALITY_MEDIUM, pos, 1.0f, 2.0f, numTriangles); break;
+          case 9: task->scene->addHair(task->sampler, RTC_BUILD_QUALITY_MEDIUM, pos, 1.0f, 2.0f, numTriangles, task->test->random_motion_vector(1.0f)); break;
 
-        case 10: {
-	  std::unique_ptr<Sphere> sphere(new Sphere(pos,2.0f));  
-	  task->scene->addUserGeometryEmpty(task->sampler,RTC_BUILD_QUALITY_MEDIUM,sphere.get());
-          spheres.push_back(std::move(sphere));
-          break;
+          case 10:
+          {
+            std::unique_ptr<Sphere> sphere(new Sphere(pos,2.0f));  
+            task->scene->addUserGeometryEmpty(task->sampler,RTC_BUILD_QUALITY_MEDIUM,sphere.get());
+            spheres.push_back(std::move(sphere));
+            break;
+          }
         }
-	}
         //if (rtcGetDeviceError(thread->device) != RTC_ERROR_NONE) task->errorCounter++;;
         if (rtcGetDeviceError(thread->device) != RTC_ERROR_NONE) {
           task->errorCounter++;
@@ -3225,28 +3231,35 @@ namespace embree
         }
       }
       
-      if (thread->threadCount) {
-	task->numActiveThreads = max(unsigned(1),RandomSampler_getInt(task->sampler) % thread->threadCount);
-	task->barrier.wait();
+      if (thread->threadCount)
+      {
+        task->numActiveThreads = max(unsigned(1),RandomSampler_getInt(task->sampler) % thread->threadCount);
+        task->barrier.wait();
         rtcJoinCommitScene(*task->scene);
-      } else {
-        if (!hasError) {
+      }
+      else
+      {
+        if (!hasError)
+        {
           rtcCommitScene(*task->scene);
         }
       }
       //if (rtcGetDeviceError(thread->device) != RTC_ERROR_NONE) task->errorCounter++;;
 
-      if (rtcGetDeviceError(thread->device) != RTC_ERROR_NONE) {
+      if (rtcGetDeviceError(thread->device) != RTC_ERROR_NONE)
+      {
         task->errorCounter++;
       }
-      else {
-        if (!hasError) {
+      else
+      {
+        if (!hasError)
+        {
           shootRandomRays(i,thread->intersectModes,thread->state->intersectVariants,*task->scene);
         }
       }
 
       if (thread->threadCount) 
-	task->barrier.wait();
+  task->barrier.wait();
 
       task->scene = nullptr;
       if (rtcGetDeviceError(thread->device) != RTC_ERROR_NONE) task->errorCounter++;
@@ -3264,19 +3277,19 @@ namespace embree
     {
       for (unsigned int i=0; i<task->sceneCount; i++) 
       {
-	task->barrier.wait();
-	if (thread->threadIndex < task->numActiveThreads) 
-	{
+        task->barrier.wait();
+        if (thread->threadIndex < task->numActiveThreads) 
+        {
           rtcJoinCommitScene(*task->scene);
-	  //if (rtcGetDeviceError(thread->device) != RTC_ERROR_NONE) task->errorCounter++;;
+          //if (rtcGetDeviceError(thread->device) != RTC_ERROR_NONE) task->errorCounter++;;
           if (rtcGetDeviceError(thread->device) != RTC_ERROR_NONE) {
             task->errorCounter++;
           }
           else {
             shootRandomRays(i,thread->intersectModes,thread->state->intersectVariants,*task->scene);
           }
-	}
-	task->barrier.wait();
+        }
+        task->barrier.wait();
       }
       delete thread; thread = nullptr;
       return;
@@ -3324,7 +3337,7 @@ namespace embree
           default: break;
           };
           size_t numPhi = RandomSampler_getInt(task->sampler)%100;
-	  if (type >= 12 && type <= 17) numPhi = RandomSampler_getInt(task->sampler)%10;
+          if (type >= 12 && type <= 17) numPhi = RandomSampler_getInt(task->sampler)%10;
 #if defined(__WIN32__)          
           numPhi = RandomSampler_getInt(task->sampler) % 4;
 #endif
@@ -3355,12 +3368,12 @@ namespace embree
           case 11: geom[index] = task->scene->addQuadSphere(task->sampler,RTC_BUILD_QUALITY_LOW,pos,2.0f,numPhi,numTriangles,task->test->random_motion_vector(1.0f)); quality[index] = RTC_BUILD_QUALITY_LOW; break;
 
           case 12: geom[index] = task->scene->addSubdivSphere(task->sampler,RTC_BUILD_QUALITY_MEDIUM,pos,2.0f,numPhi,4,numTriangles); quality[index] = RTC_BUILD_QUALITY_MEDIUM; break;
-	  case 13: geom[index] = task->scene->addSubdivSphere(task->sampler,RTC_BUILD_QUALITY_REFIT,pos,2.0f,numPhi,4,numTriangles); quality[index] = RTC_BUILD_QUALITY_REFIT; break;
-	  case 14: geom[index] = task->scene->addSubdivSphere(task->sampler,RTC_BUILD_QUALITY_LOW,pos,2.0f,numPhi,4,numTriangles); quality[index] = RTC_BUILD_QUALITY_LOW; break;
+          case 13: geom[index] = task->scene->addSubdivSphere(task->sampler,RTC_BUILD_QUALITY_REFIT,pos,2.0f,numPhi,4,numTriangles); quality[index] = RTC_BUILD_QUALITY_REFIT; break;
+          case 14: geom[index] = task->scene->addSubdivSphere(task->sampler,RTC_BUILD_QUALITY_LOW,pos,2.0f,numPhi,4,numTriangles); quality[index] = RTC_BUILD_QUALITY_LOW; break;
 
           case 15: geom[index] = task->scene->addSubdivSphere(task->sampler,RTC_BUILD_QUALITY_MEDIUM,pos,2.0f,numPhi,4,numTriangles,task->test->random_motion_vector(1.0f)); quality[index] = RTC_BUILD_QUALITY_MEDIUM; break;
-	  case 16: geom[index] = task->scene->addSubdivSphere(task->sampler,RTC_BUILD_QUALITY_REFIT,pos,2.0f,numPhi,4,numTriangles,task->test->random_motion_vector(1.0f)); quality[index] = RTC_BUILD_QUALITY_REFIT; break;
-	  case 17: geom[index] = task->scene->addSubdivSphere(task->sampler,RTC_BUILD_QUALITY_LOW,pos,2.0f,numPhi,4,numTriangles,task->test->random_motion_vector(1.0f)); quality[index] = RTC_BUILD_QUALITY_LOW; break;
+          case 16: geom[index] = task->scene->addSubdivSphere(task->sampler,RTC_BUILD_QUALITY_REFIT,pos,2.0f,numPhi,4,numTriangles,task->test->random_motion_vector(1.0f)); quality[index] = RTC_BUILD_QUALITY_REFIT; break;
+          case 17: geom[index] = task->scene->addSubdivSphere(task->sampler,RTC_BUILD_QUALITY_LOW,pos,2.0f,numPhi,4,numTriangles,task->test->random_motion_vector(1.0f)); quality[index] = RTC_BUILD_QUALITY_LOW; break;
 
           case 18: spheres[index] = Sphere(pos,2.0f); geom[index] = task->scene->addUserGeometryEmpty(task->sampler,RTC_BUILD_QUALITY_MEDIUM,&spheres[index]); quality[index] = RTC_BUILD_QUALITY_MEDIUM; break;
           case 19: spheres[index] = Sphere(pos,2.0f); geom[index] = task->scene->addUserGeometryEmpty(task->sampler,RTC_BUILD_QUALITY_REFIT,&spheres[index]); quality[index] = RTC_BUILD_QUALITY_REFIT; break;
@@ -3370,7 +3383,7 @@ namespace embree
           case 25: geom[index] = task->scene->addHair  (task->sampler,RTC_BUILD_QUALITY_REFIT,pos,1.0f,2.0f,numTriangles); quality[index] = RTC_BUILD_QUALITY_REFIT; break;
           case 26: geom[index] = task->scene->addHair  (task->sampler,RTC_BUILD_QUALITY_LOW,pos,1.0f,2.0f,numTriangles); quality[index] = RTC_BUILD_QUALITY_LOW; break;
           }; 
-	  //if (rtcGetDeviceError(thread->device) != RTC_ERROR_NONE) task->errorCounter++;;
+          //if (rtcGetDeviceError(thread->device) != RTC_ERROR_NONE) task->errorCounter++;;
           if (rtcGetDeviceError(thread->device) != RTC_ERROR_NONE) {
             task->errorCounter++;
             hasError = true;
@@ -3385,7 +3398,7 @@ namespace embree
           case 20:
           {
             rtcDetachGeometry(*task->scene,geom[index].first);     
-	    if (rtcGetDeviceError(thread->device) != RTC_ERROR_NONE) task->errorCounter++;;
+            if (rtcGetDeviceError(thread->device) != RTC_ERROR_NONE) task->errorCounter++;;
             geom[index].first = -1; 
             geom[index].second = nullptr; 
             break;
@@ -3397,7 +3410,7 @@ namespace embree
           case 4: 
           case 5:
           case 6:
-	  case 7: 
+          case 7: 
           case 8:
           case 9:
           case 10:
@@ -3419,7 +3432,7 @@ namespace embree
             switch (op) {
             case 0: {
               rtcDetachGeometry(*task->scene,geom[index].first);     
-	      if (rtcGetDeviceError(thread->device) != RTC_ERROR_NONE) task->errorCounter++;;
+              if (rtcGetDeviceError(thread->device) != RTC_ERROR_NONE) task->errorCounter++;;
               geom[index].first = -1; 
               geom[index].second = nullptr; 
               break;
@@ -3482,8 +3495,8 @@ namespace embree
       }
 
       if (thread->threadCount) {
-	task->numActiveThreads = max(unsigned(1),RandomSampler_getInt(task->sampler) % thread->threadCount);
-	task->barrier.wait();
+        task->numActiveThreads = max(unsigned(1), RandomSampler_getInt(task->sampler) % thread->threadCount);
+        task->barrier.wait();
         rtcJoinCommitScene(*task->scene);
       } else {
         if (!hasError) 
@@ -3498,7 +3511,7 @@ namespace embree
           shootRandomRays(i,thread->intersectModes,thread->state->intersectVariants,*task->scene);
 
       if (thread->threadCount) 
-	task->barrier.wait();
+  task->barrier.wait();
     }
 
     task->scene = nullptr;
@@ -3729,12 +3742,12 @@ namespace embree
     size_t numPhi;
     RTCDeviceRef device;
     Ref<VerifyScene> scene;
-	static const size_t tileSizeX = 32;
-	static const size_t tileSizeY = 32;
-	static const size_t width = 4096;
-	static const size_t height = 4096;
-	static const size_t numTilesX = width / tileSizeX;
-	static const size_t numTilesY = height / tileSizeY;
+    static const size_t tileSizeX = 32;
+    static const size_t tileSizeY = 32;
+    static const size_t width = 4096;
+    static const size_t height = 4096;
+    static const size_t numTilesX = width / tileSizeX;
+    static const size_t numTilesY = height / tileSizeY;
     
     CoherentRaysBenchmark (std::string name, int isa, GeometryType gtype, SceneFlags sflags, RTCBuildQuality quality, IntersectMode imode, IntersectVariant ivariant, size_t numPhi)
       : ParallelIntersectBenchmark(name,isa,numTilesX*numTilesY,1), gtype(gtype), sflags(sflags), quality(quality), imode(imode), ivariant(ivariant), numPhi(numPhi) {}
@@ -3784,11 +3797,11 @@ namespace embree
       float rcpWidth = 1.0f/width;
       float rcpHeight = 1.0/height;
       const size_t tileY = i / numTilesX;
-	  const size_t tileX = i - tileY * numTilesX;
-	  const size_t x0 = tileX * tileSizeX;
-	  const size_t x1 = min(x0 + tileSizeX, width);
-	  const size_t y0 = tileY * tileSizeY;
-	  const size_t y1 = min(y0 + tileSizeY, height);
+      const size_t tileX = i - tileY * numTilesX;
+      const size_t x0 = tileX * tileSizeX;
+      const size_t x1 = min(x0 + tileSizeX, width);
+      const size_t y0 = tileY * tileSizeY;
+      const size_t y1 = min(y0 + tileSizeY, height);
       
       RTCIntersectContext context;
       rtcInitIntersectContext(&context);
@@ -4614,8 +4627,8 @@ namespace embree
       groups.top()->add(new IntensiveRegressionTest("regression_dynamic",isa,rtcore_regression_dynamic_thread,0,30));
 
       if (rtcGetDeviceProperty(device,RTC_DEVICE_PROPERTY_JOIN_COMMIT_SUPPORTED)) {
-	groups.top()->add(new IntensiveRegressionTest("regression_static_build_join", isa,rtcore_regression_static_thread,2,30));
-	groups.top()->add(new IntensiveRegressionTest("regression_dynamic_build_join",isa,rtcore_regression_dynamic_thread,2,30));
+        groups.top()->add(new IntensiveRegressionTest("regression_static_build_join", isa,rtcore_regression_static_thread,2,30));
+        groups.top()->add(new IntensiveRegressionTest("regression_dynamic_build_join",isa,rtcore_regression_dynamic_thread,2,30));
       }
 
       groups.top()->add(new MemoryMonitorTest("regression_static_memory_monitor", isa,rtcore_regression_static_thread,30));
