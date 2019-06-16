@@ -219,7 +219,7 @@ namespace embree
 #endif
     }
 
-    static __forceinline void store(const vboolf8& mask, char* ptr, const vint8& ofs, const vfloat8& v) {
+    static __forceinline void store(const vboolf8& mask, int8_t* ptr, const vint8& ofs, const vfloat8& v) {
       scatter<1>(mask,ptr,ofs,v);
     }
     static __forceinline void store(const vboolf8& mask, float* ptr, const vint8& ofs, const vfloat8& v) {
