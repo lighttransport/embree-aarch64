@@ -11,7 +11,6 @@ cmake ^
 -DEMBREE_ISPC_SUPPORT:BOOL=NO ^
 -DEMBREE_TASKING_SYSTEM=Internal ^
 -DEMBREE_TUTORIALS:BOOL=NO ^
--DEMBREE_RAY_PACKETS:BOOL=NO ^
 -DEMBREE_BUILD_VERIFY:BOOL=NO ^
 ../..
 ```
@@ -40,6 +39,9 @@ cmake \
 -DCMAKE_BUILD_TYPE=Release \
 -DCMAKE_INSTALL_PREFIX:PATH=../release/ninja-ios-arm64  \
 -DEMBREE_MAX_ISA=SSE2 \
+-DEMBREE_TASKING_SYSTEM=Internal \
+-DEMBREE_TUTORIALS:BOOL=NO \
+-DEMBREE_BUILD_VERIFY:BOOL=NO \
 -DCMAKE_TOOLCHAIN_FILE=../../common/cmake/toolchains/ios.toolchain.cmake \
 -DIOS_ARCH=arm64 \
 -DPLATFORM_NAME=iphoneos \
@@ -54,6 +56,9 @@ cmake \
 -G Ninja \
 -DCMAKE_BUILD_TYPE=Release \
 -DCMAKE_INSTALL_PREFIX:PATH=../release/ninja-ios-x64  \
+-DEMBREE_TASKING_SYSTEM=Internal \
+-DEMBREE_TUTORIALS:BOOL=NO \
+-DEMBREE_BUILD_VERIFY:BOOL=NO \
 -DCMAKE_TOOLCHAIN_FILE=../../common/cmake/toolchains/ios.toolchain.cmake \
 -DIOS_ARCH=x86_64 \
 -DPLATFORM_NAME=iphonesimulator \

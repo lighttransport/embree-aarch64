@@ -1385,4 +1385,10 @@ FORCE_INLINE __m128i _mm_set_epi64x(int64_t a, int64_t b)
 	return (__m128i)vld1q_s64(data);
 }
 
+// Sets the 4 signed 32-bit integer values to i. https://msdn.microsoft.com/en-us/library/vstudio/h4xscxat(v=vs.100).aspx
+FORCE_INLINE __m128i _mm_set1_epi64x(int64_t _i)
+{
+	return vmovq_n_s64(_i);
+}
+
 #endif

@@ -152,7 +152,7 @@ namespace embree
     __forceinline       Ty& operator[](const unsigned i)       { assert(i<N); return data[i]; }
     __forceinline const Ty& operator[](const unsigned i) const { assert(i<N); return data[i]; }
 
-#if defined(__X86_64__) || defined(__aarch64__) || defined(__AARCH64__)
+#if defined(__X86_64__) || defined(__aarch64__)
     __forceinline       Ty& operator[](const size_t i)       { assert(i<N); return data[i]; }
     __forceinline const Ty& operator[](const size_t i) const { assert(i<N); return data[i]; }
 #endif
