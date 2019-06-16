@@ -150,14 +150,14 @@ namespace embree
 #if defined(__AVX512VL__)
       _mm256_i32scatter_epi32((int*)ptr, ofs, v, scale);
 #else
-			*(unsigned int*)(((int8_t*)ptr) + scale * ofs[0]) = v[0];
-			*(unsigned int*)(((int8_t*)ptr) + scale * ofs[1]) = v[1];
-			*(unsigned int*)(((int8_t*)ptr) + scale * ofs[2]) = v[2];
-			*(unsigned int*)(((int8_t*)ptr) + scale * ofs[3]) = v[3];
-			*(unsigned int*)(((int8_t*)ptr) + scale * ofs[4]) = v[4];
-			*(unsigned int*)(((int8_t*)ptr) + scale * ofs[5]) = v[5];
-			*(unsigned int*)(((int8_t*)ptr) + scale * ofs[6]) = v[6];
-			*(unsigned int*)(((int8_t*)ptr) + scale * ofs[7]) = v[7];
+      *(unsigned int*)(((int8_t*)ptr) + scale * ofs[0]) = v[0];
+      *(unsigned int*)(((int8_t*)ptr) + scale * ofs[1]) = v[1];
+      *(unsigned int*)(((int8_t*)ptr) + scale * ofs[2]) = v[2];
+      *(unsigned int*)(((int8_t*)ptr) + scale * ofs[3]) = v[3];
+      *(unsigned int*)(((int8_t*)ptr) + scale * ofs[4]) = v[4];
+      *(unsigned int*)(((int8_t*)ptr) + scale * ofs[5]) = v[5];
+      *(unsigned int*)(((int8_t*)ptr) + scale * ofs[6]) = v[6];
+      *(unsigned int*)(((int8_t*)ptr) + scale * ofs[7]) = v[7];
 #endif
     }
 

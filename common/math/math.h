@@ -303,7 +303,7 @@ namespace embree
   template<class T>
     __forceinline T bitInterleave(const T& xin, const T& yin, const T& zin)
   {
-	T x = xin, y = yin, z = zin;
+	  T x = xin, y = yin, z = zin;
     x = (x | (x << 16)) & 0x030000FF;
     x = (x | (x <<  8)) & 0x0300F00F;
     x = (x | (x <<  4)) & 0x030C30C3;

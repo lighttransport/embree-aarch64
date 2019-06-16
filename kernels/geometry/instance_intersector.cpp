@@ -225,7 +225,7 @@ namespace embree
       return ray.tfar < 0.0f;
     }
 
-#if defined(__SSE__) || (__ARM_NEON)
+#if defined(__SSE__) || defined(__ARM_NEON)
     template struct InstanceIntersectorK<4>;
     template struct InstanceIntersectorKMB<4>;
 #endif
