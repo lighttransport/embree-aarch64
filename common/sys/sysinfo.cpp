@@ -29,7 +29,13 @@ namespace embree
 
   std::string getPlatformName()
   {
-#if defined(__LINUX__) && !defined(__X86_64__)
+#if defined(__LINUX__) && defined(__ANDROID__) && defined(__aarch64__) && defined(__ARM_NEON)
+    return "Android Linux (aarch64 / arm64)";
+#elif defined(__LINUX__) && defined(__ANDROID__) && defined(__X86_64__)
+    return "Android Linux (x64)";
+#elif defined(__LINUX__) && defined(__ANDROID__) && (defined(_X86_) || defined(__X86__) || defined(_M_IX86))
+    return "Android Linux (x86)";
+#elif defined(__LINUX__) && !defined(__X86_64__)
     return "Linux (32bit)";
 #elif defined(__LINUX__) && defined(__X86_64__)
     return "Linux (64bit)";
@@ -45,6 +51,10 @@ namespace embree
     return "Windows (32bit)";
 #elif defined(__WIN32__) && defined(__X86_64__)
     return "Windows (64bit)";
+#elif defined(TARGET_IPHONE_SIMULATOR) && defined(__X86_64__)
+    return "iOS Simulator (x64)";
+#elif defined(TARGET_OS_IPHONE) && defined(__aarch64__) && defined(__ARM_NEON)
+    return "iOS (aarch64 / arm64)";
 #elif defined(__MACOSX__) && !defined(__X86_64__)
     return "Mac OS X (32bit)";
 #elif defined(__MACOSX__) && defined(__X86_64__)
@@ -53,8 +63,6 @@ namespace embree
     return "Unix (32bit)";
 #elif defined(__UNIX__) && defined(__X86_64__)
     return "Unix (64bit)";
-#elif defined(__LINUX__) && defined(__ARM_NEON)
-    return "Linux ARM";
 #else
     return "Unknown";
 #endif
