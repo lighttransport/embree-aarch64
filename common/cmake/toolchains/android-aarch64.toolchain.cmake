@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# this one is important
-set(CMAKE_SYSTEM_NAME Linux)
+SET(CMAKE_SYSTEM_NAME Linux)
 
 # Android
-SET(API_LEVEL 24)
+SET(API_LEVEL 21)
 
 # architecture
 SET(ARCH aarch64-linux-android)

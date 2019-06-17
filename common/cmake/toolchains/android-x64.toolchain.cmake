@@ -15,7 +15,7 @@
 SET(CMAKE_SYSTEM_NAME Linux)
 
 # Android
-SET(API_LEVEL 24)
+SET(API_LEVEL 21)
 
 # architecture
 SET(ARCH x86_64-linux-android)
