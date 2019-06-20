@@ -23,7 +23,7 @@ ENDMACRO()
 IF (EMBREE_ARM)
    # No thing to declare.
 ELSE ()
-  _SET_IF_EMPTY(FLAGS_SSE2  "-msse2")
+  _SET_IF_EMPTY(FLAGS_SSE2  "-msse -msse2 -mno-sse4.2")
   _SET_IF_EMPTY(FLAGS_SSE42 "-msse4.2")
   _SET_IF_EMPTY(FLAGS_AVX   "-mavx")
   _SET_IF_EMPTY(FLAGS_AVX2  "-mf16c -mavx2 -mfma -mlzcnt -mbmi -mbmi2")
