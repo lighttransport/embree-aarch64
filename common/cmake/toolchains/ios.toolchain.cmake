@@ -8,13 +8,18 @@
 #   -DCMAKE_TOOLCHAIN_FILE=../../cmake/platforms/iOS.cmake ../..
 # make <target>
 
+# Original source:
+# https://opensource.apple.com/source/clang/clang-800.0.42.1/src/cmake/platforms/iOS.cmake
+# Extensions according to:
+# https://github.com/google/filament/
+
 SET(CMAKE_SYSTEM_NAME Darwin)
 SET(CMAKE_SYSTEM_VERSION 13)
 SET(CMAKE_CXX_COMPILER_WORKS True)
 SET(CMAKE_C_COMPILER_WORKS True)
 SET(DARWIN_TARGET_OS_NAME ios)
 
-SET(PLATFORM_NAME iphoneos)
+SET(PLATFORM_NAME iphoneos CACHE STRING "iOS platform to build for")
 SET(PLATFORM_FLAG_NAME ios)
 
 IF("$ENV{RC_APPLETV}" STREQUAL "YES")
@@ -93,10 +98,7 @@ SET(CMAKE_C_FLAGS "${IOS_COMMON_FLAGS}" CACHE STRING "toolchain_cflags" FORCE)
 SET(CMAKE_CXX_FLAGS "${IOS_COMMON_FLAGS}" CACHE STRING "toolchain_cxxflags" FORCE)
 SET(CMAKE_LINK_FLAGS "${IOS_COMMON_FLAGS}" CACHE STRING "toolchain_linkflags" FORCE)
 
-# Up to this point, the file content has been downloaded from
-# https://opensource.apple.com/source/clang/clang-800.0.42.1/src/cmake/platforms/iOS.cmake
 # We make some convenience additions for consistent handling of the architecture.
-
 SET(CMAKE_OSX_ARCHITECTURES ${IOS_ARCH} CACHE STRING "Build architecture for iOS")
 SET(DIST_ARCH ${IOS_ARCH})
 ADD_DEFINITIONS(-DIOS)
