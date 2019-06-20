@@ -96,6 +96,8 @@ SET(CMAKE_LINK_FLAGS "${IOS_COMMON_FLAGS}" CACHE STRING "toolchain_linkflags" FO
 # Up to this point, the file content has been downloaded from
 # https://opensource.apple.com/source/clang/clang-800.0.42.1/src/cmake/platforms/iOS.cmake
 # We make some convenience additions for consistent handling of the architecture.
+
+SET(CMAKE_OSX_ARCHITECTURES ${IOS_ARCH} CACHE STRING "Build architecture for iOS")
 SET(DIST_ARCH ${IOS_ARCH})
 ADD_DEFINITIONS(-DIOS)
 SET(IOS TRUE)

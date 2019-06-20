@@ -41,6 +41,7 @@ cmake \
 -DEMBREE_MAX_ISA=SSE2 \
 -DEMBREE_TASKING_SYSTEM=Internal \
 -DEMBREE_TUTORIALS:BOOL=NO \
+-DEMBREE_ISPC_SUPPORT:BOOL=NO \
 -DEMBREE_BUILD_VERIFY:BOOL=NO \
 -DCMAKE_TOOLCHAIN_FILE=../../common/cmake/toolchains/ios.toolchain.cmake \
 -DIOS_ARCH=arm64 \
@@ -58,6 +59,7 @@ cmake \
 -DCMAKE_INSTALL_PREFIX:PATH=../release/ninja-ios-x64  \
 -DEMBREE_TASKING_SYSTEM=Internal \
 -DEMBREE_TUTORIALS:BOOL=NO \
+-DEMBREE_ISPC_SUPPORT:BOOL=NO \
 -DEMBREE_BUILD_VERIFY:BOOL=NO \
 -DCMAKE_TOOLCHAIN_FILE=../../common/cmake/toolchains/ios.toolchain.cmake \
 -DIOS_ARCH=x86_64 \
@@ -65,3 +67,4 @@ cmake \
 -DIOS=1 \
 ../..
 ```
+
