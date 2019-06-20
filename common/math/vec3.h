@@ -267,7 +267,7 @@ namespace embree
 #include "../simd/sse.h"
 #endif
 
-#if defined __AVX__
+#if defined(__AVX__)
 #include "../simd/avx.h"
 #endif
 
