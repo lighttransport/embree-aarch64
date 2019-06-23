@@ -193,7 +193,7 @@ namespace embree
   ////////////////////////////////////////////////////////////////////////////////
 
   typedef Vec4<bool         > Vec4b;
-  typedef Vec4<unsigned char> Vec4uc;
+  typedef Vec4<uint8_t      > Vec4uc;
   typedef Vec4<int          > Vec4i;
   typedef Vec4<float        > Vec4f;
 }

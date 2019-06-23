@@ -92,8 +92,8 @@
 #  endif
 #endif
 
-#if defined (_DEBUG)
-#define DEBUG
+#if defined (_DEBUG) && !defined(DEBUG)
+	#define DEBUG
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -203,7 +203,7 @@ namespace embree {
 
 /* windows does not have ssize_t */
 #if defined(__WIN32__)
-#if defined(__X86_64__)
+#if defined(__X86_64__) || defined(__aarch64__)
 typedef int64_t ssize_t;
 #else
 typedef int32_t ssize_t;

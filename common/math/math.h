@@ -180,7 +180,7 @@ namespace embree
   __forceinline  int64_t min(int64_t  a, int64_t  b) { return a<b ? a:b; }
   __forceinline    float min(float    a, float    b) { return a<b ? a:b; }
   __forceinline   double min(double   a, double   b) { return a<b ? a:b; }
-#if defined(__X86_64__) || defined(__aarch64__) || defined(__AARCH64__)
+#if defined(__X86_64__) || defined(__aarch64__)
   __forceinline   size_t min(size_t   a, size_t   b) { return a<b ? a:b; }
 #endif
 
@@ -197,7 +197,7 @@ namespace embree
   __forceinline  int64_t max(int64_t  a, int64_t  b) { return a<b ? b:a; }
   __forceinline    float max(float    a, float    b) { return a<b ? b:a; }
   __forceinline   double max(double   a, double   b) { return a<b ? b:a; }
-#if defined(__X86_64__) || defined(__aarch64__) || defined(__AARCH64__)
+#if defined(__X86_64__) || defined(__aarch64__)
   __forceinline   size_t max(size_t   a, size_t   b) { return a<b ? b:a; }
 #endif
 
@@ -303,7 +303,7 @@ namespace embree
   template<class T>
     __forceinline T bitInterleave(const T& xin, const T& yin, const T& zin)
   {
-	T x = xin, y = yin, z = zin;
+	  T x = xin, y = yin, z = zin;
     x = (x | (x << 16)) & 0x030000FF;
     x = (x | (x <<  8)) & 0x0300F00F;
     x = (x | (x <<  4)) & 0x030C30C3;

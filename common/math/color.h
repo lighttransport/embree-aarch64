@@ -65,17 +65,17 @@ namespace embree
     __forceinline void set(Col3uc& d) const 
     {
       vfloat4 s = clamp(vfloat4(m128))*255.0f;
-      d.r = (unsigned char)(s[0]); 
-      d.g = (unsigned char)(s[1]); 
-      d.b = (unsigned char)(s[2]); 
+      d.r = (uint8_t)(s[0]); 
+      d.g = (uint8_t)(s[1]); 
+      d.b = (uint8_t)(s[2]); 
     }
     __forceinline void set(Col4uc& d) const 
     {
       vfloat4 s = clamp(vfloat4(m128))*255.0f;
-      d.r = (unsigned char)(s[0]); 
-      d.g = (unsigned char)(s[1]); 
-      d.b = (unsigned char)(s[2]); 
-      d.a = (unsigned char)(s[3]); 
+      d.r = (uint8_t)(s[0]); 
+      d.g = (uint8_t)(s[1]); 
+      d.b = (uint8_t)(s[2]); 
+      d.a = (uint8_t)(s[3]); 
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -127,16 +127,16 @@ namespace embree
     __forceinline void set(Col3uc& d) const 
     { 
       vfloat4 s = clamp(vfloat4(m128))*255.0f;
-      d.r = (unsigned char)(s[0]); 
-      d.g = (unsigned char)(s[1]); 
-      d.b = (unsigned char)(s[2]); 
+      d.r = (uint8_t)(s[0]); 
+      d.g = (uint8_t)(s[1]); 
+      d.b = (uint8_t)(s[2]); 
     }
     __forceinline void set(Col4uc& d) const 
     { 
       vfloat4 s = clamp(vfloat4(m128))*255.0f;
-      d.r = (unsigned char)(s[0]); 
-      d.g = (unsigned char)(s[1]); 
-      d.b = (unsigned char)(s[2]); 
+      d.r = (uint8_t)(s[0]); 
+      d.g = (uint8_t)(s[1]); 
+      d.b = (uint8_t)(s[2]); 
       d.a = 255; 
     }
 

@@ -99,11 +99,11 @@ namespace embree
 #endif
 
 #if defined(__SSE4_1__)
-    static __forceinline vuint4 load(const unsigned char* ptr) {
+    static __forceinline vuint4 load(const uint8_t* ptr) {
       return _mm_cvtepu8_epi32(_mm_loadl_epi64((__m128i*)ptr));
     }
 
-    static __forceinline vuint4 loadu(const unsigned char* ptr) {
+    static __forceinline vuint4 loadu(const uint8_t* ptr) {
       return  _mm_cvtepu8_epi32(_mm_loadl_epi64((__m128i*)ptr));
     }
 
@@ -117,7 +117,7 @@ namespace embree
 #endif
     } 
 
-    static __forceinline void store_uchar(unsigned char* ptr, const vuint4& v) {
+    static __forceinline void store_uint8(uint8_t* ptr, const vuint4& v) {
 #if defined(__SSE4_1__)
       __m128i x = v;
       x = _mm_packus_epi32(x, x);
@@ -125,11 +125,11 @@ namespace embree
       *(unsigned*)ptr = _mm_cvtsi128_si32(x);
 #else
       for (size_t i=0;i<4;i++)
-        ptr[i] = (unsigned char)v[i];
+        ptr[i] = (uint8_t)v[i];
 #endif
     }
 
-    static __forceinline void store_uchar(unsigned short* ptr, const vuint4& v) {
+    static __forceinline void store_uint8(unsigned short* ptr, const vuint4& v) {
       for (size_t i=0;i<4;i++)
         ptr[i] = (unsigned short)v[i];
     }
@@ -156,10 +156,10 @@ namespace embree
       return _mm_i32gather_epi32((const int*)ptr, index, scale);
 #else
       return vuint4(
-          *(unsigned int*)(((char*)ptr)+scale*index[0]),
-          *(unsigned int*)(((char*)ptr)+scale*index[1]),
-          *(unsigned int*)(((char*)ptr)+scale*index[2]),
-          *(unsigned int*)(((char*)ptr)+scale*index[3]));
+          *(unsigned int*)(((int8_t*)ptr)+scale*index[0]),
+          *(unsigned int*)(((int8_t*)ptr)+scale*index[1]),
+          *(unsigned int*)(((int8_t*)ptr)+scale*index[2]),
+          *(unsigned int*)(((int8_t*)ptr)+scale*index[3]));
 #endif
     }
 
@@ -171,10 +171,10 @@ namespace embree
 #elif defined(__AVX2__)
       return _mm_mask_i32gather_epi32(r, (const int*)ptr, index, mask, scale);
 #else
-      if (likely(mask[0])) r[0] = *(unsigned int*)(((char*)ptr)+scale*index[0]);
-      if (likely(mask[1])) r[1] = *(unsigned int*)(((char*)ptr)+scale*index[1]);
-      if (likely(mask[2])) r[2] = *(unsigned int*)(((char*)ptr)+scale*index[2]);
-      if (likely(mask[3])) r[3] = *(unsigned int*)(((char*)ptr)+scale*index[3]);
+      if (likely(mask[0])) r[0] = *(unsigned int*)(((int8_t*)ptr)+scale*index[0]);
+      if (likely(mask[1])) r[1] = *(unsigned int*)(((int8_t*)ptr)+scale*index[1]);
+      if (likely(mask[2])) r[2] = *(unsigned int*)(((int8_t*)ptr)+scale*index[2]);
+      if (likely(mask[3])) r[3] = *(unsigned int*)(((int8_t*)ptr)+scale*index[3]);
       return r;
 #endif
     }

@@ -225,7 +225,7 @@ namespace embree
 #endif
     }
 
-#if defined(__x86_64__)
+#if defined(__x86_64__) || defined(__aarch64__)
     static __forceinline vint4 broadcast64(long long a) { return _mm_set1_epi64x(a); }
 #endif
 

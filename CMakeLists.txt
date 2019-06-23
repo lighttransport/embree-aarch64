@@ -121,7 +121,6 @@ ENDIF()
 OPTION(EMBREE_ISPC_SUPPORT "Build Embree with support for ISPC applications." ON)
 OPTION(EMBREE_TUTORIALS    "Enable to build Embree tutorials" ON)
 OPTION(EMBREE_BUILD_VERIFY "Build verify program for testing" ON)
-SET(EMBREE_TARGET_ARCH  "arm" CACHE STRING "Target archtecture.")
 SET(EMBREE_API_NAMESPACE "" CACHE STRING "C++ namespace to put API symbols into.")
 SET(EMBREE_LIBRARY_NAME  "embree${EMBREE_VERSION_MAJOR}" CACHE STRING "Name of the embree library file (default is embree${EMBREE_VERSION_MAJOR})")
 
@@ -186,6 +185,21 @@ CONFIGURE_FILE(
   "${PROJECT_SOURCE_DIR}/kernels/config.h.in"
   "${PROJECT_SOURCE_DIR}/kernels/config.h"
 )
+
+##############################################################
+# Mobile Support (support arm64 / aarch64 on Android and iOS)
+##############################################################
+# We forward-assign these variables for sanity and ease of debugging the build system.
+# They are not directly being used.
+SET(EMBREE_ANDROID ${ANDROID})
+SET(EMBREE_IOS ${IOS})
+
+# Identify whether we are compiling for ARM architecture
+STRING(FIND "${DIST_ARCH}" "arm64" pos1)
+IF(NOT pos1 MATCHES -1)
+  SET(EMBREE_ARM ON)
+  MESSAGE(STATUS "Detected ARM Architecture")
+ENDIF()
 
 ##############################################################
 # Compiler
@@ -464,15 +478,6 @@ IF (TASKING_TBB)
   FIND_PACKAGE(TBB REQUIRED)
   INCLUDE_DIRECTORIES(${TBB_INCLUDE_DIRS})
 ENDIF()
-
-# Android specific. Only supports 64bit archtecture.
-IF (DEFINED ANDROID_ABI)
-  IF (${ANDROID_ABI} STREQUAL "x86_64")
-    INCLUDE_DIRECTORIES(${ANDROID_SYSROOT}/usr/include/x86_64-linux-android)
-  ELSEIF (${ANDROID_ABI} STREQUAL "arm64-v8a")
-    INCLUDE_DIRECTORIES(${ANDROID_SYSROOT}/usr/include/aarch64-linux-android)
-  ENDIF ()
-ENDIF ()
 
 ##############################################################
 # Output paths

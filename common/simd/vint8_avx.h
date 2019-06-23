@@ -89,13 +89,13 @@ namespace embree
       _mm256_stream_ps((float*)ptr,_mm256_castsi256_ps(v));
     }
 
-    static __forceinline vint8 load(const unsigned char* ptr) {
+    static __forceinline vint8 load(const uint8_t* ptr) {
       vint4 il = vint4::load(ptr+0);
       vint4 ih = vint4::load(ptr+4);
       return vint8(il,ih);
     }
 
-    static __forceinline vint8 loadu(const unsigned char* ptr) {
+    static __forceinline vint8 loadu(const uint8_t* ptr) {
       vint4 il = vint4::loadu(ptr+0);
       vint4 ih = vint4::loadu(ptr+4);
       return vint8(il,ih);
@@ -113,7 +113,7 @@ namespace embree
       return vint8(il,ih);
     }
 
-    static __forceinline void store(unsigned char* ptr, const vint8& i) {
+    static __forceinline void store(uint8_t* ptr, const vint8& i) {
       vint4 il(i.vl);
       vint4 ih(i.vh);
       vint4::store(ptr + 0,il);
@@ -128,54 +128,54 @@ namespace embree
     template<int scale = 4>
     static __forceinline vint8 gather(const int* ptr, const vint8& index) {
       return vint8(
-          *(int*)(((char*)ptr)+scale*index[0]),
-          *(int*)(((char*)ptr)+scale*index[1]),
-          *(int*)(((char*)ptr)+scale*index[2]),
-          *(int*)(((char*)ptr)+scale*index[3]),
-          *(int*)(((char*)ptr)+scale*index[4]),
-          *(int*)(((char*)ptr)+scale*index[5]),
-          *(int*)(((char*)ptr)+scale*index[6]),
-          *(int*)(((char*)ptr)+scale*index[7]));
+          *(int*)(((int8_t*)ptr)+scale*index[0]),
+          *(int*)(((int8_t*)ptr)+scale*index[1]),
+          *(int*)(((int8_t*)ptr)+scale*index[2]),
+          *(int*)(((int8_t*)ptr)+scale*index[3]),
+          *(int*)(((int8_t*)ptr)+scale*index[4]),
+          *(int*)(((int8_t*)ptr)+scale*index[5]),
+          *(int*)(((int8_t*)ptr)+scale*index[6]),
+          *(int*)(((int8_t*)ptr)+scale*index[7]));
     }
 
     template<int scale = 4>
     static __forceinline vint8 gather(const vboolf8& mask, const int* ptr, const vint8& index) {
       vint8 r = zero;
-      if (likely(mask[0])) r[0] = *(int*)(((char*)ptr)+scale*index[0]);
-      if (likely(mask[1])) r[1] = *(int*)(((char*)ptr)+scale*index[1]);
-      if (likely(mask[2])) r[2] = *(int*)(((char*)ptr)+scale*index[2]);
-      if (likely(mask[3])) r[3] = *(int*)(((char*)ptr)+scale*index[3]);
-      if (likely(mask[4])) r[4] = *(int*)(((char*)ptr)+scale*index[4]);
-      if (likely(mask[5])) r[5] = *(int*)(((char*)ptr)+scale*index[5]);
-      if (likely(mask[6])) r[6] = *(int*)(((char*)ptr)+scale*index[6]);
-      if (likely(mask[7])) r[7] = *(int*)(((char*)ptr)+scale*index[7]);
+      if (likely(mask[0])) r[0] = *(int*)(((int8_t*)ptr)+scale*index[0]);
+      if (likely(mask[1])) r[1] = *(int*)(((int8_t*)ptr)+scale*index[1]);
+      if (likely(mask[2])) r[2] = *(int*)(((int8_t*)ptr)+scale*index[2]);
+      if (likely(mask[3])) r[3] = *(int*)(((int8_t*)ptr)+scale*index[3]);
+      if (likely(mask[4])) r[4] = *(int*)(((int8_t*)ptr)+scale*index[4]);
+      if (likely(mask[5])) r[5] = *(int*)(((int8_t*)ptr)+scale*index[5]);
+      if (likely(mask[6])) r[6] = *(int*)(((int8_t*)ptr)+scale*index[6]);
+      if (likely(mask[7])) r[7] = *(int*)(((int8_t*)ptr)+scale*index[7]);
       return r;
     }
 
     template<int scale = 4>
     static __forceinline void scatter(void* ptr, const vint8& ofs, const vint8& v)
     {
-      *(int*)(((char*)ptr)+scale*ofs[0]) = v[0];
-      *(int*)(((char*)ptr)+scale*ofs[1]) = v[1];
-      *(int*)(((char*)ptr)+scale*ofs[2]) = v[2];
-      *(int*)(((char*)ptr)+scale*ofs[3]) = v[3];
-      *(int*)(((char*)ptr)+scale*ofs[4]) = v[4];
-      *(int*)(((char*)ptr)+scale*ofs[5]) = v[5];
-      *(int*)(((char*)ptr)+scale*ofs[6]) = v[6];
-      *(int*)(((char*)ptr)+scale*ofs[7]) = v[7];
+      *(int*)(((int8_t*)ptr)+scale*ofs[0]) = v[0];
+      *(int*)(((int8_t*)ptr)+scale*ofs[1]) = v[1];
+      *(int*)(((int8_t*)ptr)+scale*ofs[2]) = v[2];
+      *(int*)(((int8_t*)ptr)+scale*ofs[3]) = v[3];
+      *(int*)(((int8_t*)ptr)+scale*ofs[4]) = v[4];
+      *(int*)(((int8_t*)ptr)+scale*ofs[5]) = v[5];
+      *(int*)(((int8_t*)ptr)+scale*ofs[6]) = v[6];
+      *(int*)(((int8_t*)ptr)+scale*ofs[7]) = v[7];
     }
 
     template<int scale = 4>
     static __forceinline void scatter(const vboolf8& mask, void* ptr, const vint8& ofs, const vint8& v)
     {
-      if (likely(mask[0])) *(int*)(((char*)ptr)+scale*ofs[0]) = v[0];
-      if (likely(mask[1])) *(int*)(((char*)ptr)+scale*ofs[1]) = v[1];
-      if (likely(mask[2])) *(int*)(((char*)ptr)+scale*ofs[2]) = v[2];
-      if (likely(mask[3])) *(int*)(((char*)ptr)+scale*ofs[3]) = v[3];
-      if (likely(mask[4])) *(int*)(((char*)ptr)+scale*ofs[4]) = v[4];
-      if (likely(mask[5])) *(int*)(((char*)ptr)+scale*ofs[5]) = v[5];
-      if (likely(mask[6])) *(int*)(((char*)ptr)+scale*ofs[6]) = v[6];
-      if (likely(mask[7])) *(int*)(((char*)ptr)+scale*ofs[7]) = v[7];
+      if (likely(mask[0])) *(int*)(((int8_t*)ptr)+scale*ofs[0]) = v[0];
+      if (likely(mask[1])) *(int*)(((int8_t*)ptr)+scale*ofs[1]) = v[1];
+      if (likely(mask[2])) *(int*)(((int8_t*)ptr)+scale*ofs[2]) = v[2];
+      if (likely(mask[3])) *(int*)(((int8_t*)ptr)+scale*ofs[3]) = v[3];
+      if (likely(mask[4])) *(int*)(((int8_t*)ptr)+scale*ofs[4]) = v[4];
+      if (likely(mask[5])) *(int*)(((int8_t*)ptr)+scale*ofs[5]) = v[5];
+      if (likely(mask[6])) *(int*)(((int8_t*)ptr)+scale*ofs[6]) = v[6];
+      if (likely(mask[7])) *(int*)(((int8_t*)ptr)+scale*ofs[7]) = v[7];
     }
 
 

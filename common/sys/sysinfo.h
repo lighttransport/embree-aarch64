@@ -73,7 +73,7 @@
 #  define ISA SSE
 #  define ISA_STR "SSE"
 #elif defined(__ARM_NEON)
-// NOTE(LTE): Use sse2 for `isa` for the compatiility at the moment.
+// NOTE(LTE): Use sse2 for `isa` for the compatibility at the moment.
 #define isa sse2
 #define ISA NEON
 #define ISA_STR "NEON"
@@ -141,7 +141,7 @@ namespace embree
   static const int CPU_FEATURE_XMM_ENABLED = 1 << 25;
   static const int CPU_FEATURE_YMM_ENABLED = 1 << 26;
   static const int CPU_FEATURE_ZMM_ENABLED = 1 << 27;
-  static const int CPU_FEATURE_NEON = 1 << 30;
+  static const int CPU_FEATURE_NEON = 1 << 28;
 
   static const int CPU_FEATURE_PSEUDO_HIFREQ256BIT = 1 << 30;
 
