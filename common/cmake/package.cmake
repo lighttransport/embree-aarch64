@@ -101,7 +101,7 @@ ELSE()
   SET(EMBREE_LIBRARY_NAME ${CMAKE_SHARED_LIBRARY_PREFIX}embree${EMBREE_VERSION_MAJOR}${CMAKE_SHARED_LIBRARY_SUFFIX}.${EMBREE_CONFIG_VERSION})
 ENDIF()
 
-IF (WIN32 OR EMBREE_ZIP_MODE)
+IF (WIN32 OR EMBREE_ZIP_MODE OR ANDROID)
   # for local "installs" and on Windows we want the cmake config files placed
   # in the install root, such that users can point the CMake variable
   # embree_DIR just to the install folder
