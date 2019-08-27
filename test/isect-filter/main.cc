@@ -182,10 +182,9 @@ void InitRay(Ray &ray,
                             float time = 0.0f,
                             int mask = -1,
                             unsigned int geomID = RTC_INVALID_GEOMETRY_ID,
-                            unsigned int primID = RTC_INVALID_GEOMETRY_ID,
-                            unsigned int instID = RTC_INVALID_GEOMETRY_ID)
+                            unsigned int primID = RTC_INVALID_GEOMETRY_ID)
 {
-  ray = Ray(org,dir,tnear,tfar,time,mask,geomID,primID,instID);
+  ray = Ray(org,dir,tnear,tfar,time,mask,geomID,primID);
 }
 
 
