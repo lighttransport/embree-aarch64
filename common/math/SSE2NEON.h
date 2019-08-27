@@ -20,10 +20,10 @@
 // Show your appreciation for open source by sending me a bitcoin tip to the following
 // address.
 //
-// TipJar: 1PzgWDSyq4pmdAXRH8SPUtta4SWGrt4B1p : 
+// TipJar: 1PzgWDSyq4pmdAXRH8SPUtta4SWGrt4B1p :
 // https://blockchain.info/address/1PzgWDSyq4pmdAXRH8SPUtta4SWGrt4B1p
 //
-// 
+//
 // Contributors to this project are:
 //
 // John W. Ratcliff : jratcliffscarab@gmail.com
@@ -44,7 +44,7 @@
 // A struct is now defined in this header file called 'SIMDVec' which can be used by applications which
 // attempt to access the contents of an _m128 struct directly.  It is important to note that accessing the __m128
 // struct directly is bad coding practice by Microsoft: @see: https://msdn.microsoft.com/en-us/library/ayeb3ayc.aspx
-// 
+//
 // However, some legacy source code may try to access the contents of an __m128 struct directly so the developer
 // can use the SIMDVec as an alias for it.  Any casting must be done manually by the developer, as you cannot
 // cast or otherwise alias the base NEON data type for intrinsic operations.
@@ -61,7 +61,7 @@
 //
 // Support for a number of new intrinsics was added, however, none of them yet have unit-tests to 100% confirm they are
 // producing the correct results on NEON.  These unit tests will be added as soon as possible.
-// 
+//
 // Here is the list of new instrinsics which have been added:
 //
 // _mm_cvtss_f32     :  extracts the lower order floating point value from the parameter
@@ -210,7 +210,7 @@ FORCE_INLINE void* _mm_malloc(int size, int align)
     } else {
         if (posix_memalign(&ptr, align, size)) {
           return 0;
-        } 
+        }
     }
 
     return ptr;
@@ -273,7 +273,7 @@ FORCE_INLINE __m128 _mm_set_ps(float w, float z, float y, float x)
 }
 
 // Sets the four single-precision, floating-point values to the four inputs in reverse order. https://msdn.microsoft.com/en-us/library/vstudio/d2172ct3(v=vs.100).aspx
-FORCE_INLINE __m128 _mm_setr_ps(float w, float z , float y , float x ) 
+FORCE_INLINE __m128 _mm_setr_ps(float w, float z , float y , float x )
 {
   float __attribute__ ((aligned (16))) data[4] = { w, z, y, x };
   return vld1q_f32(data);
@@ -317,7 +317,7 @@ FORCE_INLINE void _mm_storeu_si128(__m128i *p, __m128i a)
 }
 
 // Stores four 32-bit integer values as (as a __m128i value) at the address p. https://msdn.microsoft.com/en-us/library/vstudio/edk11s13(v=vs.100).aspx
-FORCE_INLINE void _mm_store_si128(__m128i *p, __m128i a ) 
+FORCE_INLINE void _mm_store_si128(__m128i *p, __m128i a )
 {
   vst1q_s32((int32_t*) p,a);
 }
@@ -452,7 +452,7 @@ FORCE_INLINE __m128 _mm_shuffle_ps_1032(__m128 a, __m128 b)
 // takes the lower two 32-bit values from a and swaps them and places in high end of result
 // takes the higher two 32 bit values from b and swaps them and places in low end of result.
 FORCE_INLINE __m128 _mm_shuffle_ps_2301(__m128 a, __m128 b)
-{	
+{
   return vcombine_f32(vrev64_f32(vget_low_f32(a)), vrev64_f32(vget_high_f32(b)));
 }
 
@@ -582,10 +582,10 @@ FORCE_INLINE __m128 _mm_shuffle_ps_function(__m128 a, __m128 b)
 {
   switch (i)
   {
-    case _MM_SHUFFLE(1, 0, 3, 2): 
-      return _mm_shuffle_ps_1032(a, b); 
+    case _MM_SHUFFLE(1, 0, 3, 2):
+      return _mm_shuffle_ps_1032(a, b);
       break;
-    case _MM_SHUFFLE(2, 3, 0, 1): 
+    case _MM_SHUFFLE(2, 3, 0, 1):
       return _mm_shuffle_ps_2301(a, b);
       break;
     case _MM_SHUFFLE(3, 2, 1, 0):
@@ -661,7 +661,7 @@ FORCE_INLINE __m128i _mm_shuffle_epi_0321(__m128i a, __m128i b)
 // when a and b are the same, rotates the most significant 32 bits into the least signficant 32 bits, and shifts the rest up
 FORCE_INLINE __m128i _mm_shuffle_epi_2103(__m128i a, __m128i b)
 {
-  return vextq_s32(a, b, 3);		
+  return vextq_s32(a, b, 3);
 }
 
 // gets the lower 64 bits of a, and places it in the upper 64 bits
@@ -752,8 +752,8 @@ FORCE_INLINE __m128i _mm_shuffle_epi32_single(__m128i a)
     case _MM_SHUFFLE(0, 0, 0, 0): return _mm_shuffle_epi32_splat<0>(a); break;
     case _MM_SHUFFLE(1, 1, 1, 1): return _mm_shuffle_epi32_splat<1>(a); break;
     case _MM_SHUFFLE(2, 2, 2, 2): return _mm_shuffle_epi32_splat<2>(a); break;
-    case _MM_SHUFFLE(3, 3, 3, 3): return _mm_shuffle_epi32_splat<3>(a); break;			
-    default: return _mm_shuffle_epi32_function<i>(a, a); 
+    case _MM_SHUFFLE(3, 3, 3, 3): return _mm_shuffle_epi32_splat<3>(a); break;
+    default: return _mm_shuffle_epi32_function<i>(a, a);
   }
 }
 
@@ -1053,13 +1053,13 @@ FORCE_INLINE __m128i _mm_min_epi16(__m128i a, __m128i b)
 
 // epi versions of min/max
 // Computes the pariwise maximums of the four signed 32-bit integer values of a and b. https://msdn.microsoft.com/en-us/library/vstudio/bb514055(v=vs.100).aspx
-FORCE_INLINE __m128i _mm_max_epi32(__m128i a, __m128i b ) 
+FORCE_INLINE __m128i _mm_max_epi32(__m128i a, __m128i b )
 {
   return vmaxq_s32(a,b);
 }
 
 // Computes the pariwise minima of the four signed 32-bit integer values of a and b. https://msdn.microsoft.com/en-us/library/vstudio/bb531476(v=vs.100).aspx
-FORCE_INLINE __m128i _mm_min_epi32(__m128i a, __m128i b ) 
+FORCE_INLINE __m128i _mm_min_epi32(__m128i a, __m128i b )
 {
   return vminq_s32(a,b);
 }
@@ -1072,9 +1072,9 @@ FORCE_INLINE __m128i _mm_mulhi_epi16(__m128i a, __m128i b)
   return (__m128i)ret;
 }
 
-// Computes pairwise add of each argument as single-precision, floating-point values a and b. 
+// Computes pairwise add of each argument as single-precision, floating-point values a and b.
 //https://msdn.microsoft.com/en-us/library/yd9wecaa.aspx
-FORCE_INLINE __m128 _mm_hadd_ps(__m128 a, __m128 b ) 
+FORCE_INLINE __m128 _mm_hadd_ps(__m128 a, __m128 b )
 {
 // This does not work, no vpaddq...
 //	return (__m128) vpaddq_f32(a,b);
@@ -1157,7 +1157,7 @@ FORCE_INLINE __m128i _mm_cmpgt_epi32(__m128i a, __m128i b)
 // see also:
 // http://stackoverflow.com/questions/8627331/what-does-ordered-unordered-comparison-mean
 // http://stackoverflow.com/questions/29349621/neon-isnanval-intrinsics
-FORCE_INLINE __m128 _mm_cmpord_ps(__m128 a, __m128 b ) 
+FORCE_INLINE __m128 _mm_cmpord_ps(__m128 a, __m128 b )
 {
   // Note: NEON does not have ordered compare builtin
   // Need to compare a eq a and b eq b to check for NaN
@@ -1244,11 +1244,11 @@ FORCE_INLINE __m128 _mm_cvtepi32_ps(__m128i a)
 }
 
 // Converts the four single-precision, floating-point values of a to signed 32-bit integer values. https://msdn.microsoft.com/en-us/library/vstudio/xdc42k5e(v=vs.100).aspx
-// *NOTE*. The default rounding mode on SSE is 'round to even', which ArmV7 does not support!  
+// *NOTE*. The default rounding mode on SSE is 'round to even', which ArmV7 does not support!
 // It is supported on ARMv8 however.
 FORCE_INLINE __m128i _mm_cvtps_epi32(__m128 a)
 {
-#if 1 
+#if 1
   return vcvtnq_s32_f32(a);
 #else
   __m128 half = vdupq_n_f32(0.5f);
@@ -1415,14 +1415,14 @@ FORCE_INLINE void _mm_sfence(void)
   __sync_synchronize();
 }
 
-// Stores the data in a to the address p without polluting the caches.  If the cache line containing address p is already in the cache, the cache will be updated.Address p must be 16 - byte aligned.  https://msdn.microsoft.com/en-us/library/ba08y07y%28v=vs.90%29.aspx 
+// Stores the data in a to the address p without polluting the caches.  If the cache line containing address p is already in the cache, the cache will be updated.Address p must be 16 - byte aligned.  https://msdn.microsoft.com/en-us/library/ba08y07y%28v=vs.90%29.aspx
 FORCE_INLINE void _mm_stream_si128(__m128i *p, __m128i a)
 {
   *p = a;
 }
 
 // Cache line containing p is flushed and invalidated from all caches in the coherency domain. : https://msdn.microsoft.com/en-us/library/ba08y07y(v=vs.100).aspx
-FORCE_INLINE void _mm_clflush(void const*p) 
+FORCE_INLINE void _mm_clflush(void const*p)
 {
   // no corollary for Neon?
 }
@@ -1434,10 +1434,9 @@ FORCE_INLINE __m128i _mm_set_epi64x(int64_t a, int64_t b)
   return (__m128i)vld1q_s64(data);
 }
 
-// Sets the 4 signed 32-bit integer values to i. https://msdn.microsoft.com/en-us/library/vstudio/h4xscxat(v=vs.100).aspx
 FORCE_INLINE __m128i _mm_set1_epi64x(int64_t _i)
 {
-  return vmovq_n_s64(_i);
+  return (__m128i)vmovq_n_s64(_i);
 }
 
 #endif
