@@ -18,6 +18,7 @@
 
 #include "../common/scene.h"
 #include "../common/ray.h"
+#include "../common/point_query.h"
 #include "../bvh/node_intersector1.h"
 #include "../bvh/node_intersector_packet.h"
 
@@ -46,6 +47,15 @@ namespace embree
             return true;
         }
         return false;
+      }
+      
+      template<int N>
+      static __forceinline bool pointQuery(const Accel::Intersectors* This, PointQuery* query, PointQueryContext* context, const Primitive* prim, size_t num, const TravPointQuery<N> &tquery, size_t& lazy_node)
+      {
+        bool changed = false;
+        for (size_t i=0; i<num; i++)
+          changed |= Intersector::pointQuery(query, context, prim[i]);
+        return changed;
       }
 
       template<int K>

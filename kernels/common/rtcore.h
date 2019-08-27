@@ -20,13 +20,7 @@
 RTC_NAMESPACE_OPEN
 
 namespace embree
-{
-/*! maximum number of user vertex buffers */
-#define RTC_MAX_USER_VERTEX_BUFFERS 65536
-
-/*! maximum number of index buffers for subdivision surfaces */
-#define RTC_MAX_INDEX_BUFFERS 65536
-
+{  
   /*! decoding of intersection flags */
   __forceinline bool isCoherent  (RTCIntersectContextFlags flags) { return (flags & RTC_INTERSECT_CONTEXT_FLAG_COHERENT) == RTC_INTERSECT_CONTEXT_FLAG_COHERENT; }
   __forceinline bool isIncoherent(RTCIntersectContextFlags flags) { return (flags & RTC_INTERSECT_CONTEXT_FLAG_COHERENT) == RTC_INTERSECT_CONTEXT_FLAG_INCOHERENT; }
@@ -64,6 +58,25 @@ namespace embree
   } catch (...) {                                                               \
     Device* device = scene ? scene->device : nullptr;                           \
     Device::process_error(device,RTC_ERROR_UNKNOWN,"unknown exception caught"); \
+  }
+
+#define RTC_CATCH_END2_FALSE(scene)                                             \
+  } catch (std::bad_alloc&) {                                                   \
+    Device* device = scene ? scene->device : nullptr;                           \
+    Device::process_error(device,RTC_ERROR_OUT_OF_MEMORY,"out of memory");      \
+    return false;                                                               \
+  } catch (rtcore_error& e) {                                                   \
+    Device* device = scene ? scene->device : nullptr;                           \
+    Device::process_error(device,e.error,e.what());                             \
+    return false;                                                               \
+  } catch (std::exception& e) {                                                 \
+    Device* device = scene ? scene->device : nullptr;                           \
+    Device::process_error(device,RTC_ERROR_UNKNOWN,e.what());                   \
+    return false;                                                               \
+  } catch (...) {                                                               \
+    Device* device = scene ? scene->device : nullptr;                           \
+    Device::process_error(device,RTC_ERROR_UNKNOWN,"unknown exception caught"); \
+    return false;                                                               \
   }
 
 #define RTC_VERIFY_HANDLE(handle)                               \

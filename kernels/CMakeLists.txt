@@ -56,6 +56,7 @@ SET(EMBREE_LIBRARY_FILES
 
   subdiv/bezier_curve.cpp
   subdiv/bspline_curve.cpp
+  subdiv/catmullrom_curve.cpp
 
   geometry/primitive4.cpp
   geometry/instance_intersector.cpp
@@ -312,7 +313,7 @@ IF (EMBREE_ISA_AVX512SKX AND EMBREE_LIBRARY_FILES_AVX512SKX)
   ENDIF()
 ENDIF()
 
-TARGET_LINK_LIBRARIES(embree ${EMBREE_LIBRARIES} sys math simd lexers tasking)
+TARGET_LINK_LIBRARIES(embree PRIVATE ${EMBREE_LIBRARIES} sys math simd lexers PUBLIC tasking)
 SET_TARGET_PROPERTIES(embree PROPERTIES INSTALL_RPATH "") # no RPATH for installed libembree
 SET_TARGET_PROPERTIES(embree PROPERTIES OUTPUT_NAME ${EMBREE_LIBRARY_NAME})
 

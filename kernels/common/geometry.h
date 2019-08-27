@@ -19,11 +19,13 @@
 #include "default.h"
 #include "device.h"
 #include "buffer.h"
+#include "../common/point_query.h"
 #include "../builders/priminfo.h"
 
 namespace embree
 {
   class Scene;
+  class Geometry;
 
   /*! Base class all geometries are derived from */
   class Geometry : public RefCount
@@ -49,26 +51,31 @@ namespace embree
       GTY_FLAT_HERMITE_CURVE = 12,
       GTY_ROUND_HERMITE_CURVE = 13,
       GTY_ORIENTED_HERMITE_CURVE = 14,
-
-      GTY_TRIANGLE_MESH = 16,
-      GTY_QUAD_MESH = 17,
-      GTY_GRID_MESH = 18,
-      GTY_SUBDIV_MESH = 19,
-
-      GTY_SPHERE_POINT = 21,
-      GTY_DISC_POINT = 22,
-      GTY_ORIENTED_DISC_POINT = 23,
       
-      GTY_USER_GEOMETRY = 25,
-      GTY_INSTANCE = 26,
-      GTY_END = 27,
+      GTY_FLAT_CATMULL_ROM_CURVE = 16,
+      GTY_ROUND_CATMULL_ROM_CURVE = 17,
+      GTY_ORIENTED_CATMULL_ROM_CURVE = 18,      
+
+      GTY_TRIANGLE_MESH = 20,
+      GTY_QUAD_MESH = 21,
+      GTY_GRID_MESH = 22,
+      GTY_SUBDIV_MESH = 23,
+
+      GTY_SPHERE_POINT = 25,
+      GTY_DISC_POINT = 26,
+      GTY_ORIENTED_DISC_POINT = 27,
+      
+      GTY_USER_GEOMETRY = 29,
+      GTY_INSTANCE = 30,
+      GTY_END = 31,
 
       GTY_BASIS_LINEAR = 0,
       GTY_BASIS_BEZIER = 4,
       GTY_BASIS_BSPLINE = 8,
       GTY_BASIS_HERMITE = 12,
-      GTY_BASIS_MASK = 12,
-      
+      GTY_BASIS_CATMULL_ROM = 16,
+      GTY_BASIS_MASK = 28,
+
       GTY_SUBTYPE_FLAT_CURVE = 0,
       GTY_SUBTYPE_ROUND_CURVE = 1,
       GTY_SUBTYPE_ORIENTED_CURVE = 2,
@@ -93,11 +100,16 @@ namespace embree
       MTY_ROUND_HERMITE_CURVE = 1 << GTY_ROUND_HERMITE_CURVE,
       MTY_ORIENTED_HERMITE_CURVE = 1 << GTY_ORIENTED_HERMITE_CURVE,
 
+      MTY_FLAT_CATMULL_ROM_CURVE = 1 << GTY_FLAT_CATMULL_ROM_CURVE,
+      MTY_ROUND_CATMULL_ROM_CURVE = 1 << GTY_ROUND_CATMULL_ROM_CURVE,
+      MTY_ORIENTED_CATMULL_ROM_CURVE = 1 << GTY_ORIENTED_CATMULL_ROM_CURVE,
+
       MTY_CURVE2 = MTY_FLAT_LINEAR_CURVE | MTY_ROUND_LINEAR_CURVE | MTY_ORIENTED_LINEAR_CURVE,
       
       MTY_CURVE4 = MTY_FLAT_BEZIER_CURVE | MTY_ROUND_BEZIER_CURVE | MTY_ORIENTED_BEZIER_CURVE |
                    MTY_FLAT_BSPLINE_CURVE | MTY_ROUND_BSPLINE_CURVE | MTY_ORIENTED_BSPLINE_CURVE |
-                   MTY_FLAT_HERMITE_CURVE | MTY_ROUND_HERMITE_CURVE | MTY_ORIENTED_HERMITE_CURVE,
+                   MTY_FLAT_HERMITE_CURVE | MTY_ROUND_HERMITE_CURVE | MTY_ORIENTED_HERMITE_CURVE |
+                   MTY_FLAT_CATMULL_ROM_CURVE | MTY_ROUND_CATMULL_ROM_CURVE | MTY_ORIENTED_CATMULL_ROM_CURVE,
 
       MTY_SPHERE_POINT = 1 << GTY_SPHERE_POINT,
       MTY_DISC_POINT = 1 << GTY_DISC_POINT,
@@ -271,6 +283,9 @@ namespace embree
     /*! interpolates user data to the specified u/v locations */
     virtual void interpolateN(const RTCInterpolateNArguments* const args);
 
+    /* point query api */
+    bool pointQuery(PointQuery* query, PointQueryContext* context);
+
     /*! for subdivision surfaces only */
   public:
     virtual void setSubdivisionMode (unsigned topologyID, RTCSubdivisionMode mode) {
@@ -366,6 +381,9 @@ namespace embree
     virtual void setOccludedFunctionN (RTCOccludedFunctionN occluded) { 
       throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
     }
+    
+    /*! Set point query function. */
+    void setPointQueryFunction(RTCPointQueryFunction func);
 
     /*! returns number of time segments */
     __forceinline unsigned numTimeSegments () const {
@@ -453,5 +471,6 @@ namespace embree
        
     RTCFilterFunctionN intersectionFilterN;
     RTCFilterFunctionN occlusionFilterN;
+    RTCPointQueryFunction pointQueryFunc;
   };
 }

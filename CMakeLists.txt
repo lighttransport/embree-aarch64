@@ -15,8 +15,8 @@
 ## ======================================================================== ##
 
 SET(EMBREE_VERSION_MAJOR 3)
-SET(EMBREE_VERSION_MINOR 5)
-SET(EMBREE_VERSION_PATCH 2)
+SET(EMBREE_VERSION_MINOR 6)
+SET(EMBREE_VERSION_PATCH 0)
 SET(EMBREE_VERSION_NOTE "")
 
 SET(EMBREE_VERSION ${EMBREE_VERSION_MAJOR}.${EMBREE_VERSION_MINOR}.${EMBREE_VERSION_PATCH})
@@ -30,7 +30,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.11)
 MACRO (SIGN_TARGET target)
   IF (EMBREE_SIGN_FILE)
     IF (WIN32)
-      # on Windows we only strip as debug symbols not included in binary
+      # on Windows we only sign as debug symbols not included in binary
       ADD_CUSTOM_COMMAND(TARGET ${target} POST_BUILD
         COMMAND ${EMBREE_SIGN_FILE} $<TARGET_FILE:${target}>)
     ELSEIF (APPLE)
@@ -60,23 +60,6 @@ IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git)
     SET(EMBREE_HASH 0)
   ENDIF()
 ENDIF()
-
-CONFIGURE_FILE(
-  "${PROJECT_SOURCE_DIR}/kernels/rtcore_version.h.in"
-  "${PROJECT_SOURCE_DIR}/include/embree3/rtcore_version.h"
-)
-CONFIGURE_FILE(
-  "${PROJECT_SOURCE_DIR}/kernels/hash.h.in"
-  "${PROJECT_SOURCE_DIR}/kernels/hash.h"
-)
-CONFIGURE_FILE(
-  "${PROJECT_SOURCE_DIR}/kernels/export.linux.map.in"
-  "${PROJECT_SOURCE_DIR}/kernels/export.linux.map"
-)
-CONFIGURE_FILE(
-  "${PROJECT_SOURCE_DIR}/kernels/export.macosx.map.in"
-  "${PROJECT_SOURCE_DIR}/kernels/export.macosx.map"
-)
 
 IF(COMMAND cmake_policy)
   if (POLICY CMP0003)
@@ -129,7 +112,7 @@ IF (EMBREE_API_NAMESPACE AND EMBREE_ISPC_SUPPORT)
 ENDIF()
 
 ##############################################################################
-# Configurations (add configurations also to common/cmake/embree-config-default.cmake)
+# Configurations (add configurations also to common/cmake/embree-config.cmake)
 
 OPTION(EMBREE_INSTALL_DEPENDENCIES "Install Embree dependencies in binary packages and install" OFF)
 MARK_AS_ADVANCED(EMBREE_INSTALL_DEPENDENCIES)
@@ -152,6 +135,7 @@ OPTION(EMBREE_GEOMETRY_GRID "Enables support for grid geometries." ON)
 OPTION(EMBREE_GEOMETRY_POINT "Enables support for point geometries." ON)
 OPTION(EMBREE_RAY_PACKETS "Enabled support for ray packets." ON)
 
+SET(EMBREE_MAX_INSTANCE_LEVEL_COUNT 1 CACHE INT "Maximum number of instance levels.")
 SET(EMBREE_CURVE_SELF_INTERSECTION_AVOIDANCE_FACTOR 2.0 CACHE STRING "Self intersection avoidance factor for flat curves. Specify floating point value in range 0 to inf.")
 
 SET(EMBREE_TASKING_SYSTEM "TBB" CACHE STRING "Selects tasking system")
@@ -180,11 +164,6 @@ ELSE()
   ADD_DEFINITIONS(-DTASKING_INTERNAL)
   LIST(APPEND ISPC_DEFINITIONS -DTASKING_INTERNAL)
 ENDIF()
-
-CONFIGURE_FILE(
-  "${PROJECT_SOURCE_DIR}/kernels/config.h.in"
-  "${PROJECT_SOURCE_DIR}/kernels/config.h"
-)
 
 ##############################################################
 # Mobile Support (support arm64 / aarch64 on Android and iOS)
@@ -470,6 +449,39 @@ INCLUDE (ispc)
 # Create Binary Packages (uses above config options)
 ##############################################################
 include(package)
+
+##############################################################
+# Create Config files
+##############################################################
+
+CONFIGURE_FILE(
+  "${PROJECT_SOURCE_DIR}/kernels/config.h.in"
+  "${PROJECT_SOURCE_DIR}/kernels/config.h"
+)
+
+CONFIGURE_FILE(
+  "${PROJECT_SOURCE_DIR}/kernels/rtcore_config.h.in"
+  "${PROJECT_SOURCE_DIR}/include/embree3/rtcore_config.h"
+)
+
+CONFIGURE_FILE(
+  "${PROJECT_SOURCE_DIR}/kernels/hash.h.in"
+  "${PROJECT_SOURCE_DIR}/kernels/hash.h"
+)
+CONFIGURE_FILE(
+  "${PROJECT_SOURCE_DIR}/kernels/export.linux.map.in"
+  "${PROJECT_SOURCE_DIR}/kernels/export.linux.map"
+)
+CONFIGURE_FILE(
+  "${PROJECT_SOURCE_DIR}/kernels/export.macosx.map.in"
+  "${PROJECT_SOURCE_DIR}/kernels/export.macosx.map"
+)
+
+SET(EMBREE_MAX_INSTANCE_LEVEL_COUNT 1 CACHE INT "Maximum number of instance levels.")
+CONFIGURE_FILE(
+  "${PROJECT_SOURCE_DIR}/kernels/rtcore_instance_levels.h.in"
+  "${PROJECT_SOURCE_DIR}/include/embree3/rtcore_instance_levels.h"
+)
 
 ##############################################################
 # Search paths

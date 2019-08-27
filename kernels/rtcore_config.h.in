@@ -14,20 +14,24 @@
 // limitations under the License.                                           //
 // ======================================================================== //
 
-#define RTC_VERSION_MAJOR 3
-#define RTC_VERSION_MINOR 5
-#define RTC_VERSION_PATCH 2
-#define RTC_VERSION 30502
-#define RTC_VERSION_STRING "3.5.2"
+#pragma once
 
-/* #undef EMBREE_STATIC_LIB */
-/* #undef EMBREE_API_NAMESPACE */
+#define RTC_VERSION_MAJOR @EMBREE_VERSION_MAJOR@
+#define RTC_VERSION_MINOR @EMBREE_VERSION_MINOR@
+#define RTC_VERSION_PATCH @EMBREE_VERSION_PATCH@
+#define RTC_VERSION @EMBREE_VERSION_NUMBER@
+#define RTC_VERSION_STRING "@EMBREE_VERSION_MAJOR@.@EMBREE_VERSION_MINOR@.@EMBREE_VERSION_PATCH@@EMBREE_VERSION_NOTE@"
+
+#define RTC_MAX_INSTANCE_LEVEL_COUNT @EMBREE_MAX_INSTANCE_LEVEL_COUNT@
+
+#cmakedefine EMBREE_STATIC_LIB
+#cmakedefine EMBREE_API_NAMESPACE
 
 #if defined(EMBREE_API_NAMESPACE)
-#  define RTC_NAMESPACE 
-#  define RTC_NAMESPACE_BEGIN namespace  {
+#  define RTC_NAMESPACE @EMBREE_API_NAMESPACE@
+#  define RTC_NAMESPACE_BEGIN namespace @EMBREE_API_NAMESPACE@ {
 #  define RTC_NAMESPACE_END }
-#  define RTC_NAMESPACE_OPEN using namespace ;
+#  define RTC_NAMESPACE_OPEN using namespace @EMBREE_API_NAMESPACE@;
 #  define RTC_API_EXTERN_C
 #  undef EMBREE_API_NAMESPACE
 #else

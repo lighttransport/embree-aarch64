@@ -20,7 +20,7 @@
 #include <sys/types.h>
 #include <stdbool.h>
 
-#include "rtcore_version.h"
+#include "rtcore_config.h"
 
 RTC_NAMESPACE_BEGIN
 
@@ -59,9 +59,6 @@ typedef int ssize_t;
 
 /* Maximum number of time steps */
 #define RTC_MAX_TIME_STEP_COUNT 129
-
-/* Maximum number of instancing levels */
-#define RTC_MAX_INSTANCE_LEVEL_COUNT 1
 
 /* Formats of buffers and other data structures */
 enum RTCFormat
@@ -210,15 +207,119 @@ struct RTCIntersectContext
 {
   enum RTCIntersectContextFlags flags;               // intersection flags
   RTCFilterFunctionN filter;                         // filter function to execute
-  unsigned int instID[RTC_MAX_INSTANCE_LEVEL_COUNT]; // will be set to geomID of instance when instance is entered
+  unsigned int instStackSize;                        // Number of instances currently on the stack.
+  unsigned int instID[RTC_MAX_INSTANCE_LEVEL_COUNT]; // The current stack of instance ids.
 };
 
 /* Initializes an intersection context. */
 RTC_FORCEINLINE void rtcInitIntersectContext(struct RTCIntersectContext* context)
 {
+  unsigned l = 0;
   context->flags = RTC_INTERSECT_CONTEXT_FLAG_INCOHERENT;
   context->filter = NULL;
+  context->instStackSize = 0;
+  for (; l < RTC_MAX_INSTANCE_LEVEL_COUNT; ++l)
+    context->instID[l] = RTC_INVALID_GEOMETRY_ID;
+}
+
+/* Point query structure for closest point query */
+struct RTC_ALIGN(16) RTCPointQuery 
+{
+  float x;                // x coordinate of the query point
+  float y;                // y coordinate of the query point
+  float z;                // z coordinate of the query point
+  float time;             // time of the point query
+  float radius;           // radius of the point query 
+};
+
+/* Structure of a packet of 4 query points */
+struct RTC_ALIGN(16) RTCPointQuery4
+{
+  float x[4];                // x coordinate of the query point
+  float y[4];                // y coordinate of the query point
+  float z[4];                // z coordinate of the query point
+  float time[4];             // time of the point query
+  float radius[4];           // radius of the point query
+};
+
+/* Structure of a packet of 8 query points */
+struct RTC_ALIGN(32) RTCPointQuery8
+{
+  float x[8];                // x coordinate of the query point
+  float y[8];                // y coordinate of the query point
+  float z[8];                // z coordinate of the query point
+  float time[8];             // time of the point query
+  float radius[8];           // radius ofr the point query 
+};
+
+/* Structure of a packet of 16 query points */
+struct RTC_ALIGN(64) RTCPointQuery16
+{
+  float x[16];                // x coordinate of the query point
+  float y[16];                // y coordinate of the query point
+  float z[16];                // z coordinate of the query point
+  float time[16];             // time of the point quey
+  float radius[16];           // radius of the point query
+};
+
+struct RTCPointQueryN;
+
+struct RTC_ALIGN(16) RTCPointQueryContext
+{
+  // accumulated 4x4 column major matrices from world space to instance space.
+  // undefined if size == 0.
+  float world2inst[RTC_MAX_INSTANCE_LEVEL_COUNT][16]; 
+
+  // accumulated 4x4 column major matrices from instance space to world space.
+  // undefined if size == 0.
+  float inst2world[RTC_MAX_INSTANCE_LEVEL_COUNT][16]; 
+
+  // instance ids.
+  unsigned int instID[RTC_MAX_INSTANCE_LEVEL_COUNT];
+
+  // number of instances currently on the stack.
+  unsigned int instStackSize;
+};
+
+/* Initializes an intersection context. */
+RTC_FORCEINLINE void rtcInitPointQueryContext(struct RTCPointQueryContext* context)
+{
+  context->instStackSize = 0;
   context->instID[0] = RTC_INVALID_GEOMETRY_ID;
 }
+
+struct RTC_ALIGN(16) RTCPointQueryFunctionArguments
+{
+  // The (world space) query object that was passed as an argument of rtcPointQuery. The
+  // radius of the query can be decreased inside the callback to shrink the
+  // search domain. Increasing the radius or modifying the time or position of
+  // the query results in undefined behaviour.
+  struct RTCPointQuery* query;
+
+  // Used for user input/output data. Will not be read or modified internally.
+  void* userPtr;
+
+  // primitive and geometry ID of primitive
+  unsigned int  primID;        
+  unsigned int  geomID;    
+
+  // the context with transformation and instance ID stack
+  struct RTCPointQueryContext* context;
+
+  // If the current instance transform M (= context->world2inst[context->instStackSize]) 
+  // is a similarity matrix, i.e there is a constant factor similarityScale such that,
+  //    for all x,y: dist(Mx, My) = similarityScale * dist(x, y),
+  // The similarity scale is 0, if the current instance transform is not a
+  // similarity transform and vice versa. The similarity scale allows to compute
+  // distance information in instance space and scale the distances into world
+  // space by dividing with the similarity scale, for example, to update the
+  // query radius. If the current instance transform is not a similarity
+  // transform (similarityScale = 0), the distance computation has to be
+  // performed in world space to ensure correctness. if there is no instance
+  // transform (context->instStackSize == 0), the similarity scale is 1.
+  float similarityScale;
+};
+
+typedef bool (*RTCPointQueryFunction)(struct RTCPointQueryFunctionArguments* args);
   
 RTC_NAMESPACE_END

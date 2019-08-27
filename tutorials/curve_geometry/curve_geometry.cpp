@@ -24,7 +24,7 @@ namespace embree
       : TutorialApplication("curve_geometry",FEATURE_RTCORE) 
     {
       /* set default camera */
-      camera.from = Vec3fa(2.244145155f, 1.310973883f, 0.09447964281f);
+      camera.from = Vec3fa(0.244145155f, 5.310973883f, 7.09447964281f);
       camera.to   = Vec3fa(0.0f,0.0f,0.0f);
     }
   };

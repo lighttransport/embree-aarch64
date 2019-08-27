@@ -237,7 +237,7 @@ parameters that can be configured in CMake:
   `embree3_avx512skx.a`). You have to link these libraries in exactly
   this order of increasing ISA.
 
-+ `EMBREE_ISA_NAMESPACE`: Specifies a namespace name to put all Embree
++ `EMBREE_API_NAMESPACE`: Specifies a namespace name to put all Embree
   API symbols inside. By default no namespace is used and plain C symbols
   exported.
 
@@ -322,6 +322,11 @@ parameters that can be configured in CMake:
   curve_radius*`EMBREE_CURVE_SELF_INTERSECTION_AVOIDANCE_FACTOR` to
   the ray origin are ignored. A value of 0.0f disables self
   intersection avoidance while 2.0f is the default value.
+
++ `EMBREE_MAX_INSTANCE_LEVEL_COUNT`: Specifies the maximum number of nested
+  instance levels. Should be greater than 0; the default value is 1.
+  Instances nested any deeper than this value will silently disappear in
+  release mode, and cause assertions in debug mode.
 
 
 Using Embree
