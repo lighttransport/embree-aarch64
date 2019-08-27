@@ -19,6 +19,17 @@ $ cd build-aarch64-cross
 $ make
 ```
 
+At least you'll need folliwing cmake options to enable AARCH64 build.
+
+```
+  -DEMBREE_ARM=On \
+  -DEMBREE_ISPC_SUPPORT=Off \
+  -DEMBREE_TASKING_SYSTEM=Internal \
+  -DEMBREE_TUTORIALS=Off \
+  -DEMBREE_MAX_ISA=SSE2 \
+  -DEMBREE_RAY_PACKETS=Off
+```
+
 How to build for Android arm64-v8a
 ----------------------------------
 
@@ -50,7 +61,7 @@ Status
 * [x] Instanced geometry
 * [x] Interpolation
 * [ ] Custom geometry
-* [ ] Grid geometry
+* [x] Grid geometry
 * [x] Confirmed the build for arm64-v8a Android target.
 * [x] Confirmed the simple test render(Triangle + rtcIntersect1) runs well on aarch64 linux with the debug build of Embree.
 * [x] `verify` tutorial app allegedly pass on aarch64 linux.
@@ -61,10 +72,10 @@ Status
 TODO
 ----
 
-* [ ] Run & test on Android arm64-v8a device.
+* [ ] Write Android/iOS samples
 * [ ] Support the build on Windows and macOS
 * [ ] Provide a build script for gradle
-* [ ] Support ISPC(generate code for arm target)
+* [ ] Support ISPC interop
 * [x] Raspberry Pi3 with 64bit kernel(HypriotOS)
 * [ ] Support the build with Android version of TBB.
 
