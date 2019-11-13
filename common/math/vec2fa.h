@@ -110,6 +110,12 @@ namespace embree
 
   __forceinline Vec2fa rcp  ( const Vec2fa& a )
   {
+#if defined(__aarch64__)
+        __m128 reciprocal = _mm_rcp_ps(a.m128);
+        reciprocal = vmulq_f32(vrecpsq_f32(a.m128, reciprocal), reciprocal);
+        reciprocal = vmulq_f32(vrecpsq_f32(a.m128, reciprocal), reciprocal);
+        return (const Vec2fa)reciprocal;
+#else
 #if defined(__AVX512VL__)
     const Vec2fa r = _mm_rcp14_ps(a.m128);
 #else

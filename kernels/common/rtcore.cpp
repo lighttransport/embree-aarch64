@@ -21,6 +21,11 @@
 #include "scene.h"
 #include "context.h"
 #include "../../include/embree3/rtcore_ray.h"
+
+#if defined(__aarch64__)
+#include <mutex>
+#endif
+
 using namespace embree;
 
 RTC_NAMESPACE_BEGIN;

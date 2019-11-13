@@ -15,6 +15,7 @@
 // ======================================================================== //
 
 #include "tessellation_cache.h"
+#include "../../common/sys/barrier.h"
 
 namespace embree
 {

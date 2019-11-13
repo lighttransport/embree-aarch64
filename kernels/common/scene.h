@@ -33,6 +33,11 @@
 #include "acceln.h"
 #include "geometry.h"
 
+#if defined(TASKING_GCD)
+#include <dispatch/dispatch.h>
+#include <mutex>
+#endif
+
 namespace embree
 {
   /*! Base class all scenes are derived from */

@@ -42,6 +42,8 @@ namespace embree
 
 #if defined(TASKING_INTERNAL) 
     scheduler = nullptr;
+#elif defined(TASKING_GCD)
+    // Not Needed
 #elif defined(TASKING_TBB)
     group = new tbb::task_group;
 #elif defined(TASKING_PPL)

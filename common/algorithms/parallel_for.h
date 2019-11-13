@@ -21,6 +21,12 @@
 #include "../math/math.h"
 #include "../math/range.h"
 
+#if defined(TASKING_GCD)
+#include <dispatch/dispatch.h>
+#include <algorithm>
+#include <type_traits>
+#endif
+
 namespace embree
 {
   /* parallel_for without range */

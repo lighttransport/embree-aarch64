@@ -57,7 +57,9 @@ namespace embree
     __forceinline Vec3fa( const Vec3fa& other, const int      a1) { m128 = other.m128; a = a1; }
     __forceinline Vec3fa( const Vec3fa& other, const unsigned a1) { m128 = other.m128; u = a1; }
     __forceinline Vec3fa( const Vec3fa& other, const float    w1) {      
-#if defined (__SSE4_1__)
+#if defined(__aarch64__)
+        m128 = insert<3>(other.m128, w1);
+#elif defined (__SSE4_1__)
       m128 = _mm_insert_ps(other.m128, _mm_set_ss(w1),3 << 4);
 #else
       const vint4 mask(-1,-1,-1,0);

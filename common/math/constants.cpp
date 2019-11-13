@@ -14,6 +14,10 @@
 // limitations under the License.                                           //
 // ======================================================================== //
 
+#if defined(__aarch64__)
+#include <arm_neon.h>
+#endif
+
 #include "constants.h"
 
 namespace embree

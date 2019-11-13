@@ -116,6 +116,7 @@
 
 #include <stdint.h>
 #include "arm_neon.h"
+#include "constants.h"
 
 /*******************************************************/
 /* MACRO for shuffle parameter for _mm_shuffle_ps().   */

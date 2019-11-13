@@ -192,6 +192,9 @@ namespace embree
 #if defined(TASKING_INTERNAL)
     std::cout << "internal_tasking_system ";
 #endif
+#if defined(TASKING_GCD)
+    std::cout << "GCD tasking system ";
+#endif
 #if defined(TASKING_PPL)
 	std::cout << "PPL ";
 #endif

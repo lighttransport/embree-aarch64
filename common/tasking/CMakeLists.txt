@@ -24,6 +24,8 @@ ELSEIF (TASKING_PPL)
   ADD_LIBRARY(tasking STATIC taskschedulerppl.cpp)
   TARGET_LINK_LIBRARIES(tasking PRIVATE sys math)
   TARGET_LINK_LIBRARIES(tasking PUBLIC ${PPL_LIBRARIES})
+ELSEIF (TASKING_GCD)
+  ADD_LIBRARY(tasking STATIC taskschedulergcd.cpp)
 ENDIF()
 
 SET_PROPERTY(TARGET tasking PROPERTY FOLDER common)

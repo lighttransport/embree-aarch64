@@ -67,6 +67,11 @@
 #include <utility>
 #include <sstream>
 
+#if !defined(_DEBUG)  //assert_opt
+#undef assert
+#define assert(_EXPR)
+#endif
+
 namespace embree
 {
   ////////////////////////////////////////////////////////////////////////////////

@@ -48,6 +48,18 @@ $ cd build-android
 $ make  # or ninja
 ```
 
+How to cross-compile for AARCH64 iOS
+----------------------------------
+
+Edit compiler and cmake path in `./scripts/bootstrap-aarch64-ios.sh`, then
+
+```
+$ cd $EMBREE_AARCH64_REPO
+$ ./scripts/bootstrap-aarch64-ios.sh
+$ cd build-aarch64-cross
+$ make
+```
+
 Status
 ------
 

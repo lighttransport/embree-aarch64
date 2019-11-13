@@ -63,6 +63,16 @@ namespace embree
 
   __forceinline float rcp  ( const float x )
   {
+#if defined(__aarch64__)
+      // Move scalar to vector register and do rcp.
+      __m128 a;
+      a[0] = x;
+      float32x4_t reciprocal = vrecpeq_f32(a);
+      reciprocal = vmulq_f32(vrecpsq_f32(a, reciprocal), reciprocal);
+      reciprocal = vmulq_f32(vrecpsq_f32(a, reciprocal), reciprocal);
+      return reciprocal[0];
+#else
+      
     const __m128 a = _mm_set_ss(x);
 
 #if defined(__AVX512VL__)

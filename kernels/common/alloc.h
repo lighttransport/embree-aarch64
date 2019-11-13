@@ -21,6 +21,10 @@
 #include "scene.h"
 #include "primref.h"
 
+#if defined(__aarch64__)
+#include <mutex>
+#endif
+
 namespace embree
 {
   class FastAllocator

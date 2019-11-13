@@ -18,6 +18,7 @@
 
 #include "../simd/simd.h"
 #include "parallel_for.h"
+#include "../sys/alloc.h"
 #include <algorithm>
 
 namespace embree

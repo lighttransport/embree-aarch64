@@ -16,6 +16,7 @@
 
 #include "alloc.h"
 #include "../../common/sys/thread.h"
+#include "../../common/sys/barrier.h"
 
 namespace embree
 {

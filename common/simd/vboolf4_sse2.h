@@ -48,6 +48,10 @@ namespace embree
       : v(mm_lookupmask_ps[(size_t(b) << 3) | (size_t(a) << 2) | (size_t(b) << 1) | size_t(a)]) {}
     __forceinline vboolf(bool a, bool b, bool c, bool d)
       : v(mm_lookupmask_ps[(size_t(d) << 3) | (size_t(c) << 2) | (size_t(b) << 1) | size_t(a)]) {}
+#if defined(__aarch64__)
+      __forceinline vboolf(int mask) { v = mm_lookupmask_ps[mask]; }
+      __forceinline vboolf(unsigned int mask) { v = mm_lookupmask_ps[mask]; }
+#else
     __forceinline vboolf(int mask) { assert(mask >= 0 && mask < 16); v = mm_lookupmask_ps[mask]; }
     __forceinline vboolf(unsigned int mask) { assert(mask < 16); v = mm_lookupmask_ps[mask]; }
 
