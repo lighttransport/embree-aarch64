@@ -698,7 +698,7 @@ namespace embree
           continue;
 
         /* switch to single ray traversal */
-#if (!defined(__WIN32__) || defined(__X86_64__)) && defined(__SSE4_2__)
+#if (!defined(__WIN32__) || defined(__X86_64__)) && (defined(__aarch64__) || defined(__SSE4_2__))
 #if FORCE_SINGLE_MODE == 0
         if (single)
 #endif

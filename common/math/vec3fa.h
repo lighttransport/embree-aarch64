@@ -75,7 +75,14 @@ namespace embree
     __forceinline operator const __m128&() const { return m128; }
     __forceinline operator       __m128&()       { return m128; }
 
-#if defined (__SSE4_1__)
+#if defined(__aarch64__)
+      friend __forceinline Vec3fa copy_a( const Vec3fa& a, const Vec3fa& b ) {
+          Vec3fa c = a;
+          float b_a = extract<3>((const vfloat4)b.m128);
+          c.m128 = insert<3>(c.m128, b_a);
+          return c;
+      }
+#elif defined (__SSE4_1__)
     friend __forceinline Vec3fa copy_a( const Vec3fa& a, const Vec3fa& b ) { return _mm_insert_ps(a, b, (3 << 4) | (3 << 6)); }
 #else
     friend __forceinline Vec3fa copy_a( const Vec3fa& a, const Vec3fa& b ) { Vec3fa c = a; c.a = b.a; return c; }
@@ -86,7 +93,14 @@ namespace embree
     ////////////////////////////////////////////////////////////////////////////////
 
     static __forceinline Vec3fa load( const void* const a ) {
+#if defined(__aarch64__)
+        static const uint32x4_t mask = { 0xffffffff, 0xffffffff, 0xffffffff, 0x00000000 };
+        __m128 t = _mm_load_ps((float*)a);
+        t = _mm_and_ps(t, mask);
+        return Vec3fa(t);
+#else
       return Vec3fa(_mm_and_ps(_mm_load_ps((float*)a),_mm_castsi128_ps(_mm_set_epi32(0, -1, -1, -1))));
+#endif
     }
 
     static __forceinline Vec3fa loadu( const void* const a ) {
@@ -120,19 +134,39 @@ namespace embree
 
   __forceinline Vec3fa operator +( const Vec3fa& a ) { return a; }
   __forceinline Vec3fa operator -( const Vec3fa& a ) {
+#if defined(__aarch64__)
+    static const __m128 mask = _mm_castsi128_ps(_mm_set1_epi32(0x80000000));
+#else
     const __m128 mask = _mm_castsi128_ps(_mm_set1_epi32(0x80000000));
+#endif
     return _mm_xor_ps(a.m128, mask);
   }
   __forceinline Vec3fa abs  ( const Vec3fa& a ) {
+#if defined(__aarch64__)
+    return _mm_abs_ps(a.m128);
+#else
     const __m128 mask = _mm_castsi128_ps(_mm_set1_epi32(0x7fffffff));
     return _mm_and_ps(a.m128, mask);
+#endif
   }
   __forceinline Vec3fa sign ( const Vec3fa& a ) {
+#if defined(__aarch64__)
+    Vec3fa r = blendv_ps(vOne, vmOne, _mm_cmplt_ps (a.m128,vzero));
+    return r;
+#else
     return blendv_ps(Vec3fa(one), -Vec3fa(one), _mm_cmplt_ps (a,Vec3fa(zero)));
+#endif
   }
 
   __forceinline Vec3fa rcp  ( const Vec3fa& a )
   {
+#if defined(__aarch64__)
+    __m128 reciprocal = _mm_rcp_ps(a.m128);
+    reciprocal = vmulq_f32(vrecpsq_f32(a.m128, reciprocal), reciprocal);
+    reciprocal = vmulq_f32(vrecpsq_f32(a.m128, reciprocal), reciprocal);
+    return (const Vec3fa)reciprocal;
+#else
+        
 #if defined(__AVX512VL__)
     const Vec3fa r = _mm_rcp14_ps(a.m128);
 #else
@@ -147,6 +181,7 @@ namespace embree
 #endif
 
     return res;
+#endif  //defined(__aarch64__)
   }
 
   __forceinline Vec3fa sqrt ( const Vec3fa& a ) { return _mm_sqrt_ps(a.m128); }
@@ -154,12 +189,20 @@ namespace embree
 
   __forceinline Vec3fa rsqrt( const Vec3fa& a )
   {
+#if defined(__aarch64__)
+        __m128 r = _mm_rsqrt_ps(a.m128);
+        r = vmulq_f32(r, vrsqrtsq_f32(vmulq_f32(a.m128, r), r));
+        r = vmulq_f32(r, vrsqrtsq_f32(vmulq_f32(a.m128, r), r));
+        return r;
+#else
+        
 #if defined(__AVX512VL__)
     __m128 r = _mm_rsqrt14_ps(a.m128);
 #else
     __m128 r = _mm_rsqrt_ps(a.m128);
 #endif
     return _mm_add_ps(_mm_mul_ps(_mm_set1_ps(1.5f),r), _mm_mul_ps(_mm_mul_ps(_mm_mul_ps(a, _mm_set1_ps(-0.5f)), r), _mm_mul_ps(r, r)));
+#endif
   }
 
   __forceinline Vec3fa zero_fix(const Vec3fa& a) {
@@ -192,7 +235,11 @@ namespace embree
   __forceinline Vec3fa min( const Vec3fa& a, const Vec3fa& b ) { return _mm_min_ps(a.m128,b.m128); }
   __forceinline Vec3fa max( const Vec3fa& a, const Vec3fa& b ) { return _mm_max_ps(a.m128,b.m128); }
 
-#if defined(__SSE4_1__)
+#if defined(__aarch64__)
+    __forceinline Vec3fa mini(const Vec3fa& a, const Vec3fa& b) {
+      return _mm_min_ps(a, b);
+    }
+#elif defined(__SSE4_1__)
     __forceinline Vec3fa mini(const Vec3fa& a, const Vec3fa& b) {
       const vint4 ai = _mm_castps_si128(a);
       const vint4 bi = _mm_castps_si128(b);
@@ -201,7 +248,11 @@ namespace embree
     }
 #endif
 
-#if defined(__SSE4_1__)
+#if defined(__aarch64__)
+    __forceinline Vec3fa maxi(const Vec3fa& a, const Vec3fa& b) {
+      return _mm_max_ps(a, b);
+    }
+#elif defined(__SSE4_1__)
     __forceinline Vec3fa maxi(const Vec3fa& a, const Vec3fa& b) {
       const vint4 ai = _mm_castps_si128(a);
       const vint4 bi = _mm_castps_si128(b);
@@ -224,10 +275,24 @@ namespace embree
   __forceinline Vec3fa nmadd ( const Vec3fa& a, const Vec3fa& b, const Vec3fa& c) { return _mm_fnmadd_ps(a,b,c); }
   __forceinline Vec3fa nmsub ( const Vec3fa& a, const Vec3fa& b, const Vec3fa& c) { return _mm_fnmsub_ps(a,b,c); }
 #else
+                                                                                
+#if defined(__aarch64__)
+  __forceinline Vec3fa madd  ( const Vec3fa& a, const Vec3fa& b, const Vec3fa& c) {
+        return _mm_madd_ps(a.m128, b.m128, c.m128);  //a*b+c;
+    }
+  __forceinline Vec3fa nmadd ( const Vec3fa& a, const Vec3fa& b, const Vec3fa& c) {
+        return _mm_msub_ps(a.m128, b.m128, c.m128);  //-a*b+c;
+    }
+  __forceinline Vec3fa nmsub( const Vec3fa& a, const Vec3fa& b, const Vec3fa& c) {
+        Vec3fa t = _mm_madd_ps(a, b, c);
+        return -t;
+    }
+#else
   __forceinline Vec3fa madd  ( const Vec3fa& a, const Vec3fa& b, const Vec3fa& c) { return a*b+c; }
-  __forceinline Vec3fa msub  ( const Vec3fa& a, const Vec3fa& b, const Vec3fa& c) { return a*b-c; }
   __forceinline Vec3fa nmadd ( const Vec3fa& a, const Vec3fa& b, const Vec3fa& c) { return -a*b+c;}
   __forceinline Vec3fa nmsub ( const Vec3fa& a, const Vec3fa& b, const Vec3fa& c) { return -a*b-c; }
+#endif
+  __forceinline Vec3fa msub  ( const Vec3fa& a, const Vec3fa& b, const Vec3fa& c) { return a*b-c; }
 #endif
 
   __forceinline Vec3fa madd  ( const float a, const Vec3fa& b, const Vec3fa& c) { return madd(Vec3fa(a),b,c); }
@@ -249,7 +314,22 @@ namespace embree
   ////////////////////////////////////////////////////////////////////////////////
   /// Reductions
   ////////////////////////////////////////////////////////////////////////////////
-
+#if defined(__aarch64__)
+  __forceinline float reduce_add(const Vec3fa& v) {
+    float32x4_t t = vandq_u32(v.m128, vFFF0);
+    return vaddvq_f32(t);
+  }
+                                                                                
+  __forceinline float reduce_mul(const Vec3fa& v) { return v.x*v.y*v.z; }
+  __forceinline float reduce_min(const Vec3fa& v) {
+    float32x4_t t = blendv_ps(vInf, v.m128, vFFF0);
+    return vminvq_f32(t);
+  }
+  __forceinline float reduce_max(const Vec3fa& v) {
+    float32x4_t t = blendv_ps(vmInf, v.m128, vFFF0);
+    return vmaxvq_f32(t);
+  }
+#else
   __forceinline float reduce_add(const Vec3fa& v) { 
     const vfloat4 a(v);
     const vfloat4 b = shuffle<1>(a);
@@ -260,7 +340,8 @@ namespace embree
   __forceinline float reduce_mul(const Vec3fa& v) { return v.x*v.y*v.z; }
   __forceinline float reduce_min(const Vec3fa& v) { return min(v.x,v.y,v.z); }
   __forceinline float reduce_max(const Vec3fa& v) { return max(v.x,v.y,v.z); }
-
+#endif
+                                                                                
   ////////////////////////////////////////////////////////////////////////////////
   /// Comparison Operators
   ////////////////////////////////////////////////////////////////////////////////
@@ -358,7 +439,11 @@ namespace embree
   /// Rounding Functions
   ////////////////////////////////////////////////////////////////////////////////
 
-#if defined (__SSE4_1__)
+#if defined(__aarch64__)
+  __forceinline Vec3fa floor(const Vec3fa& a) { return vrndmq_f32(a); }
+  __forceinline Vec3fa ceil (const Vec3fa& a) { return vrndpq_f32(a); }
+  __forceinline Vec3fa trunc(const Vec3fa& a) { return vrndq_f32(a); }
+#elif defined (__SSE4_1__)
   __forceinline Vec3fa trunc( const Vec3fa& a ) { return _mm_round_ps(a, _MM_FROUND_TO_NEAREST_INT); }
   __forceinline Vec3fa floor( const Vec3fa& a ) { return _mm_round_ps(a, _MM_FROUND_TO_NEG_INF    ); }
   __forceinline Vec3fa ceil ( const Vec3fa& a ) { return _mm_round_ps(a, _MM_FROUND_TO_POS_INF    ); }

@@ -86,19 +86,61 @@ namespace embree
 #else
     return _mm_cvtss_f32(_mm_mul_ss(r,_mm_sub_ss(_mm_set_ss(2.0f), _mm_mul_ss(r, a))));
 #endif
+      
+#endif  //defined(__aarch64__)
   }
 
   __forceinline float signmsk ( const float x ) {
+#if defined(__aarch64__)
+      // FP and Neon shares same vector register in arm64
+      __m128 a;
+      __m128i b;
+      a[0] = x;
+      b[0] = 0x80000000;
+      a = _mm_and_ps(a, b);
+      return a[0];
+#else
     return _mm_cvtss_f32(_mm_and_ps(_mm_set_ss(x),_mm_castsi128_ps(_mm_set1_epi32(0x80000000))));
+#endif
   }
   __forceinline float xorf( const float x, const float y ) {
+#if defined(__aarch64__)
+      // FP and Neon shares same vector register in arm64
+      __m128 a;
+      __m128 b;
+      a[0] = x;
+      b[0] = y;
+      a = _mm_xor_ps(a, b);
+      return a[0];
+#else
     return _mm_cvtss_f32(_mm_xor_ps(_mm_set_ss(x),_mm_set_ss(y)));
+#endif
   }
   __forceinline float andf( const float x, const unsigned y ) {
+#if defined(__aarch64__)
+      // FP and Neon shares same vector register in arm64
+      __m128 a;
+      __m128 b;
+      a[0] = x;
+      b[0] = y;
+      a = _mm_and_ps(a, b);
+      return a[0];
+#else
     return _mm_cvtss_f32(_mm_and_ps(_mm_set_ss(x),_mm_castsi128_ps(_mm_set1_epi32(y))));
+#endif
   }
   __forceinline float rsqrt( const float x )
   {
+#if defined(__aarch64__)
+      // FP and Neon shares same vector register in arm64
+      __m128 a;
+      a[0] = x;
+      __m128 value = _mm_rsqrt_ps(a);
+      value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(a, value), value));
+      value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(a, value), value));
+      return value[0];
+#else
+      
     const __m128 a = _mm_set_ss(x);
 #if defined(__AVX512VL__)
     const __m128 r = _mm_rsqrt14_ss(_mm_set_ss(0.0f),a);
@@ -108,6 +150,7 @@ namespace embree
     const __m128 c = _mm_add_ss(_mm_mul_ss(_mm_set_ss(1.5f), r),
                                 _mm_mul_ss(_mm_mul_ss(_mm_mul_ss(a, _mm_set_ss(-0.5f)), r), _mm_mul_ss(r, r)));
     return _mm_cvtss_f32(c);
+#endif
   }
 
 #if defined(__WIN32__) && (__MSC_VER <= 1700)
@@ -164,7 +207,17 @@ namespace embree
   __forceinline double floor( const double x ) { return ::floor (x); }
   __forceinline double ceil ( const double x ) { return ::ceil (x); }
 
-#if defined(__SSE4_1__)
+#if defined(__aarch64__)
+    __forceinline float mini(float a, float b) {
+        // FP and Neon shares same vector register in arm64
+        __m128 x;
+        __m128 y;
+        x[0] = a;
+        y[0] = b;
+        x = _mm_min_ps(x, y);
+        return x[0];
+    }
+#elif defined(__SSE4_1__)
   __forceinline float mini(float a, float b) {
     const __m128i ai = _mm_castps_si128(_mm_set_ss(a));
     const __m128i bi = _mm_castps_si128(_mm_set_ss(b));
@@ -173,7 +226,17 @@ namespace embree
   }
 #endif
 
-#if defined(__SSE4_1__)
+#if defined(__aarch64__)
+    __forceinline float maxi(float a, float b) {
+        // FP and Neon shares same vector register in arm64
+        __m128 x;
+        __m128 y;
+        x[0] = a;
+        y[0] = b;
+        x = _mm_max_ps(x, y);
+        return x[0];
+    }
+#elif defined(__SSE4_1__)
   __forceinline float maxi(float a, float b) {
     const __m128i ai = _mm_castps_si128(_mm_set_ss(a));
     const __m128i bi = _mm_castps_si128(_mm_set_ss(b));
@@ -188,7 +251,19 @@ namespace embree
   __forceinline      int min(int      a, int      b) { return a<b ? a:b; }
   __forceinline unsigned min(unsigned a, unsigned b) { return a<b ? a:b; }
   __forceinline  int64_t min(int64_t  a, int64_t  b) { return a<b ? a:b; }
-  __forceinline    float min(float    a, float    b) { return a<b ? a:b; }
+#if defined(__aarch64__)
+    __forceinline float min(float a, float b) {
+        // FP and Neon shares same vector register in arm64
+        __m128 x;
+        __m128 y;
+        x[0] = a;
+        y[0] = b;
+        x = _mm_min_ps(x, y);
+        return x[0];
+    }
+#else
+    __forceinline    float min(float    a, float    b) { return a<b ? a:b; }
+#endif
   __forceinline   double min(double   a, double   b) { return a<b ? a:b; }
 #if defined(__X86_64__) || defined(__aarch64__)
   __forceinline   size_t min(size_t   a, size_t   b) { return a<b ? a:b; }
@@ -205,7 +280,19 @@ namespace embree
   __forceinline      int max(int      a, int      b) { return a<b ? b:a; }
   __forceinline unsigned max(unsigned a, unsigned b) { return a<b ? b:a; }
   __forceinline  int64_t max(int64_t  a, int64_t  b) { return a<b ? b:a; }
-  __forceinline    float max(float    a, float    b) { return a<b ? b:a; }
+#if defined(__aarch64__)
+    __forceinline float max(float a, float b) {
+        // FP and Neon shares same vector register in arm64
+        __m128 x;
+        __m128 y;
+        x[0] = a;
+        y[0] = b;
+        x = _mm_max_ps(x, y);
+        return x[0];
+    }
+#else
+    __forceinline    float max(float    a, float    b) { return a<b ? b:a; }
+#endif
   __forceinline   double max(double   a, double   b) { return a<b ? b:a; }
 #if defined(__X86_64__) || defined(__aarch64__)
   __forceinline   size_t max(size_t   a, size_t   b) { return a<b ? b:a; }

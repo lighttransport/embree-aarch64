@@ -128,6 +128,11 @@
 /* places in fp1 of result. fp0 is the same for fp0 of */
 /* result                                              */
 /*******************************************************/
+#if defined(__aarch64__)
+#define _MN_SHUFFLE(fp3,fp2,fp1,fp0) ( (uint8x16_t){ (((fp3)*4)+0), (((fp3)*4)+1), (((fp3)*4)+2), (((fp3)*4)+3),  (((fp2)*4)+0), (((fp2)*4)+1), (((fp2)*4)+2), (((fp2)*4)+3),  (((fp1)*4)+0), (((fp1)*4)+1), (((fp1)*4)+2), (((fp1)*4)+3),  (((fp0)*4)+0), (((fp0)*4)+1), (((fp0)*4)+2), (((fp0)*4)+3) } )
+#define _MF_SHUFFLE(fp3,fp2,fp1,fp0) ( (uint8x16_t){ (((fp3)*4)+0), (((fp3)*4)+1), (((fp3)*4)+2), (((fp3)*4)+3),  (((fp2)*4)+0), (((fp2)*4)+1), (((fp2)*4)+2), (((fp2)*4)+3),  (((fp1)*4)+16+0), (((fp1)*4)+16+1), (((fp1)*4)+16+2), (((fp1)*4)+16+3),  (((fp0)*4)+16+0), (((fp0)*4)+16+1), (((fp0)*4)+16+2), (((fp0)*4)+16+3) } )
+#endif
+
 #define _MM_SHUFFLE(fp3,fp2,fp1,fp0) (((fp3) << 6) | ((fp2) << 4) | \
   ((fp1) << 2) | ((fp0)))
 
@@ -237,10 +242,17 @@ FORCE_INLINE void _mm_setcsr(int val)
 // ******************************************
 
 // extracts the lower order floating point value from the parameter : https://msdn.microsoft.com/en-us/library/bb514059%28v=vs.120%29.aspx?f=255&MSPPError=-2147217396
+#if defined(__aarch64__)
+FORCE_INLINE float _mm_cvtss_f32(const __m128& x)
+{
+    return x[0];
+}
+#else
 FORCE_INLINE float _mm_cvtss_f32(__m128 a)
 {
     return vgetq_lane_f32(a, 0);
 }
+#endif
 
 // Sets the 128-bit value to zero https://msdn.microsoft.com/en-us/library/vstudio/ys7dw0kh(v=vs.100).aspx
 FORCE_INLINE __m128i _mm_setzero_si128()
@@ -267,18 +279,33 @@ FORCE_INLINE __m128 _mm_set_ps1(float _w)
 }
 
 // Sets the four single-precision, floating-point values to the four inputs. https://msdn.microsoft.com/en-us/library/vstudio/afh0zf75(v=vs.100).aspx
+#if defined(__aarch64__)
+FORCE_INLINE __m128 _mm_set_ps(const float w, const float z, const float y, const float x)
+{
+    float32x4_t t = { x, y, z, w };
+    return t;
+}
+
+// Sets the four single-precision, floating-point values to the four inputs in reverse order. https://msdn.microsoft.com/en-us/library/vstudio/d2172ct3(v=vs.100).aspx
+FORCE_INLINE __m128 _mm_setr_ps(const float w, const float z , const float y , const float x )
+{
+    float32x4_t t = { w, z, y, x };
+    return t;
+}
+#else
 FORCE_INLINE __m128 _mm_set_ps(float w, float z, float y, float x)
 {
-  float __attribute__((aligned(16))) data[4] = { x, y, z, w };
-  return vld1q_f32(data);
+    float __attribute__((aligned(16))) data[4] = { x, y, z, w };
+    return vld1q_f32(data);
 }
 
 // Sets the four single-precision, floating-point values to the four inputs in reverse order. https://msdn.microsoft.com/en-us/library/vstudio/d2172ct3(v=vs.100).aspx
 FORCE_INLINE __m128 _mm_setr_ps(float w, float z , float y , float x )
 {
-  float __attribute__ ((aligned (16))) data[4] = { w, z, y, x };
-  return vld1q_f32(data);
+    float __attribute__ ((aligned (16))) data[4] = { w, z, y, x };
+    return vld1q_f32(data);
 }
+#endif
 
 // Sets the 4 signed 32-bit integer values to i. https://msdn.microsoft.com/en-us/library/vstudio/h4xscxat(v=vs.100).aspx
 FORCE_INLINE __m128i _mm_set1_epi32(int _i)
@@ -287,18 +314,34 @@ FORCE_INLINE __m128i _mm_set1_epi32(int _i)
 }
 
 //Set the first lane to of 4 signed single-position, floating-point number to w
+#if defined(__aarch64__)
 FORCE_INLINE __m128 _mm_set_ss(float _w)
 {
-  __m128 val = _mm_setzero_ps();
-  return vsetq_lane_f32(_w, val, 0);
+    float32x4_t res;
+    res[0] = _w;
+    return res;
 }
 
 // Sets the 4 signed 32-bit integer values. https://msdn.microsoft.com/en-us/library/vstudio/019beekt(v=vs.100).aspx
 FORCE_INLINE __m128i _mm_set_epi32(int i3, int i2, int i1, int i0)
 {
-  int32_t __attribute__((aligned(16))) data[4] = { i0, i1, i2, i3 };
-  return vld1q_s32(data);
+    int32x4_t t = {i0,i1,i2,i3};
+    return t;
 }
+#else
+FORCE_INLINE __m128 _mm_set_ss(float _w)
+{
+    __m128 val = _mm_setzero_ps();
+    return vsetq_lane_f32(_w, val, 0);
+}
+
+// Sets the 4 signed 32-bit integer values. https://msdn.microsoft.com/en-us/library/vstudio/019beekt(v=vs.100).aspx
+FORCE_INLINE __m128i _mm_set_epi32(int i3, int i2, int i1, int i0)
+{
+    int32_t __attribute__((aligned(16))) data[4] = { i0, i1, i2, i3 };
+    return vld1q_s32(data);
+}
+#endif
 
 // Stores four single-precision, floating-point values. https://msdn.microsoft.com/en-us/library/vstudio/s3h4ay6y(v=vs.100).aspx
 FORCE_INLINE void _mm_store_ps(float *p, __m128 a)
@@ -433,6 +476,11 @@ FORCE_INLINE int _mm_movemask_ps(__m128 a)
   uint32x4_t &ia = *(uint32x4_t *)&a;
   return (ia[0] >> 31) | ((ia[1] >> 30) & 2) | ((ia[2] >> 29) & 4) | ((ia[3] >> 28) & 8);
 #else
+    
+#if defined(__aarch64__)
+    uint32x4_t t2 = vandq_u32(a, embree::movemask_mask);
+    return vaddvq_u32(t2);
+#else
   static const uint32x4_t movemask = { 1, 2, 4, 8 };
   static const uint32x4_t highbit = { 0x80000000, 0x80000000, 0x80000000, 0x80000000 };
   uint32x4_t t0 = vreinterpretq_u32_f32(a);
@@ -441,7 +489,19 @@ FORCE_INLINE int _mm_movemask_ps(__m128 a)
   uint32x2_t t3 = vorr_u32(vget_low_u32(t2), vget_high_u32(t2));
   return vget_lane_u32(t3, 0) | vget_lane_u32(t3, 1);
 #endif
+    
+#endif
 }
+
+#if defined(__aarch64__)
+FORCE_INLINE int _mm_movemask_popcnt_ps(__m128 a)
+{
+    uint32x4_t t2 = vandq_u32(a, embree::movemask_mask);
+    t2 = vcntq_u8(t2);
+    return vaddvq_u32(t2);
+    
+}
+#endif
 
 // Takes the upper 64 bits of a and places it in the low end of the result
 // Takes the lower 64 bits of b and places it into the high end of the result.
@@ -782,6 +842,10 @@ FORCE_INLINE __m128i _mm_shufflehi_epi16_function(__m128i a)
 // Based on SIMDe
 FORCE_INLINE __m128i _mm_slli_epi32(__m128i a, const int imm8)
 {
+#if defined(__aarch64__)
+    const int32x4_t s = vdupq_n_s32(imm8);
+    return vshlq_s32(a, s);
+#else
   int32_t __attribute__((aligned(16))) data[4];
   vst1q_s32(data, a);
   const int s = (imm8 > 31) ? 0 : imm8;
@@ -791,6 +855,7 @@ FORCE_INLINE __m128i _mm_slli_epi32(__m128i a, const int imm8)
   data[3] = data[3] << s;
 
   return vld1q_s32(data);
+#endif
 }
 
 
@@ -800,6 +865,11 @@ FORCE_INLINE __m128i _mm_slli_epi32(__m128i a, const int imm8)
 // Based on SIMDe
 FORCE_INLINE __m128i _mm_srli_epi32(__m128i a, const int imm8)
 {
+#if defined(__aarch64__)
+    const int shift = (imm8 > 31) ? 0 : imm8;  // Unfortunately, we need to check for this case for embree.
+    const int32x4_t s = vdupq_n_s32(-shift);
+    return vshlq_u32(a, s);
+#else
   int32_t __attribute__((aligned(16))) data[4];
   vst1q_s32(data, a);
 
@@ -811,6 +881,7 @@ FORCE_INLINE __m128i _mm_srli_epi32(__m128i a, const int imm8)
   data[3] = data[3] >> s;
 
   return vld1q_s32(data);
+#endif
 }
 
 
@@ -820,6 +891,10 @@ FORCE_INLINE __m128i _mm_srli_epi32(__m128i a, const int imm8)
 // Based on SIMDe
 FORCE_INLINE __m128i _mm_srai_epi32(__m128i a, const int imm8)
 {
+#if defined(__aarch64__)
+    const int32x4_t s = vdupq_n_s32(-imm8);
+    return vshlq_s32(a, s);
+#else
   int32_t __attribute__((aligned(16))) data[4];
   vst1q_s32(data, a);
   const uint32_t m = (uint32_t) ((~0U) << (32 - imm8));
@@ -830,6 +905,7 @@ FORCE_INLINE __m128i _mm_srai_epi32(__m128i a, const int imm8)
   }
 
   return vld1q_s32(data);
+#endif
 }
 
 // Shifts the 128 - bit value in a right by imm bytes while shifting in zeros.imm must be an immediate. https://msdn.microsoft.com/en-us/library/305w28yz(v=vs.100).aspx
@@ -948,8 +1024,12 @@ FORCE_INLINE __m128 _mm_rcp_ps(__m128 in)
 {
   // Get an initial estimate of 1/in.
   float32x4_t reciprocal = vrecpeq_f32(in);
+  
+    // Refinements are done outside for rcp in aarch64 embree
+#if !defined(__aarch64__)
   reciprocal = vmulq_f32(vrecpsq_f32(in, reciprocal), reciprocal);
   reciprocal = vmulq_f32(vrecpsq_f32(in, reciprocal), reciprocal);
+#endif
 
   return reciprocal;
 }
@@ -967,6 +1047,13 @@ FORCE_INLINE __m128 _mm_rcp_ss(__m128 in)
 FORCE_INLINE __m128 _mm_div_ps(__m128 a, __m128 b)
 {
   float32x4_t reciprocal = _mm_rcp_ps(b);
+    
+  // Refinements are done here for div in aarch64 embree.
+#if defined(__aarch64__)
+  reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
+  reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
+#endif
+    
   return vmulq_f32(a, reciprocal);
 }
 
@@ -983,8 +1070,12 @@ FORCE_INLINE __m128 _mm_div_ss(__m128 a, __m128 b)
 FORCE_INLINE __m128 _mm_rsqrt_ps(__m128 in)
 {
   float32x4_t value = vrsqrteq_f32(in);
+  
+    // Refinements are done outside for vector rsqrt in aarch64 embree.
+#if !defined(__aarch64__)
   value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
   value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
+#endif
 
   return value;
 }
@@ -992,7 +1083,15 @@ FORCE_INLINE __m128 _mm_rsqrt_ps(__m128 in)
 FORCE_INLINE __m128 _mm_rsqrt_ss(__m128 in)
 {
   float32x4_t result = in;
+  
+  // Refinements are done here for scalar rsqrt in aarch64 embree.
+#if defined(__aarch64__)
+  __m128 value = _mm_rsqrt_ps(in);
+  value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
+  value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
+#else
   float32x4_t value = _mm_rsqrt_ps(in);
+#endif
   return vsetq_lane_f32(vgetq_lane_f32(value, 0), result, 0);
 }
 
@@ -1000,7 +1099,14 @@ FORCE_INLINE __m128 _mm_rsqrt_ss(__m128 in)
 // Computes the approximations of square roots of the four single-precision, floating-point values of a. First computes reciprocal square roots and then reciprocals of the four values. https://msdn.microsoft.com/en-us/library/vstudio/8z67bwwk(v=vs.100).aspx
 FORCE_INLINE __m128 _mm_sqrt_ps(__m128 in)
 {
+    // Refinements are done outside for vector sqrt in embree.
+#if defined(__aarch64__)
+  __m128 reciprocal = _mm_rsqrt_ps(in);
+  reciprocal = vmulq_f32(reciprocal, vrsqrtsq_f32(vmulq_f32(in, reciprocal), reciprocal));
+  reciprocal = vmulq_f32(reciprocal, vrsqrtsq_f32(vmulq_f32(in, reciprocal), reciprocal));
+#else
   float32x4_t reciprocal = _mm_rsqrt_ps(in);
+#endif
   return vmulq_f32(in, reciprocal);
 }
 
@@ -1277,13 +1383,21 @@ FORCE_INLINE __m128i _mm_cvtsi32_si128(int a)
 // Applies a type cast to reinterpret four 32-bit floating point values passed in as a 128-bit parameter as packed 32-bit integers. https://msdn.microsoft.com/en-us/library/bb514099.aspx
 FORCE_INLINE __m128i _mm_castps_si128(__m128 a)
 {
+#if defined(__aarch64__)
+    return (__m128i)a;
+#else
   return *(const __m128i *)&a;
+#endif
 }
 
 // Applies a type cast to reinterpret four 32-bit integers passed in as a 128-bit parameter as packed 32-bit floating point values. https://msdn.microsoft.com/en-us/library/bb514029.aspx
 FORCE_INLINE __m128 _mm_castsi128_ps(__m128i a)
 {
+#if defined(__aarch64__)
+    return (__m128)a;
+#else
   return *(const __m128 *)&a;
+#endif
 }
 
 // Loads 128-bit value. : https://msdn.microsoft.com/en-us/library/atzzad1h(v=vs.80).aspx
@@ -1439,5 +1553,100 @@ FORCE_INLINE __m128i _mm_set1_epi64x(int64_t _i)
 {
   return (__m128i)vmovq_n_s64(_i);
 }
+
+#if defined(__aarch64__)
+FORCE_INLINE __m128 _mm_blendv_ps(__m128 a, __m128 b, __m128 c)
+{
+    return vbslq_f32( c, b, a);
+}
+
+FORCE_INLINE __m128i _mm_load4epu8_epi32(__m128i *ptr)
+{
+    uint8x8_t  t0 = vld1_u8((uint8_t*)ptr);
+    uint16x8_t t1 = vmovl_u8(t0);
+    uint32x4_t t2 = vmovl_u16(vget_low_u16(t1));
+    return t2;
+}
+
+FORCE_INLINE __m128i _mm_load4epu16_epi32(__m128i *ptr)
+{
+    uint16x8_t t0 = vld1q_u16((uint16_t*)ptr);
+    uint32x4_t t1 = vmovl_u16(vget_low_u16(t0));
+    return t1;
+}
+
+FORCE_INLINE __m128i _mm_load4epi8_f32(__m128i *ptr)
+{
+    int8x8_t    t0 = vld1_s8((int8_t*)ptr);
+    int16x8_t   t1 = vmovl_s8(t0);
+    int32x4_t   t2 = vmovl_s16(vget_low_s16(t1));
+    float32x4_t t3 = vcvtq_f32_s32(t2);
+    return t3;
+}
+
+FORCE_INLINE __m128i _mm_load4epu8_f32(__m128i *ptr)
+{
+    uint8x8_t   t0 = vld1_u8((uint8_t*)ptr);
+    uint16x8_t  t1 = vmovl_u8(t0);
+    uint32x4_t  t2 = vmovl_u16(vget_low_u16(t1));
+    float32x4_t t3 = vcvtq_f32_s32(t2);
+    return t3;
+}
+
+FORCE_INLINE __m128i _mm_load4epi16_f32(__m128i *ptr)
+{
+    int16x8_t   t0 = vld1q_s16((int16_t*)ptr);
+    int32x4_t   t1 = vmovl_s16(vget_low_s16(t0));
+    float32x4_t t2 = vcvtq_f32_s32(t1);
+    return t2;
+}
+
+FORCE_INLINE __m128i _mm_packus_epi32(__m128i a, __m128i b)
+{
+    return vcombine_u16( vqmovun_s32(a), vqmovun_s32(b));
+}
+
+FORCE_INLINE __m128i _mm_stream_load_si128(__m128i* ptr)
+{
+    // No non-temporal load on a single register on ARM.
+    return vld1q_u8((uint8_t*)ptr);
+}
+
+FORCE_INLINE void _mm_stream_ps(float* ptr, __m128i a)
+{
+    // No non-temporal store on a single register on ARM.
+    vst1q_f32((float*)ptr, a);
+}
+
+FORCE_INLINE __m128i _mm_min_epu32(__m128i a, __m128i b)
+{
+    return vminq_u32(a, b);
+}
+
+FORCE_INLINE __m128i _mm_max_epu32(__m128i a, __m128i b)
+{
+    return vmaxq_u32(a, b);
+}
+
+FORCE_INLINE __m128 _mm_abs_ps(__m128 a)
+{
+    return vabsq_f32(a);
+}
+
+FORCE_INLINE __m128 _mm_madd_ps(__m128 a, __m128 b, __m128 c)
+{
+    return vmlaq_f32(c, a, b);
+}
+
+FORCE_INLINE __m128 _mm_msub_ps(__m128 a, __m128 b, __m128 c)
+{
+    return vmlsq_f32(c, a, b);
+}
+
+FORCE_INLINE __m128 _mm_abs_epi32(__m128 a)
+{
+    return vabsq_s32(a);
+}
+#endif  //defined(__aarch64__)
 
 #endif

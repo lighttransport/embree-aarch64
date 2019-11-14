@@ -465,6 +465,10 @@ namespace embree
 #if defined(TASKING_PPL)
     case RTC_DEVICE_PROPERTY_TASKING_SYSTEM: return 2;
 #endif
+            
+#if defined(TASKING_GCD)
+    case RTC_DEVICE_PROPERTY_TASKING_SYSTEM: return 3;
+#endif
 
 #if defined(EMBREE_GEOMETRY_TRIANGLE)
     case RTC_DEVICE_PROPERTY_TRIANGLE_GEOMETRY_SUPPORTED: return 1;

@@ -238,7 +238,11 @@ namespace embree
     }
 
     __forceinline Ref<Geometry> get_locked(size_t i)  {
-      Lock<SpinLock> lock(geometriesMutex);
+#if defined(__aarch64__)
+    std::scoped_lock lock(geometriesMutex);
+#else
+    Lock<SpinLock> lock(geometriesMutex);
+#endif
       assert(i < geometries.size()); 
       return geometries[i]; 
     }
@@ -278,7 +282,11 @@ namespace embree
     RTCSceneFlags scene_flags;
     RTCBuildQuality quality_flags;
     MutexSys buildMutex;
+#if defined(__aarch64__)
+    std::mutex geometriesMutex;
+#else
     SpinLock geometriesMutex;
+#endif
     bool is_build;
     bool modified;                   //!< true if scene got modified
     
@@ -286,6 +294,8 @@ namespace embree
 #if defined(TASKING_INTERNAL) 
     MutexSys schedulerMutex;
     Ref<TaskScheduler> scheduler;
+#elif defined(TASKING_GCD)
+    // Not needed
 #elif defined(TASKING_TBB)
     tbb::task_group* group;
     BarrierActiveAutoReset group_barrier;

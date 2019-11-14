@@ -63,6 +63,8 @@ namespace embree
   {
 #if defined(TASKING_TBB) || defined(TASKING_PPL)
     delete group; group = nullptr;
+#elif defined(TASKING_GCD)
+      // Not Needed
 #endif
 
     /* detach all geometries */
@@ -568,9 +570,13 @@ namespace embree
   void Scene::clear() {
   }
 
-  unsigned Scene::bind(unsigned geomID, Ref<Geometry> geometry) 
+  unsigned Scene::bind(unsigned geomID, Ref<Geometry> geometry)
   {
+#if defined(__aarch64__)
+    std::scoped_lock lock(geometriesMutex);
+#else
     Lock<SpinLock> lock(geometriesMutex);
+#endif
     if (geomID == RTC_INVALID_GEOMETRY_ID) {
       geomID = id_pool.allocate();
       if (geomID == RTC_INVALID_GEOMETRY_ID)
@@ -591,7 +597,11 @@ namespace embree
 
   void Scene::detachGeometry(size_t geomID)
   {
+#if defined(__aarch64__)
+    std::scoped_lock lock(geometriesMutex);
+#else
     Lock<SpinLock> lock(geometriesMutex);
+#endif
     
     if (geomID >= geometries.size())
       throw_RTCError(RTC_ERROR_INVALID_OPERATION,"invalid geometry ID");
@@ -757,7 +767,7 @@ namespace embree
 
 #endif
 
-#if defined(TASKING_TBB) || defined(TASKING_PPL)
+#if defined(TASKING_TBB) || defined(TASKING_PPL) || defined(TASKING_GCD)
 
   void Scene::commit (bool join) 
   {
@@ -781,6 +791,8 @@ namespace embree
         throw_RTCError(RTC_ERROR_INVALID_OPERATION,"use rtcJoinCommitScene to join a build operation");
 #if USE_TASK_ARENA
       device->arena->execute([&]{ group->wait(); });
+#elif defined(TASKING_GCD)
+      // Do Nothing
 #else
       group->wait();
 #endif
@@ -789,6 +801,8 @@ namespace embree
         yield();
 #if USE_TASK_ARENA
         device->arena->execute([&]{ group->wait(); });
+#elif defined(TASKING_GCD)
+        // Do Nothing
 #else
         group->wait();
 #endif
@@ -827,13 +841,19 @@ namespace embree
      
       /* reset MXCSR register again */
       _mm_setcsr(mxcsr);
-#else
+
+#elif defined(TASKING_GCD)
+        
+        commit_task();
+        
+#else  // #if defined(TASKING_TBB)
+        
       group->run([&]{
           concurrency::parallel_for(size_t(0), size_t(1), size_t(1), [&](size_t) { commit_task(); });
         });
       group->wait();
 
-#endif
+#endif  // #if defined(TASKING_TBB)
     } 
     catch (...) {
 

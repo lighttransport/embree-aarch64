@@ -54,7 +54,7 @@ namespace embree
 #else
     __forceinline vboolf(int mask) { assert(mask >= 0 && mask < 16); v = mm_lookupmask_ps[mask]; }
     __forceinline vboolf(unsigned int mask) { assert(mask < 16); v = mm_lookupmask_ps[mask]; }
-
+#endif
     /* return int32 mask */
     __forceinline __m128i mask32() const { 
       return _mm_castps_si128(v);
@@ -71,8 +71,13 @@ namespace embree
     /// Array Access
     ////////////////////////////////////////////////////////////////////////////////
 
+#if defined(__aarch64__)
+      __forceinline bool operator [](size_t index) const { return (_mm_movemask_ps(v) >> index) & 1; }
+      __forceinline int& operator [](size_t index)       { return i[index]; }
+#else
     __forceinline bool operator [](size_t index) const { assert(index < 4); return (_mm_movemask_ps(v) >> index) & 1; }
     __forceinline int& operator [](size_t index)       { assert(index < 4); return i[index]; }
+#endif
   };
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -107,7 +112,7 @@ namespace embree
   __forceinline vboolf4 operator ==(const vboolf4& a, const vboolf4& b) { return _mm_castsi128_ps(_mm_cmpeq_epi32(a, b)); }
   
   __forceinline vboolf4 select(const vboolf4& m, const vboolf4& t, const vboolf4& f) {
-#if defined(__SSE4_1__)
+#if defined(__aarch64__) || defined(__SSE4_1__)
     return _mm_blendv_ps(f, t, m); 
 #else
     return _mm_or_ps(_mm_and_ps(m, t), _mm_andnot_ps(m, f)); 
@@ -121,6 +126,17 @@ namespace embree
   __forceinline vboolf4 unpacklo(const vboolf4& a, const vboolf4& b) { return _mm_unpacklo_ps(a, b); }
   __forceinline vboolf4 unpackhi(const vboolf4& a, const vboolf4& b) { return _mm_unpackhi_ps(a, b); }
 
+#if defined(__aarch64__)
+  template<int i0, int i1, int i2, int i3>
+  __forceinline vboolf4 shuffle(const vboolf4& v) {
+    return vqtbl1q_u8( (__m128i)v, _MN_SHUFFLE(i0, i1, i2, i3));
+  }
+                                                                
+  template<int i0, int i1, int i2, int i3>
+  __forceinline vboolf4 shuffle(const vboolf4& a, const vboolf4& b) {
+    return vqtbl2q_u8( (uint8x16x2_t){(__m128i)a, (__m128i)b}, _MF_SHUFFLE(i0, i1, i2, i3) );
+  }
+#else
   template<int i0, int i1, int i2, int i3>
   __forceinline vboolf4 shuffle(const vboolf4& v) {
     return _mm_castsi128_ps(_mm_shuffle_epi32(v, _MM_SHUFFLE(i3, i2, i1, i0)));
@@ -130,13 +146,18 @@ namespace embree
   __forceinline vboolf4 shuffle(const vboolf4& a, const vboolf4& b) {
     return _mm_shuffle_ps(a, b, _MM_SHUFFLE(i3, i2, i1, i0));
   }
-
+#endif
+                                                                
   template<int i0>
   __forceinline vboolf4 shuffle(const vboolf4& v) {
     return shuffle<i0,i0,i0,i0>(v);
   }
 
-#if defined(__SSE3__)
+#if defined(__aarch64__)
+  template<> __forceinline vboolf4 shuffle<0, 0, 2, 2>(const vboolf4& v) { return vqtbl1q_u8( (int32x4_t)v, v0022 ); }
+  template<> __forceinline vboolf4 shuffle<1, 1, 3, 3>(const vboolf4& v) { return vqtbl1q_u8( (int32x4_t)v, v1133 ); }
+  template<> __forceinline vboolf4 shuffle<0, 1, 0, 1>(const vboolf4& v) { return vqtbl1q_u8( (int32x4_t)v, v0101 ); }
+#elif defined(__SSE3__)
   template<> __forceinline vboolf4 shuffle<0, 0, 2, 2>(const vboolf4& v) { return _mm_moveldup_ps(v); }
   template<> __forceinline vboolf4 shuffle<1, 1, 3, 3>(const vboolf4& v) { return _mm_movehdup_ps(v); }
   template<> __forceinline vboolf4 shuffle<0, 1, 0, 1>(const vboolf4& v) { return _mm_castpd_ps(_mm_movedup_pd(v)); }
@@ -164,10 +185,14 @@ namespace embree
   __forceinline bool none(const vboolf4& valid, const vboolf4& b) { return none(valid & b); }
   
   __forceinline size_t movemask(const vboolf4& a) { return _mm_movemask_ps(a); }
+#if defined(__aarch64__)
+__forceinline size_t popcnt(const vboolf4& a) { return _mm_movemask_popcnt_ps(a); }
+#else
 #if defined(__SSE4_2__)
   __forceinline size_t popcnt(const vboolf4& a) { return popcnt((size_t)_mm_movemask_ps(a)); }
 #else
   __forceinline size_t popcnt(const vboolf4& a) { return bool(a[0])+bool(a[1])+bool(a[2])+bool(a[3]); }
+#endif
 #endif
 
   ////////////////////////////////////////////////////////////////////////////////
