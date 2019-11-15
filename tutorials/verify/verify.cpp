@@ -25,6 +25,10 @@
 #include <regex>
 #include <stack>
 
+#if defined(__APPLE__)
+#include "TargetConditionals.h"
+#endif
+
 #define random  use_random_function_of_test // do use random_int() and random_float() from Test class
 #define drand48 use_random_function_of_test // do use random_int() and random_float() from Test class
 
@@ -620,6 +624,9 @@ namespace embree
       //std::cout << "<DartMeasurement name=\"" + name + ".avg\" type=\"numeric/float\">" << bestStat.getAvg() << "</DartMeasurement>" << std::endl;
       //std::cout << "<DartMeasurement name=\"" + name + ".sigma\" type=\"numeric/float\">" << bestStat.getAvgSigma() << "</DartMeasurement>" << std::endl;
 
+#if defined(__APPLE__) && defined(TARGET_OS_IPHONE)
+      // system() is prohibited to use on iOS, so disable it.
+#else
       /* send plot only when test failed */
       if (!passed)
       {
@@ -628,6 +635,7 @@ namespace embree
         if (system(command.c_str()) == 0)
           std::cout << "<DartMeasurementFile name=\"" << name << "\" type=\"image/png\">" << base.addExt(".png") << "</DartMeasurementFile>" << std::endl;
       }
+#endif
     }   
 
     sleepSeconds(0.1);
