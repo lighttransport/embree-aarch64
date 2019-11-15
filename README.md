@@ -60,6 +60,8 @@ $ cd build-aarch64-cross
 $ make
 ```
 
+`EMBREE_TASKING_SYSTEM=TASKING_GCD` is provided for iOS platform.
+
 Status
 ------
 
