@@ -1,0 +1,20 @@
+name: C/C++ CI
+
+on: [push]
+
+jobs:
+  build-aarch64:
+
+    runs-on: ubuntu-18.04
+    name: Build on aarch64
+    
+    steps:
+    - uses: actions/checkout@v1
+      id: aarch64
+      with:
+        architecture: aarch64
+        distribution: ubuntu18.04
+        run: |
+          ./scripts/bootstrap-aarch64-linux.sh
+          cd build
+          make
