@@ -1,8 +1,12 @@
 #!/bin/bash
 
 CMAKE_BIN=cmake
+BUILD_DIR=build-aarch64-cross
 
-rm -rf build-aarch64-cross
+rm -rf $BUILD_DIR
+mkdir $BUILD_DIR
+
+cd $BUILD_DIR
 
 $CMAKE_BIN \
   -DCMAKE_BUILD_TYPE=RelWithDebInfo \
@@ -16,4 +20,6 @@ $CMAKE_BIN \
   -DEMBREE_TUTORIALS=Off \
   -DEMBREE_MAX_ISA=SSE2 \
   -DEMBREE_RAY_PACKETS=Off \
-  -Bbuild-aarch64-cross -H.
+  ..
+
+cd ..
