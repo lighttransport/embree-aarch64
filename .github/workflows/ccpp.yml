@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: BuildCI
 
 on: [push]
 
@@ -19,5 +19,5 @@ jobs:
           apt-get update
           apt-get install -y cmake gcc g++
           ./scripts/bootstrap-aarch64-linux.sh
-          cd build
-          make
+          cd build-aarch64
+          make VERBOSE=1
