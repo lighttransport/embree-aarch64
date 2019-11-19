@@ -11,7 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - uses: uraimo/run-on-arch-action@v1.0.5
-      id: aarch64-build
+      id: aarch64-build-on-qemu-aarch64
       with:
         architecture: aarch64
         distribution: ubuntu18.04
