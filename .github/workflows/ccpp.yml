@@ -7,10 +7,11 @@ jobs:
 
     runs-on: ubuntu-18.04
     name: Build on aarch64
-    
+
     steps:
     - uses: actions/checkout@v1
-      id: aarch64
+    - uses: uraimo/run-on-arch-action@v1.0.5
+      id: aarch64-build
       with:
         architecture: aarch64
         distribution: ubuntu18.04
