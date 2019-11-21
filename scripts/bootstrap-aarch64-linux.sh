@@ -1,20 +1,21 @@
 #!/bin/bash
 
+# aarch64 linux native build
+
 CMAKE_BIN=cmake
-BUILD_DIR=build-aarch64-cross
 
-rm -rf $BUILD_DIR
-mkdir $BUILD_DIR
+rm -rf build-aarch64
+mkdir build-aarch64
 
-cd $BUILD_DIR
+cd build-aarch64
 
 $CMAKE_BIN \
   -DCMAKE_BUILD_TYPE=RelWithDebInfo \
   -DEMBREE_ARM=On \
   -DEMBREE_ADDRESS_SANITIZER=On \
   -DCMAKE_INSTALL_PREFIX=$HOME/local/embree3 \
-  -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc-8 \
-  -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++-8 \
+  -DCMAKE_C_COMPILER=gcc \
+  -DCMAKE_CXX_COMPILER=g++ \
   -DEMBREE_ISPC_SUPPORT=Off \
   -DEMBREE_TASKING_SYSTEM=Internal \
   -DEMBREE_TUTORIALS=Off \

@@ -1,6 +1,8 @@
 % Embree: High Performance Ray Tracing Kernels 3.6.1
 % Intel Corporation
 
+[![Actions Status](https://github.com/lighttransport/embree-aarch64/workflows/BuildCI/badge.svg)](https://github.com/lighttransport/embree-aarch64/actions)
+
 Embree-aarch64 Overview
 =======================
 
@@ -507,7 +509,7 @@ options cannot be set by CMake.
 
 Most configuration parameters described in the [CMake Configuration]
 can be set under Windows as well. Finally, click "Generate" to create
-the Visual Studio solution files. 
+the Visual Studio solution files.
 
 The following CMake options are only available under Windows:
 
@@ -2669,7 +2671,7 @@ Each grid in the grid buffer is of the type `RTCGrid`:
     {
       unsigned int startVertexID;
       unsigned int stride;
-      unsigned short width,height; 
+      unsigned short width,height;
     };
 
 The `RTCGrid` structure describes a 2D grid of vertices (with respect
@@ -2891,25 +2893,25 @@ RTC\_GEOMETRY\_TYPE\_CURVE
     RTC_GEOMETRY_TYPE_FLAT_BEZIER_CURVE -
       flat curve geometry with cubic Bézier basis
 
-    RTC_GEOMETRY_TYPE_FLAT_BSPLINE_CURVE - 
+    RTC_GEOMETRY_TYPE_FLAT_BSPLINE_CURVE -
       flat curve geometry with cubic B-spline basis
 
-    RTC_GEOMETRY_TYPE_FLAT_HERMITE_CURVE - 
+    RTC_GEOMETRY_TYPE_FLAT_HERMITE_CURVE -
       flat curve geometry with cubic Hermite basis
 
-    RTC_GEOMETRY_TYPE_FLAT_CATMULL_ROM_CURVE - 
+    RTC_GEOMETRY_TYPE_FLAT_CATMULL_ROM_CURVE -
       flat curve geometry with Catmull-Rom basis
 
     RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_BEZIER_CURVE -
       flat normal oriented curve geometry with cubic Bézier basis
 
-    RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_BSPLINE_CURVE - 
+    RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_BSPLINE_CURVE -
       flat normal oriented curve geometry with cubic B-spline basis
 
-    RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_HERMITE_CURVE - 
+    RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_HERMITE_CURVE -
       flat normal oriented curve geometry with cubic Hermite basis
 
-    RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_CATMULL_ROM_CURVE - 
+    RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_CATMULL_ROM_CURVE -
       flat normal oriented curve geometry with Catmull-Rom basis
 
     RTC_GEOMETRY_TYPE_ROUND_BEZIER_CURVE -
@@ -4603,8 +4605,8 @@ rtcSetGeometryPointQueryFunction
       void* userPtr;
 
       // primitive and geometry ID of primitive
-      unsigned int  primID;        
-      unsigned int  geomID;    
+      unsigned int  primID;
+      unsigned int  geomID;
 
       // the context with transformation and instance ID stack
       struct RTCPointQueryContext* context;
@@ -6892,13 +6894,13 @@ rtcInitPointQueryContext
     {
       // accumulated 4x4 column major matrices from world to instance space.
       float world2inst[RTC_MAX_INSTANCE_LEVEL_COUNT][16];
-      
+
       // accumulated 4x4 column major matrices from instance to world space.
       float inst2world[RTC_MAX_INSTANCE_LEVEL_COUNT][16];
 
       // instance ids.
       unsigned int instID[RTC_MAX_INSTANCE_LEVEL_COUNT];
-      
+
       // number of instances currently on the stack.
       unsigned int instStackSize;
     };
@@ -7150,7 +7152,7 @@ rtcBuildBVH
 
     struct RTC_ALIGN(32) RTCBuildPrimitive
     {
-      float lower_x, lower_y, lower_z; 
+      float lower_x, lower_y, lower_z;
       unsigned int geomID;
       float upper_x, upper_y, upper_z;
       unsigned int primID;
@@ -7220,7 +7222,7 @@ rtcBuildBVH
       struct RTCBuildPrimitive* primitives;
       size_t primitiveCount;
       size_t primitiveArrayCapacity;
-      
+
       RTCCreateNodeFunction createNode;
       RTCSetNodeChildrenFunction setNodeChildren;
       RTCSetNodeBoundsFunction setNodeBounds;
@@ -7485,8 +7487,8 @@ Embree Tutorials
 
 Embree comes with a set of tutorials aimed at helping users understand
 how Embree can be used and extended. There is a very basic minimal
-that can be compiled as both C and C++, which should get new users started quickly. 
-All other tutorials exist in an ISPC and C++ version to demonstrate 
+that can be compiled as both C and C++, which should get new users started quickly.
+All other tutorials exist in an ISPC and C++ version to demonstrate
 the two versions of the API. Look for files
 named `tutorialname_device.ispc` for the ISPC implementation of the
 tutorial, and files named `tutorialname_device.cpp` for the single ray C++
@@ -7495,9 +7497,9 @@ executables, to start the ISPC version use the `tutorialname_ispc`
 executables. All tutorials can print available command line options
 using the `--help` command line parameter.
 
-For all tutorials except minimal, you can select an initial camera using 
-the `--vp` (camera position), `--vi` (camera look-at point), `--vu` 
-(camera up vector), and `--fov` (vertical field of view) command line 
+For all tutorials except minimal, you can select an initial camera using
+the `--vp` (camera position), `--vi` (camera look-at point), `--vu`
+(camera up vector), and `--fov` (vertical field of view) command line
 parameters:
 
     ./triangle_geometry --vp 10 10 10 --vi 0 0 0
