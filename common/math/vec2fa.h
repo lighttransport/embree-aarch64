@@ -110,7 +110,7 @@ namespace embree
 
   __forceinline Vec2fa rcp  ( const Vec2fa& a )
   {
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
         __m128 reciprocal = _mm_rcp_ps(a.m128);
         reciprocal = vmulq_f32(vrecpsq_f32(a.m128, reciprocal), reciprocal);
         reciprocal = vmulq_f32(vrecpsq_f32(a.m128, reciprocal), reciprocal);
@@ -130,7 +130,7 @@ namespace embree
 #endif
 
     return res;
-#endif  //defined(__aarch64__)
+#endif  //defined(__aarch64__) && defined(BUILD_IOS)
   }
 
   __forceinline Vec2fa sqrt ( const Vec2fa& a ) { return _mm_sqrt_ps(a.m128); }
@@ -138,7 +138,7 @@ namespace embree
 
   __forceinline Vec2fa rsqrt( const Vec2fa& a )
   {
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
         __m128 r = _mm_rsqrt_ps(a.m128);
         r = vmulq_f32(r, vrsqrtsq_f32(vmulq_f32(a.m128, r), r));
         r = vmulq_f32(r, vrsqrtsq_f32(vmulq_f32(a.m128, r), r));
@@ -185,7 +185,7 @@ namespace embree
   __forceinline Vec2fa min( const Vec2fa& a, const Vec2fa& b ) { return _mm_min_ps(a.m128,b.m128); }
   __forceinline Vec2fa max( const Vec2fa& a, const Vec2fa& b ) { return _mm_max_ps(a.m128,b.m128); }
 
-#if defined(__aarch64__) || defined(__SSE4_1__)
+#if (defined(__aarch64__) && defined(BUILD_IOS)) || defined(__SSE4_1__)
     __forceinline Vec2fa mini(const Vec2fa& a, const Vec2fa& b) {
       const vint4 ai = _mm_castps_si128(a);
       const vint4 bi = _mm_castps_si128(b);
@@ -194,7 +194,7 @@ namespace embree
     }
 #endif
 
-#if defined(__aarch64__) || defined(__SSE4_1__)
+#if (defined(__aarch64__) && defined(BUILD_IOS)) || defined(__SSE4_1__)
     __forceinline Vec2fa maxi(const Vec2fa& a, const Vec2fa& b) {
       const vint4 ai = _mm_castps_si128(a);
       const vint4 bi = _mm_castps_si128(b);
@@ -304,7 +304,7 @@ namespace embree
   /// Rounding Functions
   ////////////////////////////////////////////////////////////////////////////////
 
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
 __forceinline Vec2fa floor(const Vec2fa& a) { return vrndmq_f32(a); }
 __forceinline Vec2fa ceil (const Vec2fa& a) { return vrndpq_f32(a); }
 //__forceinline Vec2fa trunc(const Vec2fa& a) { return vrndq_f32(a); }

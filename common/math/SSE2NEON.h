@@ -116,7 +116,9 @@
 
 #include <stdint.h>
 #include "arm_neon.h"
+#if defined(__aarch64__) && defined(BUILD_IOS)
 #include "constants.h"
+#endif
 
 /*******************************************************/
 /* MACRO for shuffle parameter for _mm_shuffle_ps().   */
@@ -128,7 +130,7 @@
 /* places in fp1 of result. fp0 is the same for fp0 of */
 /* result                                              */
 /*******************************************************/
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
 #define _MN_SHUFFLE(fp3,fp2,fp1,fp0) ( (uint8x16_t){ (((fp3)*4)+0), (((fp3)*4)+1), (((fp3)*4)+2), (((fp3)*4)+3),  (((fp2)*4)+0), (((fp2)*4)+1), (((fp2)*4)+2), (((fp2)*4)+3),  (((fp1)*4)+0), (((fp1)*4)+1), (((fp1)*4)+2), (((fp1)*4)+3),  (((fp0)*4)+0), (((fp0)*4)+1), (((fp0)*4)+2), (((fp0)*4)+3) } )
 #define _MF_SHUFFLE(fp3,fp2,fp1,fp0) ( (uint8x16_t){ (((fp3)*4)+0), (((fp3)*4)+1), (((fp3)*4)+2), (((fp3)*4)+3),  (((fp2)*4)+0), (((fp2)*4)+1), (((fp2)*4)+2), (((fp2)*4)+3),  (((fp1)*4)+16+0), (((fp1)*4)+16+1), (((fp1)*4)+16+2), (((fp1)*4)+16+3),  (((fp0)*4)+16+0), (((fp0)*4)+16+1), (((fp0)*4)+16+2), (((fp0)*4)+16+3) } )
 #endif
@@ -242,7 +244,7 @@ FORCE_INLINE void _mm_setcsr(int val)
 // ******************************************
 
 // extracts the lower order floating point value from the parameter : https://msdn.microsoft.com/en-us/library/bb514059%28v=vs.120%29.aspx?f=255&MSPPError=-2147217396
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
 FORCE_INLINE float _mm_cvtss_f32(const __m128& x)
 {
     return x[0];
@@ -279,7 +281,7 @@ FORCE_INLINE __m128 _mm_set_ps1(float _w)
 }
 
 // Sets the four single-precision, floating-point values to the four inputs. https://msdn.microsoft.com/en-us/library/vstudio/afh0zf75(v=vs.100).aspx
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
 FORCE_INLINE __m128 _mm_set_ps(const float w, const float z, const float y, const float x)
 {
     float32x4_t t = { x, y, z, w };
@@ -314,7 +316,7 @@ FORCE_INLINE __m128i _mm_set1_epi32(int _i)
 }
 
 //Set the first lane to of 4 signed single-position, floating-point number to w
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
 FORCE_INLINE __m128 _mm_set_ss(float _w)
 {
     float32x4_t res;
@@ -477,7 +479,7 @@ FORCE_INLINE int _mm_movemask_ps(__m128 a)
   return (ia[0] >> 31) | ((ia[1] >> 30) & 2) | ((ia[2] >> 29) & 4) | ((ia[3] >> 28) & 8);
 #else
     
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     uint32x4_t t2 = vandq_u32(a, embree::movemask_mask);
     return vaddvq_u32(t2);
 #else
@@ -493,7 +495,7 @@ FORCE_INLINE int _mm_movemask_ps(__m128 a)
 #endif
 }
 
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
 FORCE_INLINE int _mm_movemask_popcnt_ps(__m128 a)
 {
     uint32x4_t t2 = vandq_u32(a, embree::movemask_mask);
@@ -842,7 +844,7 @@ FORCE_INLINE __m128i _mm_shufflehi_epi16_function(__m128i a)
 // Based on SIMDe
 FORCE_INLINE __m128i _mm_slli_epi32(__m128i a, const int imm8)
 {
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     const int32x4_t s = vdupq_n_s32(imm8);
     return vshlq_s32(a, s);
 #else
@@ -865,7 +867,7 @@ FORCE_INLINE __m128i _mm_slli_epi32(__m128i a, const int imm8)
 // Based on SIMDe
 FORCE_INLINE __m128i _mm_srli_epi32(__m128i a, const int imm8)
 {
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     const int shift = (imm8 > 31) ? 0 : imm8;  // Unfortunately, we need to check for this case for embree.
     const int32x4_t s = vdupq_n_s32(-shift);
     return vshlq_u32(a, s);
@@ -891,7 +893,7 @@ FORCE_INLINE __m128i _mm_srli_epi32(__m128i a, const int imm8)
 // Based on SIMDe
 FORCE_INLINE __m128i _mm_srai_epi32(__m128i a, const int imm8)
 {
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     const int32x4_t s = vdupq_n_s32(-imm8);
     return vshlq_s32(a, s);
 #else
@@ -1026,7 +1028,7 @@ FORCE_INLINE __m128 _mm_rcp_ps(__m128 in)
   float32x4_t reciprocal = vrecpeq_f32(in);
   
     // Refinements are done outside for rcp in aarch64 embree
-#if !defined(__aarch64__)
+#if !defined(__aarch64__) && defined(BUILD_IOS)
   reciprocal = vmulq_f32(vrecpsq_f32(in, reciprocal), reciprocal);
   reciprocal = vmulq_f32(vrecpsq_f32(in, reciprocal), reciprocal);
 #endif
@@ -1049,7 +1051,7 @@ FORCE_INLINE __m128 _mm_div_ps(__m128 a, __m128 b)
   float32x4_t reciprocal = _mm_rcp_ps(b);
     
   // Refinements are done here for div in aarch64 embree.
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
   reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
   reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
 #endif
@@ -1072,7 +1074,7 @@ FORCE_INLINE __m128 _mm_rsqrt_ps(__m128 in)
   float32x4_t value = vrsqrteq_f32(in);
   
     // Refinements are done outside for vector rsqrt in aarch64 embree.
-#if !defined(__aarch64__)
+#if !defined(__aarch64__) && defined(BUILD_IOS)
   value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
   value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
 #endif
@@ -1085,7 +1087,7 @@ FORCE_INLINE __m128 _mm_rsqrt_ss(__m128 in)
   float32x4_t result = in;
   
   // Refinements are done here for scalar rsqrt in aarch64 embree.
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
   __m128 value = _mm_rsqrt_ps(in);
   value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
   value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
@@ -1100,7 +1102,7 @@ FORCE_INLINE __m128 _mm_rsqrt_ss(__m128 in)
 FORCE_INLINE __m128 _mm_sqrt_ps(__m128 in)
 {
     // Refinements are done outside for vector sqrt in embree.
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
   __m128 reciprocal = _mm_rsqrt_ps(in);
   reciprocal = vmulq_f32(reciprocal, vrsqrtsq_f32(vmulq_f32(in, reciprocal), reciprocal));
   reciprocal = vmulq_f32(reciprocal, vrsqrtsq_f32(vmulq_f32(in, reciprocal), reciprocal));
@@ -1383,7 +1385,7 @@ FORCE_INLINE __m128i _mm_cvtsi32_si128(int a)
 // Applies a type cast to reinterpret four 32-bit floating point values passed in as a 128-bit parameter as packed 32-bit integers. https://msdn.microsoft.com/en-us/library/bb514099.aspx
 FORCE_INLINE __m128i _mm_castps_si128(__m128 a)
 {
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     return (__m128i)a;
 #else
   return *(const __m128i *)&a;
@@ -1393,7 +1395,7 @@ FORCE_INLINE __m128i _mm_castps_si128(__m128 a)
 // Applies a type cast to reinterpret four 32-bit integers passed in as a 128-bit parameter as packed 32-bit floating point values. https://msdn.microsoft.com/en-us/library/bb514029.aspx
 FORCE_INLINE __m128 _mm_castsi128_ps(__m128i a)
 {
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     return (__m128)a;
 #else
   return *(const __m128 *)&a;
@@ -1554,7 +1556,7 @@ FORCE_INLINE __m128i _mm_set1_epi64x(int64_t _i)
   return (__m128i)vmovq_n_s64(_i);
 }
 
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
 FORCE_INLINE __m128 _mm_blendv_ps(__m128 a, __m128 b, __m128 c)
 {
     return vbslq_f32( c, b, a);

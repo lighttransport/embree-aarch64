@@ -572,7 +572,7 @@ namespace embree
 
   unsigned Scene::bind(unsigned geomID, Ref<Geometry> geometry)
   {
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     std::scoped_lock lock(geometriesMutex);
 #else
     Lock<SpinLock> lock(geometriesMutex);
@@ -597,7 +597,7 @@ namespace embree
 
   void Scene::detachGeometry(size_t geomID)
   {
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     std::scoped_lock lock(geometriesMutex);
 #else
     Lock<SpinLock> lock(geometriesMutex);

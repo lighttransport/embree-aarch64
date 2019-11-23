@@ -48,7 +48,7 @@ namespace embree
       : v(mm_lookupmask_ps[(size_t(b) << 3) | (size_t(a) << 2) | (size_t(b) << 1) | size_t(a)]) {}
     __forceinline vboolf(bool a, bool b, bool c, bool d)
       : v(mm_lookupmask_ps[(size_t(d) << 3) | (size_t(c) << 2) | (size_t(b) << 1) | size_t(a)]) {}
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
       __forceinline vboolf(int mask) { v = mm_lookupmask_ps[mask]; }
       __forceinline vboolf(unsigned int mask) { v = mm_lookupmask_ps[mask]; }
 #else
@@ -71,7 +71,7 @@ namespace embree
     /// Array Access
     ////////////////////////////////////////////////////////////////////////////////
 
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
       __forceinline bool operator [](size_t index) const { return (_mm_movemask_ps(v) >> index) & 1; }
       __forceinline int& operator [](size_t index)       { return i[index]; }
 #else
@@ -112,7 +112,7 @@ namespace embree
   __forceinline vboolf4 operator ==(const vboolf4& a, const vboolf4& b) { return _mm_castsi128_ps(_mm_cmpeq_epi32(a, b)); }
   
   __forceinline vboolf4 select(const vboolf4& m, const vboolf4& t, const vboolf4& f) {
-#if defined(__aarch64__) || defined(__SSE4_1__)
+#if (defined(__aarch64__) && defined(BUILD_IOS)) || defined(__SSE4_1__)
     return _mm_blendv_ps(f, t, m); 
 #else
     return _mm_or_ps(_mm_and_ps(m, t), _mm_andnot_ps(m, f)); 
@@ -126,7 +126,7 @@ namespace embree
   __forceinline vboolf4 unpacklo(const vboolf4& a, const vboolf4& b) { return _mm_unpacklo_ps(a, b); }
   __forceinline vboolf4 unpackhi(const vboolf4& a, const vboolf4& b) { return _mm_unpackhi_ps(a, b); }
 
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
   template<int i0, int i1, int i2, int i3>
   __forceinline vboolf4 shuffle(const vboolf4& v) {
     return vqtbl1q_u8( (__m128i)v, _MN_SHUFFLE(i0, i1, i2, i3));
@@ -153,7 +153,7 @@ namespace embree
     return shuffle<i0,i0,i0,i0>(v);
   }
 
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
   template<> __forceinline vboolf4 shuffle<0, 0, 2, 2>(const vboolf4& v) { return vqtbl1q_u8( (int32x4_t)v, v0022 ); }
   template<> __forceinline vboolf4 shuffle<1, 1, 3, 3>(const vboolf4& v) { return vqtbl1q_u8( (int32x4_t)v, v1133 ); }
   template<> __forceinline vboolf4 shuffle<0, 1, 0, 1>(const vboolf4& v) { return vqtbl1q_u8( (int32x4_t)v, v0101 ); }
@@ -185,7 +185,7 @@ namespace embree
   __forceinline bool none(const vboolf4& valid, const vboolf4& b) { return none(valid & b); }
   
   __forceinline size_t movemask(const vboolf4& a) { return _mm_movemask_ps(a); }
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
 __forceinline size_t popcnt(const vboolf4& a) { return _mm_movemask_popcnt_ps(a); }
 #else
 #if defined(__SSE4_2__)

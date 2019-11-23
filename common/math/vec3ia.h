@@ -78,7 +78,7 @@ namespace embree
 
   __forceinline Vec3ia operator +( const Vec3ia& a ) { return a; }
   __forceinline Vec3ia operator -( const Vec3ia& a ) { return _mm_sub_epi32(_mm_setzero_si128(), a.m128); }
-#if defined(__aarch64__) || defined(__SSSE3__)
+#if (defined(__aarch64__) && defined(BUILD_IOS)) || defined(__SSSE3__)
   __forceinline Vec3ia abs       ( const Vec3ia& a ) { return _mm_abs_epi32(a.m128); }
 #endif
 
@@ -94,7 +94,7 @@ namespace embree
   __forceinline Vec3ia operator -( const Vec3ia& a, const int     b ) { return a-Vec3ia(b); }
   __forceinline Vec3ia operator -( const int     a, const Vec3ia& b ) { return Vec3ia(a)-b; }
 
-#if defined(__aarch64__) || defined(__SSE4_1__)
+#if (defined(__aarch64__) && defined(BUILD_IOS)) || defined(__SSE4_1__)
   __forceinline Vec3ia operator *( const Vec3ia& a, const Vec3ia& b ) { return _mm_mullo_epi32(a.m128, b.m128); }
   __forceinline Vec3ia operator *( const Vec3ia& a, const int     b ) { return a * Vec3ia(b); }
   __forceinline Vec3ia operator *( const int     a, const Vec3ia& b ) { return Vec3ia(a) * b; }
@@ -131,7 +131,7 @@ namespace embree
   __forceinline Vec3ia& operator -=( Vec3ia& a, const Vec3ia& b ) { return a = a - b; }
   __forceinline Vec3ia& operator -=( Vec3ia& a, const int&   b ) { return a = a - b; }
   
-#if defined(__aarch64__) || defined(__SSE4_1__)
+#if (defined(__aarch64__) && defined(BUILD_IOS)) || defined(__SSE4_1__)
   __forceinline Vec3ia& operator *=( Vec3ia& a, const Vec3ia& b ) { return a = a * b; }
   __forceinline Vec3ia& operator *=( Vec3ia& a, const int&    b ) { return a = a * b; }
 #endif
@@ -150,7 +150,7 @@ namespace embree
   ////////////////////////////////////////////////////////////////////////////////
   /// Reductions
   ////////////////////////////////////////////////////////////////////////////////
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
   __forceinline int reduce_add(const Vec3ia& v) {
     int32x4_t t = vandq_u32(v.m128, vFFF0);
     return vaddvq_s32(t);
@@ -195,14 +195,14 @@ namespace embree
   ////////////////////////////////////////////////////////////////////////////////
 
   __forceinline Vec3ia select( const Vec3ba& m, const Vec3ia& t, const Vec3ia& f ) {
-#if defined(__aarch64__) || defined(__SSE4_1__)
+#if (defined(__aarch64__) && defined(BUILD_IOS)) || defined(__SSE4_1__)
     return _mm_castps_si128(_mm_blendv_ps(_mm_castsi128_ps(f), _mm_castsi128_ps(t), m));
 #else
     return _mm_or_si128(_mm_and_si128(_mm_castps_si128(m), t), _mm_andnot_si128(_mm_castps_si128(m), f)); 
 #endif
   }
 
-#if defined(__aarch64__) || defined(__SSE4_1__)
+#if (defined(__aarch64__) && defined(BUILD_IOS)) || defined(__SSE4_1__)
   __forceinline Vec3ia min( const Vec3ia& a, const Vec3ia& b ) { return _mm_min_epi32(a.m128,b.m128); }
   __forceinline Vec3ia max( const Vec3ia& a, const Vec3ia& b ) { return _mm_max_epi32(a.m128,b.m128); }
 #else

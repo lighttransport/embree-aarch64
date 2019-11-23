@@ -67,7 +67,7 @@
 #include <utility>
 #include <sstream>
 
-#if !defined(_DEBUG)  //assert_opt
+#if !defined(_DEBUG) && defined(BUILD_IOS)
 #undef assert
 #define assert(_EXPR)
 #endif

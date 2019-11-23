@@ -33,7 +33,7 @@
 #include "acceln.h"
 #include "geometry.h"
 
-#if defined(TASKING_GCD)
+#if defined(TASKING_GCD) && defined(BUILD_IOS)
 #include <dispatch/dispatch.h>
 #include <mutex>
 #endif
@@ -238,7 +238,7 @@ namespace embree
     }
 
     __forceinline Ref<Geometry> get_locked(size_t i)  {
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     std::scoped_lock lock(geometriesMutex);
 #else
     Lock<SpinLock> lock(geometriesMutex);
@@ -282,7 +282,7 @@ namespace embree
     RTCSceneFlags scene_flags;
     RTCBuildQuality quality_flags;
     MutexSys buildMutex;
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     std::mutex geometriesMutex;
 #else
     SpinLock geometriesMutex;

@@ -18,7 +18,9 @@
 
 #include "../simd/simd.h"
 #include "parallel_for.h"
+#if defined(TASKING_GCD) && defined(BUILD_IOS)
 #include "../sys/alloc.h"
+#endif
 #include <algorithm>
 
 namespace embree

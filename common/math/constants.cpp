@@ -14,7 +14,7 @@
 // limitations under the License.                                           //
 // ======================================================================== //
 
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
 #include <arm_neon.h>
 #endif
 
@@ -42,7 +42,7 @@ namespace embree
   EmptyTy empty;
   UndefinedTy undefined;
 
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
 const uint32x4_t movemask_mask = { 1, 2, 4, 8 };
 const uint32x4_t vzero = { 0, 0, 0, 0 };
 const uint32x4_t v0x80000000 = { 0x80000000, 0x80000000, 0x80000000, 0x80000000 };

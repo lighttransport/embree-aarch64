@@ -166,7 +166,7 @@ namespace embree
     newNumThreads = min(newNumThreads, (size_t) getNumberOfLogicalThreads());
 
     // We are observing a few % gain by increasing number threads by 2 on aarch64.
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     numThreads = newNumThreads*2;
 #else
     numThreads = newNumThreads;

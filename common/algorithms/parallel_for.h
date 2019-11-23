@@ -21,7 +21,7 @@
 #include "../math/math.h"
 #include "../math/range.h"
 
-#if defined(TASKING_GCD)
+#if defined(TASKING_GCD) && defined(BUILD_IOS)
 #include <dispatch/dispatch.h>
 #include <algorithm>
 #include <type_traits>
@@ -42,7 +42,7 @@ namespace embree
       if (!TaskScheduler::wait())
         throw std::runtime_error("task cancelled");
     }
-#elif defined(TASKING_GCD)
+#elif defined(TASKING_GCD) && defined(BUILD_IOS)
       
     const size_t baselineNumBlocks = (TaskScheduler::threadCount() > 1)? TaskScheduler::threadCount() : 1;
     const size_t length = N;
@@ -87,7 +87,7 @@ namespace embree
     if (!TaskScheduler::wait())
       throw std::runtime_error("task cancelled");
 
-#elif defined(TASKING_GCD)
+#elif defined(TASKING_GCD) && defined(BUILD_IOS)
       
     const size_t baselineNumBlocks = (TaskScheduler::threadCount() > 1)? 4*TaskScheduler::threadCount() : 1;
     const size_t length = last - first;
