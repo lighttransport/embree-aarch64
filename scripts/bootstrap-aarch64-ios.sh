@@ -22,7 +22,7 @@ $CMAKE_BIN \
 -DEMBREE_TUTORIALS=Off \
 -DEMBREE_TUTORIALS_LIBJPEG=Off \
 -DEMBREE_TUTORIALS_LIBPNG=Off \
--DCMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.2.sdk \
+-DCMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk \
 -DCMAKE_OSX_ARCHITECTURES=arm64e \
 -DCMAKE_TOOLCHAIN_FILE=../common/cmake/toolchains/ios.toolchain.cmake \
 -Bbuild-aarch64-cross -H.
