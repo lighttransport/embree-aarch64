@@ -3,76 +3,97 @@ name: BuildCI
 on: [push, pull_request]
 
 jobs:
-  # Build Embree on qemu-emulated aarch64 Ubuntu
-  build-native-aarch64:
+  ## Build Embree on qemu-emulated aarch64 Ubuntu
+  #build-native-aarch64:
+
+  #  runs-on: ubuntu-18.04
+  #  name: Build on native aarch64
+
+  #  steps:
+  #  - uses: actions/checkout@v1
+  #  - uses: uraimo/run-on-arch-action@v1.0.5
+  #    id: aarch64-build-on-qemu-aarch64
+  #    with:
+  #      architecture: aarch64
+  #      distribution: ubuntu18.04
+  #      run: |
+  #        apt-get update
+  #        apt-get install -y cmake gcc g++
+  #        ./scripts/bootstrap-aarch64-linux.sh
+  #        cd build-aarch64
+  #        make VERBOSE=1
+
+  ## Cross-compile Embree for aarch64 target
+  #build-cross-aarch64:
+
+  #  runs-on: ubuntu-18.04
+  #  name: Build on cross aarch64
+
+  #  steps:
+  #    - name: Checkout
+  #      uses: actions/checkout@v1
+  #    - name: CmakeAndBuild
+  #      run: |
+  #          sudo apt-get update
+  #          sudo apt-get install -y build-essential
+  #          sudo apt-get install -y gcc-8-aarch64-linux-gnu g++-8-aarch64-linux-gnu
+  #          ./scripts/bootstrap-aarch64-gcc-cross-linux.sh
+  #          cd build-aarch64-cross
+  #          make VERBOSE=1
+
+  ## Native x86-64 build
+  #build-x86-64:
+
+  #  runs-on: ubuntu-18.04
+  #  name: Build on x86-64 with clang-7
+
+  #  steps:
+  #    - name: Checkout
+  #      uses: actions/checkout@v1
+  #    - name: CmakeAndBuild
+  #      run: |
+  #          sudo apt-get update
+  #          sudo apt-get install -y build-essential
+  #          sudo apt-get install -y clang-7
+  #          ./scripts/bootstrap-clang-linux.sh
+  #          cd build
+  #          make VERBOSE=1
+
+  ## iOS build
+  #build-ios:
+
+  #  runs-on: macos-latest
+  #  name: Build for iOS
+
+  #  steps:
+  #    - name: Checkout
+  #      uses: actions/checkout@v1
+  #    - name: List up iPhone platform
+  #      run: |
+  #          ls -la /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs
+  #    - name: CmakeAndBuild
+  #      run: |
+  #          ./scripts/bootstrap-aarch64-ios.sh
+  #          cd build-aarch64-cross
+  #          make VERBOSE=1
+
+  # Android(aarch64) build
+  build-android:
 
     runs-on: ubuntu-18.04
-    name: Build on native aarch64
-
-    steps:
-    - uses: actions/checkout@v1
-    - uses: uraimo/run-on-arch-action@v1.0.5
-      id: aarch64-build-on-qemu-aarch64
-      with:
-        architecture: aarch64
-        distribution: ubuntu18.04
-        run: |
-          apt-get update
-          apt-get install -y cmake gcc g++
-          ./scripts/bootstrap-aarch64-linux.sh
-          cd build-aarch64
-          make VERBOSE=1
-
-  # Cross-compile Embree for aarch64 target
-  build-cross-aarch64:
-
-    runs-on: ubuntu-18.04
-    name: Build on cross aarch64
+    name: Build for Android(arm64v8a)
 
     steps:
       - name: Checkout
         uses: actions/checkout@v1
+      - name: Show android sdk root
+        run: |
+            echo $ANDROID_SDK_ROOT
+      - name: Setup
+        run: |
+           sudo apt-get install -y build-essential
       - name: CmakeAndBuild
         run: |
-            sudo apt-get update
-            sudo apt-get install -y build-essential
-            sudo apt-get install -y gcc-8-aarch64-linux-gnu g++-8-aarch64-linux-gnu
-            ./scripts/bootstrap-aarch64-gcc-cross-linux.sh
-            cd build-aarch64-cross
-            make VERBOSE=1
-
-  # Native x86-64 build
-  build-x86-64:
-
-    runs-on: ubuntu-18.04
-    name: Build on x86-64 with clang-7
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-      - name: CmakeAndBuild
-        run: |
-            sudo apt-get update
-            sudo apt-get install -y build-essential
-            sudo apt-get install -y clang-7
-            ./scripts/bootstrap-clang-linux.sh
-            cd build
-            make VERBOSE=1
-
-  # iOS build
-  build-ios:
-
-    runs-on: macos-latest
-    name: Build for iOS
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-      - name: List up iPhone platform
-        run: |
-            ls -la /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs
-      - name: CmakeAndBuild
-        run: |
-            ./scripts/bootstrap-aarch64-ios.sh
-            cd build-aarch64-cross
-            make VERBOSE=1
+            ./scripts/bootstrap-android-cmake-linux.sh
+            cd build-android
+            ninja
