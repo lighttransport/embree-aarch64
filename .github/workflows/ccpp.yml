@@ -24,42 +24,41 @@ jobs:
   #        cd build-aarch64
   #        make VERBOSE=1
 
-  # Disable until iOS build go success.
-  ## Cross-compile Embree for aarch64 target
-  #build-cross-aarch64:
+  # Cross-compile Embree for aarch64 target
+  build-cross-aarch64:
 
-  #  runs-on: ubuntu-18.04
-  #  name: Build on cross aarch64
+    runs-on: ubuntu-18.04
+    name: Build on cross aarch64
 
-  #  steps:
-  #    - name: Checkout
-  #      uses: actions/checkout@v1
-  #    - name: CmakeAndBuild
-  #      run: |
-  #          sudo apt-get update
-  #          sudo apt-get install -y build-essential
-  #          sudo apt-get install -y gcc-8-aarch64-linux-gnu g++-8-aarch64-linux-gnu
-  #          ./scripts/bootstrap-aarch64-gcc-cross-linux.sh
-  #          cd build-aarch64-cross
-  #          make VERBOSE=1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: CmakeAndBuild
+        run: |
+            sudo apt-get update
+            sudo apt-get install -y build-essential
+            sudo apt-get install -y gcc-8-aarch64-linux-gnu g++-8-aarch64-linux-gnu
+            ./scripts/bootstrap-aarch64-gcc-cross-linux.sh
+            cd build-aarch64-cross
+            make VERBOSE=1
 
-  ## Native x86-64 build
-  #build-x86-64:
+  # Native x86-64 build
+  build-x86-64:
 
-  #  runs-on: ubuntu-18.04
-  #  name: Build on x86-64 with clang-7
+    runs-on: ubuntu-18.04
+    name: Build on x86-64 with clang-7
 
-  #  steps:
-  #    - name: Checkout
-  #      uses: actions/checkout@v1
-  #    - name: CmakeAndBuild
-  #      run: |
-  #          sudo apt-get update
-  #          sudo apt-get install -y build-essential
-  #          sudo apt-get install -y clang-7
-  #          ./scripts/bootstrap-clang-linux.sh
-  #          cd build
-  #          make VERBOSE=1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: CmakeAndBuild
+        run: |
+            sudo apt-get update
+            sudo apt-get install -y build-essential
+            sudo apt-get install -y clang-7
+            ./scripts/bootstrap-clang-linux.sh
+            cd build
+            make VERBOSE=1
 
   # iOS build
   build-ios:
