@@ -21,7 +21,7 @@
 #include "scene.h"
 #include "primref.h"
 
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
 #include <mutex>
 #endif
 
@@ -149,7 +149,7 @@ namespace embree
       {
         assert(alloc_i);
         if (alloc.load() == alloc_i) return;
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
         std::scoped_lock lock(mutex);
 #else
         Lock<SpinLock> lock(mutex);
@@ -171,7 +171,7 @@ namespace embree
       {
         assert(alloc_i);
         if (alloc.load() != alloc_i) return;
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
         std::scoped_lock lock(mutex);
 #else
         Lock<SpinLock> lock(mutex);
@@ -186,7 +186,7 @@ namespace embree
       }
 
     public:
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
       std::mutex mutex;
 #else
       SpinLock mutex;        //!< required as unbind is called from other threads
@@ -246,7 +246,7 @@ namespace embree
       ThreadLocal2* alloc = thread_local_allocator2;
       if (alloc == nullptr) {
         thread_local_allocator2 = alloc = new ThreadLocal2;
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
         std::scoped_lock lock(s_thread_local_allocators_lock);
 #else
         Lock<SpinLock> lock(s_thread_local_allocators_lock);
@@ -260,7 +260,7 @@ namespace embree
 
     __forceinline void join(ThreadLocal2* alloc)
     {
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
       std::scoped_lock lock(s_thread_local_allocators_lock);
 #else
       Lock<SpinLock> lock(thread_local_allocators_lock);
@@ -533,7 +533,7 @@ namespace embree
         /* parallel block creation in case of no freeBlocks, avoids single global mutex */
         if (likely(freeBlocks.load() == nullptr))
         {
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
           std::scoped_lock lock(slotMutex[slot]);
 #else
           Lock<SpinLock> lock(slotMutex[slot]);
@@ -550,7 +550,7 @@ namespace embree
 
         /* if this fails allocate new block */
         {
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
             std::scoped_lock lock(mutex);
 #else
             Lock<SpinLock> lock(mutex);
@@ -576,7 +576,7 @@ namespace embree
     /*! add new block */
     void addBlock(void* ptr, ssize_t bytes)
     {
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
       std::scoped_lock lock(mutex);
 #else
       Lock<SpinLock> lock(mutex);
@@ -989,7 +989,7 @@ namespace embree
     std::atomic<Block*> freeBlocks;
 
     std::atomic<Block*> threadBlocks[MAX_THREAD_USED_BLOCK_SLOTS];
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     std::mutex slotMutex[MAX_THREAD_USED_BLOCK_SLOTS];
 #else
     SpinLock slotMutex[MAX_THREAD_USED_BLOCK_SLOTS];
@@ -1007,7 +1007,7 @@ namespace embree
     static __thread ThreadLocal2* thread_local_allocator2;
     static SpinLock s_thread_local_allocators_lock;
     static std::vector<std::unique_ptr<ThreadLocal2>> s_thread_local_allocators;
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     std::mutex thread_local_allocators_lock;
 #else
     SpinLock thread_local_allocators_lock;

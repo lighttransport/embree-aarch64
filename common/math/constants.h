@@ -207,7 +207,7 @@ namespace embree
 
   extern MAYBE_UNUSED UndefinedTy undefined;
     
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
   extern const uint32x4_t movemask_mask;
   extern const uint32x4_t vzero;
   extern const uint32x4_t v0x80000000;

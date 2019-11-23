@@ -22,7 +22,7 @@
 #include "context.h"
 #include "../../include/embree3/rtcore_ray.h"
 
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
 #include <mutex>
 #endif
 
@@ -31,7 +31,7 @@ using namespace embree;
 RTC_NAMESPACE_BEGIN;
 
   /* mutex to make API thread safe */
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     static std::mutex g_mutex;
 #else
     static MutexSys g_mutex;
@@ -41,7 +41,7 @@ RTC_NAMESPACE_BEGIN;
   {
     RTC_CATCH_BEGIN;
     RTC_TRACE(rtcNewDevice);
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     std::scoped_lock lock(g_mutex);
 #else
     Lock<MutexSys> lock(g_mutex);
@@ -58,7 +58,7 @@ RTC_NAMESPACE_BEGIN;
     RTC_CATCH_BEGIN;
     RTC_TRACE(rtcRetainDevice);
     RTC_VERIFY_HANDLE(hdevice);
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     std::scoped_lock lock(g_mutex);
 #else
     Lock<MutexSys> lock(g_mutex);
@@ -73,7 +73,7 @@ RTC_NAMESPACE_BEGIN;
     RTC_CATCH_BEGIN;
     RTC_TRACE(rtcReleaseDevice);
     RTC_VERIFY_HANDLE(hdevice);
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     std::scoped_lock lock(g_mutex);
 #else
     Lock<MutexSys> lock(g_mutex);
@@ -88,7 +88,7 @@ RTC_NAMESPACE_BEGIN;
     RTC_CATCH_BEGIN;
     RTC_TRACE(rtcGetDeviceProperty);
     RTC_VERIFY_HANDLE(hdevice);
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     std::scoped_lock lock(g_mutex);
 #else
     Lock<MutexSys> lock(g_mutex);
@@ -105,7 +105,7 @@ RTC_NAMESPACE_BEGIN;
     RTC_TRACE(rtcSetDeviceProperty);
     const bool internal_prop = (size_t)prop >= 1000000 && (size_t)prop < 1000004;
     if (!internal_prop) RTC_VERIFY_HANDLE(hdevice); // allow NULL device for special internal settings
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     std::scoped_lock lock(g_mutex);
 #else
     Lock<MutexSys> lock(g_mutex);
@@ -214,7 +214,7 @@ RTC_NAMESPACE_BEGIN;
     RTC_CATCH_BEGIN;
     RTC_TRACE(rtcSetSceneProgressMonitorFunction);
     RTC_VERIFY_HANDLE(hscene);
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     std::scoped_lock lock(g_mutex);
 #else
     Lock<MutexSys> lock(g_mutex);

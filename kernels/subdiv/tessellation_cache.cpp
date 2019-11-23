@@ -15,7 +15,9 @@
 // ======================================================================== //
 
 #include "tessellation_cache.h"
+#if defined(TASKING_GCD) && defined(BUILD_IOS)
 #include "../../common/sys/barrier.h"
+#endif
 
 namespace embree
 {

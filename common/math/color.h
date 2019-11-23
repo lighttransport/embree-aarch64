@@ -165,7 +165,7 @@ namespace embree
   }
   __forceinline const Color rcp  ( const Color& a )
   {
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     __m128 reciprocal = _mm_rcp_ps(a.m128);
     reciprocal = vmulq_f32(vrecpsq_f32(a.m128, reciprocal), reciprocal);
     reciprocal = vmulq_f32(vrecpsq_f32(a.m128, reciprocal), reciprocal);
@@ -177,11 +177,11 @@ namespace embree
     const Color r = _mm_rcp_ps(a.m128);
 #endif
     return _mm_sub_ps(_mm_add_ps(r, r), _mm_mul_ps(_mm_mul_ps(r, r), a));
-#endif  //defined(__aarch64__)
+#endif  //defined(__aarch64__) && defined(BUILD_IOS)
   }
   __forceinline const Color rsqrt( const Color& a )
   {
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     __m128 r = _mm_rsqrt_ps(a.m128);
     r = vmulq_f32(r, vrsqrtsq_f32(vmulq_f32(a.m128, r), r));
     r = vmulq_f32(r, vrsqrtsq_f32(vmulq_f32(a.m128, r), r));
@@ -195,7 +195,7 @@ namespace embree
 #endif
     return _mm_add_ps(_mm_mul_ps(_mm_set1_ps(1.5f),r), _mm_mul_ps(_mm_mul_ps(_mm_mul_ps(a, _mm_set1_ps(-0.5f)), r), _mm_mul_ps(r, r)));
       
-#endif  //defined(__aarch64__)
+#endif  //defined(__aarch64__) && defined(BUILD_IOS)
   }
   __forceinline const Color sqrt ( const Color& a ) { return _mm_sqrt_ps(a.m128); }
 

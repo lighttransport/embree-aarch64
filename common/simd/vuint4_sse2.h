@@ -98,7 +98,7 @@ namespace embree
     static __forceinline void storeu(const vboolf4& mask, void* ptr, const vuint4& i) { storeu(ptr,select(mask,i,loadu(ptr))); }
 #endif
 
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
     static __forceinline vuint4 load(const uint8_t* ptr) {
         return _mm_load4epu8_epi32(((__m128i*)ptr));
     }
@@ -117,7 +117,7 @@ namespace embree
 #endif
 
     static __forceinline vuint4 load(const unsigned short* ptr) {
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
       return _mm_load4epu16_epi32(((__m128i*)ptr));
 #elif defined (__SSE4_1__)
       return _mm_cvtepu16_epi32(_mm_loadu_si128((__m128i*)ptr));
@@ -127,7 +127,7 @@ namespace embree
     } 
 
     static __forceinline void store_uint8(uint8_t* ptr, const vuint4& v) {
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
         uint32x4_t x = v;
         uint16x4_t y = vqmovn_u32(x);
         uint8x8_t z = vqmovn_u16(vcombine_u16(y, y));
@@ -144,7 +144,7 @@ namespace embree
     }
 
     static __forceinline void store_uint8(unsigned short* ptr, const vuint4& v) {
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
         int32x4_t x = v;
         int16x4_t y = vqmovn_u32(x);
         vst1_u16(ptr, y);
@@ -155,7 +155,7 @@ namespace embree
     }
 
     static __forceinline vuint4 load_nt(void* ptr) {
-#if defined(__aarch64__) || defined(__SSE4_1__)
+#if (defined(__aarch64__) && defined(BUILD_IOS)) || defined(__SSE4_1__)
       return _mm_stream_load_si128((__m128i*)ptr); 
 #else
       return _mm_load_si128((__m128i*)ptr); 
@@ -163,7 +163,7 @@ namespace embree
     }
     
     static __forceinline void store_nt(void* ptr, const vuint4& v) {
-#if defined(__aarch64__) || defined(__SSE4_1__)
+#if (defined(__aarch64__) && defined(BUILD_IOS)) || defined(__SSE4_1__)
       _mm_stream_ps((float*)ptr,_mm_castsi128_ps(v)); 
 #else
       _mm_store_si128((__m128i*)ptr,v);
@@ -363,7 +363,7 @@ namespace embree
 #endif    
   }
                                                                                
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
   template<> __forceinline vuint4 select<0>(const vuint4& t, const vuint4& f) {
     return _mm_blendv_ps(f, t, vzero);
   }
@@ -435,7 +435,7 @@ namespace embree
   __forceinline vuint4 unpacklo(const vuint4& a, const vuint4& b) { return _mm_castps_si128(_mm_unpacklo_ps(_mm_castsi128_ps(a), _mm_castsi128_ps(b))); }
   __forceinline vuint4 unpackhi(const vuint4& a, const vuint4& b) { return _mm_castps_si128(_mm_unpackhi_ps(_mm_castsi128_ps(a), _mm_castsi128_ps(b))); }
 
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
   template<int i0, int i1, int i2, int i3>
   __forceinline vuint4 shuffle(const vuint4& v) {
     return vqtbl1q_u8( v, _MN_SHUFFLE(i0, i1, i2, i3));
@@ -455,7 +455,7 @@ namespace embree
   }
 #endif
                                                                                
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
   template<> __forceinline vuint4 shuffle<0, 0, 2, 2>(const vuint4& v) { return vqtbl1q_u8( v, (uint8x16_t){0,1,2,3, 0,1,2,3, 8,9,10,11, 8,9,10,11} ); }
   template<> __forceinline vuint4 shuffle<1, 1, 3, 3>(const vuint4& v) { return vqtbl1q_u8( v, (uint8x16_t){4,5,6,7, 4,5,6,7, 12,13,14,15, 12,13,14,15} ); }
   template<> __forceinline vuint4 shuffle<0, 1, 0, 1>(const vuint4& v) { return vqtbl1q_u8( v, (uint8x16_t){0,1,2,3, 4,5,6,7, 0,1,2,3, 4,5,6,7} ); }
@@ -470,7 +470,7 @@ namespace embree
     return shuffle<i,i,i,i>(v);
   }
 
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
   template<int src> __forceinline unsigned int extract(const vuint4& b);
   template<int dst> __forceinline vuint4 insert(const vuint4& a, const unsigned b);
 #elif defined(__SSE4_1__)
@@ -481,7 +481,7 @@ namespace embree
   template<int dst> __forceinline vuint4 insert(const vuint4& a, const unsigned b) { vuint4 c = a; c[dst&3] = b; return c; }
 #endif
 
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
   template<> __forceinline unsigned int extract<0>(const vuint4& b) {
     return b[0];
   }
