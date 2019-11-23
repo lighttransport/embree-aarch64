@@ -3,26 +3,25 @@ name: BuildCI
 on: [push, pull_request]
 
 jobs:
-  # Disable for a while since build in qemu takes too much time(2~3 hours)
-  ## Build Embree on qemu-emulated aarch64 Ubuntu
-  #build-native-aarch64:
+  # Build Embree on qemu-emulated aarch64 Ubuntu
+  build-native-aarch64:
 
-  #  runs-on: ubuntu-18.04
-  #  name: Build on native aarch64
+    runs-on: ubuntu-18.04
+    name: Build on native aarch64
 
-  #  steps:
-  #  - uses: actions/checkout@v1
-  #  - uses: uraimo/run-on-arch-action@v1.0.5
-  #    id: aarch64-build-on-qemu-aarch64
-  #    with:
-  #      architecture: aarch64
-  #      distribution: ubuntu18.04
-  #      run: |
-  #        apt-get update
-  #        apt-get install -y cmake gcc g++
-  #        ./scripts/bootstrap-aarch64-linux.sh
-  #        cd build-aarch64
-  #        make VERBOSE=1
+    steps:
+    - uses: actions/checkout@v1
+    - uses: uraimo/run-on-arch-action@v1.0.5
+      id: aarch64-build-on-qemu-aarch64
+      with:
+        architecture: aarch64
+        distribution: ubuntu18.04
+        run: |
+          apt-get update
+          apt-get install -y cmake gcc g++
+          ./scripts/bootstrap-aarch64-linux.sh
+          cd build-aarch64
+          make VERBOSE=1
 
   # Cross-compile Embree for aarch64 target
   build-cross-aarch64:
