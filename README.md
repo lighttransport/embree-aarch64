@@ -47,7 +47,7 @@ Then,
 $ cd $EMBREE_AARCH64_REPO
 $ ./scripts/bootstrap-android-cmake-linux.sh
 $ cd build-android
-$ make  # or ninja
+$ ninja # or `make` if you use Makefile generator
 ```
 
 How to cross-compile for AARCH64 iOS
