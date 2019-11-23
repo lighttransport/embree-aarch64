@@ -64,7 +64,7 @@ jobs:
   # iOS build
   build-ios:
 
-    runs-on: macosx-latest
+    runs-on: macos-latest
     name: Build for iOS
 
     steps:
