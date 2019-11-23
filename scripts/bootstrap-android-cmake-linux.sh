@@ -3,7 +3,7 @@
 # Edit path to Android NDK
 
 # Use ANDROID_SDK_HOME environment
-ANDROID_NDK_ROOT=$ANDROID_SDK_HOME/ndk-bundle
+ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk-bundle
 
 # default installation directory of NDK through old? Android Studio
 # ANDROID_NDK_ROOT=$HOME/Android/Sdk/ndk-bundle
