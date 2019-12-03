@@ -135,7 +135,7 @@ OPTION(EMBREE_GEOMETRY_GRID "Enables support for grid geometries." ON)
 OPTION(EMBREE_GEOMETRY_POINT "Enables support for point geometries." ON)
 OPTION(EMBREE_RAY_PACKETS "Enabled support for ray packets." ON)
 
-SET(EMBREE_MAX_INSTANCE_LEVEL_COUNT 1 CACHE INT "Maximum number of instance levels.")
+SET(EMBREE_MAX_INSTANCE_LEVEL_COUNT 1 CACHE STRING "Maximum number of instance levels.")
 SET(EMBREE_CURVE_SELF_INTERSECTION_AVOIDANCE_FACTOR 2.0 CACHE STRING "Self intersection avoidance factor for flat curves. Specify floating point value in range 0 to inf.")
 
 ##############################################################
