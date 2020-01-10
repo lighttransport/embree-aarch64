@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -46,18 +46,6 @@ namespace embree
     : Geometry(device,gtype,0,1), tessellationRate(4)
   {
     resizeBuffers(numTimeSteps);
-  }
-
-  void CurveGeometry::enabling() 
-  {
-    if (numTimeSteps == 1) scene->world.numBezierCurves += numPrimitives; 
-    else                   scene->worldMB.numBezierCurves += numPrimitives; 
-  }
-  
-  void CurveGeometry::disabling() 
-  {
-    if (numTimeSteps == 1) scene->world.numBezierCurves -= numPrimitives; 
-    else                   scene->worldMB.numBezierCurves -= numPrimitives;
   }
   
   void CurveGeometry::setMask (unsigned mask) 
@@ -228,43 +216,43 @@ namespace embree
     {
       if (slot != 0)
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid buffer slot");
-      curves.setModified(true);
+      curves.setModified();
     }
     else if (type == RTC_BUFFER_TYPE_VERTEX)
     {
       if (slot >= vertices.size())
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid buffer slot");
-      vertices[slot].setModified(true);
+      vertices[slot].setModified();
     }
     else if (type == RTC_BUFFER_TYPE_NORMAL)
     {
       if (slot >= normals.size())
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid buffer slot");
-      normals[slot].setModified(true);
+      normals[slot].setModified();
     }
     else if (type == RTC_BUFFER_TYPE_TANGENT)
     {
       if (slot >= tangents.size())
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid buffer slot");
-      tangents[slot].setModified(true);
+      tangents[slot].setModified();
     }
     else if (type == RTC_BUFFER_TYPE_NORMAL_DERIVATIVE)
     {
       if (slot >= dnormals.size())
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid buffer slot");
-      dnormals[slot].setModified(true);
+      dnormals[slot].setModified();
     }
     else if (type == RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE)
     {
       if (slot >= vertexAttribs.size())
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid buffer slot");
-      vertexAttribs[slot].setModified(true);
+      vertexAttribs[slot].setModified();
     }
     else if (type == RTC_BUFFER_TYPE_FLAGS) 
     {
       if (slot != 0)
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid buffer slot");
-      flags.setModified(true);
+      flags.setModified();
     }
     else
     {
@@ -277,6 +265,12 @@ namespace embree
   void CurveGeometry::setTessellationRate(float N)
   {
     tessellationRate = clamp((int)N,1,16);
+  }
+
+  void CurveGeometry::addElementsToCount (GeometryCounts & counts) const 
+  {
+    if (numTimeSteps == 1) counts.numBezierCurves += numPrimitives; 
+    else                   counts.numMBBezierCurves += numPrimitives;
   }
 
   bool CurveGeometry::verify () 
@@ -360,7 +354,7 @@ namespace embree
     return true;
   }
 
-  void CurveGeometry::preCommit()
+  void CurveGeometry::commit()
   {
     /* verify that stride of all time steps are identical */
     for (const auto& buffer : vertices)
@@ -389,26 +383,20 @@ namespace embree
     if (getCurveBasis() == GTY_BASIS_HERMITE)
       tangents0 = tangents[0];
 
-    Geometry::preCommit();
-  }
-
-  void CurveGeometry::postCommit() 
-  {
-    curves.setModified(false);
-    for (auto& buf : vertices) buf.setModified(false);
-    for (auto& buf : normals)  buf.setModified(false);
-    for (auto& buf : tangents) buf.setModified(false);
-    for (auto& buf : dnormals)  buf.setModified(false);
-    for (auto& attrib : vertexAttribs) attrib.setModified(false);
-    flags.setModified(false);
-
-    Geometry::postCommit();
+    Geometry::commit();
   }
 
 #endif
 
   namespace isa
   {
+    BBox3fa enlarge_bounds(const BBox3fa& bounds)
+    {
+      const float size = reduce_max(max(abs(bounds.lower),abs(bounds.upper)));
+      assert(std::isfinite(size));
+      return enlarge(bounds,Vec3fa(4.0f*float(ulp)*size));
+    }
+    
     template<typename Curve3fa, typename Curve4f>
     struct CurveGeometryInterface : public CurveGeometry
     {
@@ -820,9 +808,9 @@ namespace embree
       __forceinline BBox3fa bounds(size_t i, size_t itime = 0) const
       {
         switch (ctype) {
-        case Geometry::GTY_SUBTYPE_FLAT_CURVE: return getCurve(i,itime).accurateFlatBounds(tessellationRate);
-        case Geometry::GTY_SUBTYPE_ROUND_CURVE: return getCurve(i,itime).accurateRoundBounds();
-        case Geometry::GTY_SUBTYPE_ORIENTED_CURVE: return getOrientedCurve(i,itime).accurateBounds();
+        case Geometry::GTY_SUBTYPE_FLAT_CURVE: return enlarge_bounds(getCurve(i,itime).accurateFlatBounds(tessellationRate));
+        case Geometry::GTY_SUBTYPE_ROUND_CURVE: return enlarge_bounds(getCurve(i,itime).accurateRoundBounds());
+        case Geometry::GTY_SUBTYPE_ORIENTED_CURVE: return enlarge_bounds(getOrientedCurve(i,itime).accurateBounds());
         default: return empty;
         }
       }
@@ -831,9 +819,9 @@ namespace embree
       __forceinline BBox3fa bounds(const LinearSpace3fa& space, size_t i, size_t itime = 0) const
       {
         switch (ctype) {
-        case Geometry::GTY_SUBTYPE_FLAT_CURVE: return getCurve(space,i,itime).accurateFlatBounds(tessellationRate);
-        case Geometry::GTY_SUBTYPE_ROUND_CURVE: return getCurve(space,i,itime).accurateRoundBounds();
-        case Geometry::GTY_SUBTYPE_ORIENTED_CURVE: return getOrientedCurve(space,i,itime).accurateBounds();
+        case Geometry::GTY_SUBTYPE_FLAT_CURVE: return enlarge_bounds(getCurve(space,i,itime).accurateFlatBounds(tessellationRate));
+        case Geometry::GTY_SUBTYPE_ROUND_CURVE: return enlarge_bounds(getCurve(space,i,itime).accurateRoundBounds());
+        case Geometry::GTY_SUBTYPE_ORIENTED_CURVE: return enlarge_bounds(getOrientedCurve(space,i,itime).accurateBounds());
         default: return empty;
         }
       }
@@ -842,9 +830,9 @@ namespace embree
       __forceinline BBox3fa bounds(const Vec3fa& ofs, const float scale, const float r_scale0, const LinearSpace3fa& space, size_t i, size_t itime = 0) const
       {
         switch (ctype) {
-        case Geometry::GTY_SUBTYPE_FLAT_CURVE: return getCurve(ofs,scale,r_scale0,space,i,itime).accurateFlatBounds(tessellationRate);
-        case Geometry::GTY_SUBTYPE_ROUND_CURVE: return getCurve(ofs,scale,r_scale0,space,i,itime).accurateRoundBounds();
-        case Geometry::GTY_SUBTYPE_ORIENTED_CURVE: return getOrientedCurve(ofs,scale,space,i,itime).accurateBounds();
+        case Geometry::GTY_SUBTYPE_FLAT_CURVE: return enlarge_bounds(getCurve(ofs,scale,r_scale0,space,i,itime).accurateFlatBounds(tessellationRate));
+        case Geometry::GTY_SUBTYPE_ROUND_CURVE: return enlarge_bounds(getCurve(ofs,scale,r_scale0,space,i,itime).accurateRoundBounds());
+        case Geometry::GTY_SUBTYPE_ORIENTED_CURVE: return enlarge_bounds(getOrientedCurve(ofs,scale,space,i,itime).accurateBounds());
         default: return empty;
         }
       }
@@ -864,7 +852,7 @@ namespace embree
         return LBBox3fa([&] (size_t itime) { return bounds(ofs, scale, r_scale0, space, primID, itime); }, dt, this->time_range, fnumTimeSegments);
       }
       
-      PrimInfo createPrimRefArray(mvector<PrimRef>& prims, const range<size_t>& r, size_t k) const
+      PrimInfo createPrimRefArray(mvector<PrimRef>& prims, const range<size_t>& r, size_t k, unsigned int geomID) const
       {
         PrimInfo pinfo(empty);
         for (size_t j=r.begin(); j<r.end(); j++)
@@ -872,14 +860,14 @@ namespace embree
           if (!valid(ctype, j, make_range<size_t>(0, numTimeSegments()))) continue;
           const BBox3fa box = bounds(j);
           if (box.empty()) continue; // checks oriented curves with invalid normals which cause NaNs here
-          const PrimRef prim(box,this->geomID,unsigned(j));
+          const PrimRef prim(box,geomID,unsigned(j));
           pinfo.add_center2(prim);
           prims[k++] = prim;
         }
         return pinfo;
       }
 
-      PrimInfoMB createPrimRefMBArray(mvector<PrimRefMB>& prims, const BBox1f& t0t1, const range<size_t>& r, size_t k) const
+      PrimInfoMB createPrimRefMBArray(mvector<PrimRefMB>& prims, const BBox1f& t0t1, const range<size_t>& r, size_t k, unsigned int geomID) const
       {
         PrimInfoMB pinfo(empty);
         for (size_t j=r.begin(); j<r.end(); j++)
@@ -887,7 +875,7 @@ namespace embree
           if (!valid(ctype, j, this->timeSegmentRange(t0t1))) continue;
           const LBBox3fa lbox = linearBounds(j,t0t1);
           if (lbox.bounds0.empty() || lbox.bounds1.empty()) continue; // checks oriented curves with invalid normals which cause NaNs here
-          const PrimRefMB prim(lbox,this->numTimeSegments(),this->time_range,this->numTimeSegments(),this->geomID,unsigned(j));
+          const PrimRefMB prim(lbox,this->numTimeSegments(),this->time_range,this->numTimeSegments(),geomID,unsigned(j));
           pinfo.add_primref(prim);
           prims[k++] = prim;
         }

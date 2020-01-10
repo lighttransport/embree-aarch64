@@ -1,5 +1,5 @@
 ## ======================================================================== ##
-## Copyright 2009-2018 Intel Corporation                                    ##
+## Copyright 2009-2020 Intel Corporation                                    ##
 ##                                                                          ##
 ## Licensed under the Apache License, Version 2.0 (the "License");          ##
 ## you may not use this file except in compliance with the License.         ##
@@ -15,8 +15,8 @@
 ## ======================================================================== ##
 
 SET(EMBREE_VERSION_MAJOR 3)
-SET(EMBREE_VERSION_MINOR 6)
-SET(EMBREE_VERSION_PATCH 1)
+SET(EMBREE_VERSION_MINOR 7)
+SET(EMBREE_VERSION_PATCH 0)
 SET(EMBREE_VERSION_NOTE "")
 
 SET(EMBREE_VERSION ${EMBREE_VERSION_MAJOR}.${EMBREE_VERSION_MINOR}.${EMBREE_VERSION_PATCH})
@@ -27,21 +27,26 @@ PROJECT(embree${EMBREE_VERSION_MAJOR})
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.11)
 
+# We use our own strip tool on macOS to sign during install. This is required as CMake modifies RPATH of the binary during install.
+IF (APPLE AND EMBREE_SIGN_FILE)
+  SET(EMBREE_STRIP ${CMAKE_STRIP})
+  SET(CMAKE_STRIP ${PROJECT_BINARY_DIR}/post_install_target.sh)
+  CONFIGURE_FILE(scripts/post_install_target.sh.in ${PROJECT_BINARY_DIR}/post_install_target.sh @ONLY)
+ENDIF()
+
 MACRO (SIGN_TARGET target)
   IF (EMBREE_SIGN_FILE)
     IF (WIN32)
-      # on Windows we only sign as debug symbols not included in binary
+      # on Windows we sign and do not strip as debug symbols not included in binary
       ADD_CUSTOM_COMMAND(TARGET ${target} POST_BUILD
         COMMAND ${EMBREE_SIGN_FILE} $<TARGET_FILE:${target}>)
     ELSEIF (APPLE)
-      # on MacOSX we strip and sign
+      # on MacOSX we strip and sign here for testing purposes but also during install, as CMake modifies binary during install
       ADD_CUSTOM_COMMAND(TARGET ${target} POST_BUILD
-        COMMAND ${CMAKE_STRIP} -x $<TARGET_FILE:${target}>
-        COMMAND ${EMBREE_SIGN_FILE} $<TARGET_FILE:${target}>)
+        COMMAND ${EMBREE_STRIP} -x $<TARGET_FILE:${target}>
+        COMMAND ${EMBREE_SIGN_FILE} -o runtime -e ${CMAKE_SOURCE_DIR}/common/cmake/embree.entitlements $<TARGET_FILE:${target}>)
     ELSE()
-      # on Linux just strip as signing not supported
-      ADD_CUSTOM_COMMAND(TARGET ${target} POST_BUILD
-        COMMAND ${CMAKE_STRIP} -x $<TARGET_FILE:${target}>)
+      # on Linux signing of binaries is not supported and stripping is done during install
     ENDIF()
   ENDIF()
 ENDMACRO()
@@ -68,6 +73,9 @@ IF(COMMAND cmake_policy)
   if (POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
   endif()
+  if(POLICY CMP0072)
+    cmake_policy(SET CMP0072 OLD)
+  endif()
 ENDIF(COMMAND cmake_policy)
 
 MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
@@ -81,7 +89,9 @@ MARK_AS_ADVANCED(CLEAR CMAKE_CXX_COMPILER)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/common/cmake ${CMAKE_MODULE_PATH})
 
-INCLUDE(test)
+IF (BUILD_TESTING)
+  INCLUDE(test)
+ENDIF()
 
 ##############################################################
 # Embree configuration
@@ -537,4 +547,5 @@ SET_PROPERTY(TARGET uninstall PROPERTY FOLDER CMakePredefinedTargets)
 ##############################################################
 # Has to be last
 ##############################################################
+
 INCLUDE(CPack)

@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -99,6 +99,8 @@ namespace embree
       pixels(nullptr),
 
       outputImageFilename(""),
+      referenceImageFilename(""),
+      referenceImageThreshold(32.0f),
 
       skipBenchmarkFrames(0),
       numBenchmarkFrames(0),
@@ -150,6 +152,15 @@ namespace embree
         outputImageFilename = cin->getFileName();
         interactive = false;
       }, "-o <filename>: output image filename");
+
+    registerOption("compare", [this] (Ref<ParseStream> cin, const FileName& path) {
+        referenceImageFilename = cin->getFileName();
+        interactive = false;
+      }, "--compare <filename>: reference image to compare against");
+
+    registerOption("compare-threshold", [this] (Ref<ParseStream> cin, const FileName& path) {
+        referenceImageThreshold = cin->getFloat();
+      }, "--compare--threshold <float>: threshold in number of wrong pixels when image is considered wrong");
 
     /* camera settings */
     registerOption("vp", [this] (Ref<ParseStream> cin, const FileName& path) {
@@ -232,6 +243,11 @@ namespace embree
          debug3 = cin->getInt();
        }, "--debug3: sets internal debugging value");
 
+     registerOption("time", [this] (Ref<ParseStream> cin, const FileName& path) {
+         shader = SHADER_EYELIGHT;
+         g_debug = cin->getFloat();
+       }, "--time: sets time for motion blur");
+
     /* output filename */
     registerOption("shader", [this] (Ref<ParseStream> cin, const FileName& path) {
         std::string mode = cin->getString();
@@ -309,12 +325,12 @@ namespace embree
       grid_resY(2),
       remove_mblur(false),
       remove_non_mblur(false),
-      sceneFilename(""),
+      sceneFilename(),
       instancing_mode(SceneGraph::INSTANCING_NONE),
       print_scene_cameras(false)
   {
     registerOption("i", [this] (Ref<ParseStream> cin, const FileName& path) {
-        sceneFilename = path + cin->getFileName();
+        sceneFilename.push_back(path + cin->getFileName());
       }, "-i <filename>: parses scene from <filename>");
 
     registerOption("animlist", [this] (Ref<ParseStream> cin, const FileName& path) {
@@ -696,6 +712,19 @@ namespace embree
     storeImage(image, fileName);
   }
 
+  void TutorialApplication::compareToReferenceImage(const FileName& fileName)
+  {
+    resize(width,height);
+    ISPCCamera ispccamera = camera.getISPCCamera(width,height);
+    initRayStats();
+    device_render(pixels,width,height,0.0f,ispccamera);
+    Ref<Image> image = new Image4uc(width, height, (Col4uc*)pixels);
+    Ref<Image> reference = loadImage(fileName);
+    const double error = compareImages(image,reference);
+    if (error > referenceImageThreshold) // error corresponds roughly to number of pixels that are completely off in color
+      throw std::runtime_error("reference image differs by " + std::to_string(error));
+  }
+
   void TutorialApplication::set_parameter(size_t parm, ssize_t val) {
     rtcSetDeviceProperty(nullptr,(RTCDeviceProperty)parm,val);
   }
@@ -1028,6 +1057,10 @@ namespace embree
     if (outputImageFilename.str() != "")
       renderToFile(outputImageFilename);
 
+    /* compare to reference image */
+    if (referenceImageFilename.str() != "")
+      compareToReferenceImage(referenceImageFilename);
+
     /* interactive mode */
     if (interactive)
     {
@@ -1140,12 +1173,15 @@ namespace embree
     log(1,"application start");
     
     /* load scene */
-    if (sceneFilename != "")
+    if (sceneFilename.size())
     {
-      if (toLowerCase(sceneFilename.ext()) == std::string("obj"))
-        scene->add(loadOBJ(sceneFilename,subdiv_mode != ""));
-      else if (sceneFilename.ext() != "")
-        scene->add(SceneGraph::load(sceneFilename));
+      for (auto& file : sceneFilename)
+      {
+        if (toLowerCase(file.ext()) == std::string("obj"))
+          scene->add(loadOBJ(file,subdiv_mode != ""));
+        else if (file.ext() != "")
+          scene->add(SceneGraph::load(file));
+      }
     }
 
     Application::instance->log(1,"loading scene done");
@@ -1216,7 +1252,7 @@ namespace embree
       SceneGraph::calculateStatistics(flattened_scene.dynamicCast<SceneGraph::Node>()).print();
       std::cout << std::endl;
     }
-   
+
     /* convert model */
     obj_scene.add(flattened_scene);
     flattened_scene = nullptr;

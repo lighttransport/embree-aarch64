@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -318,12 +318,12 @@ namespace embree
       __forceinline int isQuantizedNode() const { return (ptr & (size_t)align_mask) == tyQuantizedNode; }
 
       /*! returns base node pointer */
-      __forceinline BaseNode* baseNode(int types)
+      __forceinline BaseNode* baseNode()
       {
         assert(!isLeaf());
         return (BaseNode*)(ptr & ~(size_t)align_mask);
       }
-      __forceinline const BaseNode* baseNode(int types) const
+      __forceinline const BaseNode* baseNode() const
       {
         assert(!isLeaf());
         return (const BaseNode*)(ptr & ~(size_t)align_mask);

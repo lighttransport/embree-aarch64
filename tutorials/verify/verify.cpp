@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -22,6 +22,8 @@
 #include "../common/math/closest_point.h"
 #include "../../common/algorithms/parallel_for.h"
 #include "../../kernels/common/context.h"
+#include "../../kernels/common/geometry.h"
+#include "../../kernels/common/scene.h"
 #include <regex>
 #include <stack>
 
@@ -298,11 +300,11 @@ namespace embree
 
         RTCGeometry geom = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_INSTANCE);
         rtcSetGeometryInstancedScene(geom, exemplar);
-        rtcSetGeometryTimeStepCount(geom, mesh->spaces.size());
+        rtcSetGeometryTimeStepCount(geom, (unsigned) mesh->spaces.size());
         for (size_t i = 0; i < mesh->spaces.size(); ++i)
         {
           rtcSetGeometryTransform(geom,
-                                  i,
+                                  (unsigned)i,
                                   RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR,
                                   reinterpret_cast<float*>(&mesh->spaces[i]));
         }
@@ -1032,6 +1034,36 @@ namespace embree
       
       return VerifyApplication::PASSED;
     }
+  };
+
+  /////////////////////////////////////////////////////////////////////////////////
+
+  /*
+   * Test that types can be instantiated.
+   */
+  struct TypesTest : public VerifyApplication::Test
+  {
+    TypesTest(std::string name, int isa)
+      : VerifyApplication::Test(name,isa,VerifyApplication::TEST_SHOULD_PASS)
+    {}
+
+    VerifyApplication::TestReturnValue run(VerifyApplication* state, bool silent)
+    {
+      return VerifyApplication::PASSED;
+    }
+
+    BBox<Vec2<int>> bbv2i;
+    BBox<Vec3<int>> bbv3i;
+    BBox<Vec4<int>> bbv4i;
+    BBox<Vec2<unsigned int>> bbv2u;
+    BBox<Vec3<unsigned int>> bbv3u;
+    BBox<Vec4<unsigned int>> bbv4u;
+    BBox<Vec2<float>> bbv2f;
+    BBox<Vec3<float>> bbv3f;
+    BBox<Vec4<float>> bbv4f;
+    BBox<Vec2<double>> bbv2d;
+    BBox<Vec3<double>> bbv3d;
+    BBox<Vec4<double>> bbv4d;
   };
 
   /////////////////////////////////////////////////////////////////////////////////
@@ -3507,9 +3539,9 @@ namespace embree
       Triangle* triangles = (Triangle*)rtcSetNewGeometryBuffer(geom, RTC_BUFFER_TYPE_INDEX , 0, RTC_FORMAT_UINT3, sizeof(Triangle), 32);
       for (int i = 0; i < 32; ++i) {
         float xi = random_float();
-        vertices[3*i+0] = Vec3f(0.0f,          0.0f,          i);
-        vertices[3*i+1] = Vec3f(1.0f + 5.f*xi, 0.0f,          i);
-        vertices[3*i+2] = Vec3f(0.0f,          1.0f + 5.f*xi, i);
+        vertices[3*i+0] = Vec3f(0.0f,          0.0f,          (float)i);
+        vertices[3*i+1] = Vec3f(1.0f + 5.f*xi, 0.0f,          (float)i);
+        vertices[3*i+2] = Vec3f(0.0f,          1.0f + 5.f*xi, (float)i);
         triangles[i] = Triangle(3*i+0, 3*i+1, 3*i+2);
       };
 
@@ -3723,6 +3755,164 @@ namespace embree
 
       return VerifyApplication::PASSED;
     }
+  };
+
+  struct GeometryStateTest : public VerifyApplication::Test
+  {
+    GeometryStateTest (std::string name, int isa)
+      : VerifyApplication::Test (name, isa, VerifyApplication::TEST_SHOULD_PASS) {}
+    
+    VerifyApplication::TestReturnValue run (VerifyApplication* state, bool silent)
+    {
+      std::string cfg = state->rtcore + ",isa=" + stringOfISA(isa);
+      RTCDeviceRef device = rtcNewDevice(cfg.c_str());
+      errorHandler (nullptr, rtcGetDeviceError(device));
+      AssertNoError(device);
+      RTCGeometry geom0 = rtcNewGeometry (device, RTC_GEOMETRY_TYPE_TRIANGLE);
+      AssertNoError(device);
+      using embree::Geometry;
+      auto geometry = (Geometry *) geom0;
+
+      // test construction
+      if (geometry->state != (unsigned)Geometry::State::MODIFIED) {
+        return VerifyApplication::FAILED;
+      }
+
+      //test update
+      geometry->state = (unsigned)Geometry::State::COMMITTED;
+      geometry->update();
+      if (geometry->state != (unsigned)Geometry::State::MODIFIED) {
+        return VerifyApplication::FAILED;
+      }
+
+      //test commit
+      geometry->state = (unsigned)Geometry::State::MODIFIED;
+      geometry->commit();
+      if (geometry->state != (unsigned)Geometry::State::COMMITTED) {
+        return VerifyApplication::FAILED;
+      }
+
+      // test disable
+      geometry->enabled = false;
+      geometry->disable ();
+      if (geometry->isEnabled ()) {
+        return VerifyApplication::FAILED;
+      }
+
+      geometry->enabled = true;
+      geometry->disable ();
+      if (geometry->isEnabled ()) {
+        return VerifyApplication::FAILED;
+      }
+
+      // test enable
+      geometry->enabled = true;
+      geometry->enable ();
+      if (!geometry->isEnabled ()) {
+        return VerifyApplication::FAILED;
+      }
+
+      geometry->enabled = false;
+      geometry->enable ();
+      if (!geometry->isEnabled ()) {
+        return VerifyApplication::FAILED;
+      }
+
+      rtcReleaseGeometry(geom0);
+      AssertNoError(device);
+
+      return VerifyApplication::PASSED;
+    }
+  };
+
+  struct SceneCheckModifiedGeometryTest : public VerifyApplication::Test
+  {
+	  struct TestScene : public Scene {
+
+		  __forceinline void setGeomCounter(size_t geomID, unsigned int count) {
+			  geometryModCounters_[geomID] = count;
+		  }
+
+		  __forceinline unsigned int getGeomCount(size_t geomID) {
+			  return geometryModCounters_[geomID];
+		  }
+			 
+		  __forceinline void checkIfModifiedAndSet() {
+			  return Scene::checkIfModifiedAndSet();
+		  }
+	  };
+
+	  SceneCheckModifiedGeometryTest (std::string name, int isa) 
+		: VerifyApplication::Test(name, isa, VerifyApplication::TEST_SHOULD_PASS)
+	  {}
+
+	  VerifyApplication::TestReturnValue run(VerifyApplication* state, bool silent)
+	  {
+		  std::string cfg = state->rtcore + ",isa=" + stringOfISA(isa);
+		  RTCDeviceRef device = rtcNewDevice(cfg.c_str());
+		  errorHandler(nullptr, rtcGetDeviceError(device));
+
+		  RTCSceneRef scene = rtcNewScene(device);
+		  AssertNoError(device);
+
+		  RTCGeometry geom0 = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
+		  AssertNoError(device);
+		  RTCGeometry geom1 = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
+		  AssertNoError(device);
+		  RTCGeometry geom2 = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
+		  AssertNoError(device);
+		  RTCGeometry geom3 = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
+		  AssertNoError(device);
+
+		  rtcAttachGeometry(scene, geom0);
+		  rtcAttachGeometry(scene, geom1);
+		  rtcAttachGeometry(scene, geom2);
+		  rtcAttachGeometry(scene, geom3);
+
+		  auto scene0 = (TestScene*)scene.scene;
+		  auto geometry0 = (Geometry*) geom0;
+		  auto geometry1 = (Geometry*) geom1;
+		  auto geometry2 = (Geometry*) geom2;
+		  auto geometry3 = (Geometry*) geom3;
+
+		  for (size_t geomID = 0; geomID < 4; ++geomID) {
+			  scene0->setGeomCounter(geomID, 1);
+		  }
+
+		  scene0->setModified();
+		  scene0->checkIfModifiedAndSet();
+		  if (!scene0->isModified()) {
+			  return VerifyApplication::FAILED;
+		  }
+
+		  scene0->setModified(false);
+		  geometry0->enable();
+		  geometry1->enable();
+		  geometry2->enable();
+		  geometry3->enable();
+		  scene0->checkIfModifiedAndSet();
+		  if (scene0->isModified()) {
+			  return VerifyApplication::FAILED;
+		  }
+
+		  geometry2->modCounter_ += 2;
+			
+		  scene0->checkIfModifiedAndSet();
+		  if (!scene0->isModified()) {
+			  return VerifyApplication::FAILED;
+		  }
+
+		  rtcReleaseGeometry(geom0);
+		  AssertNoError(device);
+		  rtcReleaseGeometry(geom1);
+		  AssertNoError(device);
+		  rtcReleaseGeometry(geom2);
+		  AssertNoError(device);
+		  rtcReleaseGeometry(geom3);
+		  AssertNoError(device);
+
+		  return VerifyApplication::PASSED;
+	  }
   };
 
   /////////////////////////////////////////////////////////////////////////////////
@@ -4981,6 +5171,7 @@ namespace embree
       push(new TestGroup(stringOfISA(isa),false,false));
       
       groups.top()->add(new MultipleDevicesTest("multiple_devices",isa));
+      groups.top()->add(new TypesTest("types_test",isa));
 
       push(new TestGroup("get_bounds",true,true));
       for (auto gtype : gtypes_all)
@@ -5337,6 +5528,14 @@ namespace embree
 
       groups.top()->add(new MemoryMonitorTest("regression_static_memory_monitor", isa,rtcore_regression_static_thread,30));
       groups.top()->add(new MemoryMonitorTest("regression_dynamic_memory_monitor",isa,rtcore_regression_dynamic_thread,30));
+
+      /**************************************************************************/
+      /*                  Function Level Testing                                */
+      /**************************************************************************/
+
+      groups.top()->add(new GeometryStateTest("geometry_state_tests", isa));
+	  groups.top()->add(new SceneCheckModifiedGeometryTest("scene_modified_geometry_tests", isa));
+
       
       /**************************************************************************/
       /*                           Benchmarks                                   */

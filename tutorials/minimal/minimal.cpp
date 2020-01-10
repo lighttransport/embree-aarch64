@@ -1,5 +1,5 @@
-/* ======================================================================== //
-// Copyright 2009-2019 Intel Corporation                                    //
+// ======================================================================== //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -12,11 +12,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
 // See the License for the specific language governing permissions and      //
 // limitations under the License.                                           //
-// ======================================================================== */
+// ======================================================================== //
 
 #include <embree3/rtcore.h>
 #include <stdio.h>
 #include <math.h>
+#include <limits>
 
 /*
  * A minimal tutorial. 
@@ -181,7 +182,7 @@ void castRay(RTCScene scene,
   rayhit.ray.dir_y = dy;
   rayhit.ray.dir_z = dz;
   rayhit.ray.tnear = 0;
-  rayhit.ray.tfar = INFINITY;
+  rayhit.ray.tfar = std::numeric_limits<float>::infinity();
   rayhit.ray.mask = 0;
   rayhit.ray.flags = 0;
   rayhit.hit.geomID = RTC_INVALID_GEOMETRY_ID;

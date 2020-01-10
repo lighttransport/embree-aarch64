@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -52,7 +52,7 @@ namespace embree
     GetActiveProcessorCountFunc pGetActiveProcessorCount = (GetActiveProcessorCountFunc)GetProcAddress(hlib, "GetActiveProcessorCount");
     SetThreadGroupAffinityFunc pSetThreadGroupAffinity = (SetThreadGroupAffinityFunc)GetProcAddress(hlib, "SetThreadGroupAffinity");
     SetThreadIdealProcessorExFunc pSetThreadIdealProcessorEx = (SetThreadIdealProcessorExFunc)GetProcAddress(hlib, "SetThreadIdealProcessorEx");
-    if (pGetActiveProcessorGroupCount && pGetActiveProcessorCount && pSetThreadGroupAffinity && pSetThreadIdealProcessorEx) 
+    if (pGetActiveProcessorGroupCount && pGetActiveProcessorCount && pSetThreadGroupAffinity && pSetThreadIdealProcessorEx)
     {
       int groups = pGetActiveProcessorGroupCount();
       int totalProcessors = 0, group = 0, number = 0;
@@ -65,7 +65,7 @@ namespace embree
         }
         totalProcessors += processors;
       }
-  
+
       GROUP_AFFINITY groupAffinity;
       groupAffinity.Group = (WORD)group;
       groupAffinity.Mask = (KAFFINITY)(uint64_t(1) << number);
@@ -74,15 +74,15 @@ namespace embree
       groupAffinity.Reserved[2] = 0;
       if (!pSetThreadGroupAffinity(thread, &groupAffinity, nullptr))
         WARNING("SetThreadGroupAffinity failed"); // on purpose only a warning
-  
+
       PROCESSOR_NUMBER processorNumber;
       processorNumber.Group = group;
       processorNumber.Number = number;
       processorNumber.Reserved = 0;
       if (!pSetThreadIdealProcessorEx(thread, &processorNumber, nullptr))
         WARNING("SetThreadIdealProcessorEx failed"); // on purpose only a warning
-    } 
-    else 
+    }
+    else
     {
       if (!SetThreadAffinityMask(thread, DWORD_PTR(uint64_t(1) << affinity)))
         WARNING("SetThreadAffinityMask failed"); // on purpose only a warning
@@ -96,10 +96,10 @@ namespace embree
     setAffinity(GetCurrentThread(), affinity);
   }
 
-  struct ThreadStartupData 
+  struct ThreadStartupData
   {
   public:
-    ThreadStartupData (thread_func f, void* arg) 
+    ThreadStartupData (thread_func f, void* arg)
       : f(f), arg(arg) {}
   public:
     thread_func f;
@@ -179,12 +179,13 @@ namespace embree
 {
   static MutexSys mutex;
   static std::vector<size_t> threadIDs;
-  
+
+#if !defined(__ANDROID__) // TODO(LTE): Implement for Android target
   /* changes thread ID mapping such that we first fill up all thread on one core */
   size_t mapThreadID(size_t threadID)
   {
     Lock<MutexSys> lock(mutex);
-    
+
     if (threadIDs.size() == 0)
     {
       /* parse thread/CPU topology */
@@ -196,11 +197,11 @@ namespace embree
         if (fs.fail()) break;
 
         int i;
-        while (fs >> i) 
+        while (fs >> i)
         {
           if (std::none_of(threadIDs.begin(),threadIDs.end(),[&] (int id) { return id == i; }))
             threadIDs.push_back(i);
-          if (fs.peek() == ',') 
+          if (fs.peek() == ',')
             fs.ignore();
         }
         fs.close();
@@ -226,8 +227,25 @@ namespace embree
     if (threadID < threadIDs.size())
       ID = threadIDs[threadID];
 
+    /* find correct thread to affinitize to */
+    cpu_set_t set;
+    if (pthread_getaffinity_np(pthread_self(), sizeof(set), &set) == 0)
+    {
+      for (int i=0, j=0; i<CPU_SETSIZE; i++)
+      {
+        if (!CPU_ISSET(i,&set)) continue;
+
+        if (j == ID) {
+          ID = i;
+          break;
+        }
+        j++;
+      }
+    }
+
     return ID;
   }
+#endif
 
   /*! set affinity of the calling thread */
   void setAffinity(ssize_t affinity)
@@ -237,10 +255,11 @@ namespace embree
 #else
     cpu_set_t cset;
     CPU_ZERO(&cset);
-    CPU_SET(mapThreadID(affinity), &cset);
+    size_t threadID = mapThreadID(affinity);
+    CPU_SET(threadID, &cset);
 
     if (pthread_setaffinity_np(pthread_self(), sizeof(cset), &cset) != 0)
-      WARNING("pthread_setaffinity_np failed"); // on purpose only a warning
+      WARNING("pthread_setaffinity_np failed to set affinity to thread "+std::to_string(threadID)); // on purpose only a warning
 #endif
   }
 }
@@ -307,21 +326,21 @@ namespace embree
 
 namespace embree
 {
-  struct ThreadStartupData 
+  struct ThreadStartupData
   {
   public:
-    ThreadStartupData (thread_func f, void* arg, int affinity) 
+    ThreadStartupData (thread_func f, void* arg, int affinity)
       : f(f), arg(arg), affinity(affinity) {}
-  public: 
+  public:
     thread_func f;
     void* arg;
     ssize_t affinity;
   };
-  
+
   static void* threadStartup(ThreadStartupData* parg)
   {
     _mm_setcsr(_mm_getcsr() | /*FTZ:*/ (1<<15) | /*DAZ:*/ (1<<6));
-    
+
     /*! Mac OS X does not support setting affinity at thread creation time */
 #if defined(__MACOSX__)
     if (parg->affinity >= 0)
@@ -345,7 +364,7 @@ namespace embree
     pthread_t* tid = new pthread_t;
     if (pthread_create(tid,&attr,(void*(*)(void*))threadStartup,new ThreadStartupData(f,arg,threadID)) != 0) {
       pthread_attr_destroy(&attr);
-      delete tid; 
+      delete tid;
       FATAL("pthread_create failed");
     }
     pthread_attr_destroy(&attr);
@@ -355,9 +374,10 @@ namespace embree
     if (threadID >= 0) {
       cpu_set_t cset;
       CPU_ZERO(&cset);
-      CPU_SET(mapThreadID(threadID), &cset);
+      threadID = mapThreadID(threadID);
+      CPU_SET(threadID, &cset);
       if (pthread_setaffinity_np(*tid, sizeof(cset), &cset))
-        WARNING("pthread_setaffinity_np failed"); // on purpose only a warning
+        WARNING("pthread_setaffinity_np failed to set affinity to thread "+std::to_string(threadID)); // on purpose only a warning
     }
 #elif defined(__FreeBSD__)
     if (threadID >= 0) {
@@ -385,7 +405,7 @@ namespace embree
   }
 
   /*! creates thread local storage */
-  tls_t createTls() 
+  tls_t createTls()
   {
     pthread_key_t* key = new pthread_key_t;
     if (pthread_key_create(key,nullptr) != 0) {
@@ -397,14 +417,14 @@ namespace embree
   }
 
   /*! return the thread local storage pointer */
-  void* getTls(tls_t tls) 
+  void* getTls(tls_t tls)
   {
     assert(tls);
     return pthread_getspecific(*(pthread_key_t*)tls);
   }
 
   /*! set the thread local storage pointer */
-  void setTls(tls_t tls, void* const ptr) 
+  void setTls(tls_t tls, void* const ptr)
   {
     assert(tls);
     if (pthread_setspecific(*(pthread_key_t*)tls, ptr) != 0)
@@ -412,7 +432,7 @@ namespace embree
   }
 
   /*! destroys thread local storage identifier */
-  void destroyTls(tls_t tls) 
+  void destroyTls(tls_t tls)
   {
     assert(tls);
     if (pthread_key_delete(*(pthread_key_t*)tls) != 0)

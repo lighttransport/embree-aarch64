@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -29,6 +29,12 @@ namespace embree
 #  define USE_TASK_ARENA 1
 #else
 #  define USE_TASK_ARENA 0
+#endif
+
+#if defined(TASKING_TBB) && (TBB_INTERFACE_VERSION >= 11009) // TBB 2019 Update 9
+#  define TASKING_TBB_USE_TASK_ISOLATION 1
+#else
+#  define TASKING_TBB_USE_TASK_ISOLATION 0
 #endif
 
 /*! Macros used in the rtcore API implementation */

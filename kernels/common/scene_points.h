@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -33,8 +33,6 @@ namespace embree
     Points(Device* device, Geometry::GType gtype);
 
    public:
-    void enabling();
-    void disabling();
     void setMask(unsigned mask);
     void setNumTimeSteps(unsigned int numTimeSteps);
     void setVertexAttributeCount(unsigned int N);
@@ -47,9 +45,9 @@ namespace embree
                    unsigned int num);
     void* getBuffer(RTCBufferType type, unsigned int slot);
     void updateBuffer(RTCBufferType type, unsigned int slot);
-    void preCommit();
-    void postCommit();
+    void commit();
     bool verify();
+    void addElementsToCount (GeometryCounts & counts) const;
 
    public:
     /*! returns the number of vertices */
@@ -210,10 +208,9 @@ namespace embree
       return true;
     }
 
-    /* returns true if topology changed */
-    bool topologyChanged() const
-    {
-      return numPrimitivesChanged;
+    /*! get fast access to first vertex buffer */
+    __forceinline float * getCompactVertexArray () const {
+      return (float*) vertices0.getPtr();
     }
 
    public:
@@ -240,7 +237,7 @@ namespace embree
         return Vec3fa(1, 0, 0);
       }
 
-      PrimInfo createPrimRefArray(mvector<PrimRef>& prims, const range<size_t>& r, size_t k) const
+      PrimInfo createPrimRefArray(mvector<PrimRef>& prims, const range<size_t>& r, size_t k, unsigned int geomID) const
       {
         PrimInfo pinfo(empty);
         for (size_t j = r.begin(); j < r.end(); j++) {
@@ -254,7 +251,7 @@ namespace embree
         return pinfo;
       }
 
-      PrimInfo createPrimRefArrayMB(mvector<PrimRef>& prims, size_t itime, const range<size_t>& r, size_t k) const
+      PrimInfo createPrimRefArrayMB(mvector<PrimRef>& prims, size_t itime, const range<size_t>& r, size_t k, unsigned int geomID) const
       {
         PrimInfo pinfo(empty);
         for (size_t j = r.begin(); j < r.end(); j++) {
@@ -271,7 +268,8 @@ namespace embree
       PrimInfoMB createPrimRefMBArray(mvector<PrimRefMB>& prims,
                                       const BBox1f& t0t1,
                                       const range<size_t>& r,
-                                      size_t k) const
+                                      size_t k,
+                                      unsigned int geomID) const
       {
         PrimInfoMB pinfo(empty);
         for (size_t j = r.begin(); j < r.end(); j++) {
@@ -281,7 +279,7 @@ namespace embree
                                this->numTimeSegments(),
                                this->time_range,
                                this->numTimeSegments(),
-                               this->geomID,
+                               geomID,
                                unsigned(j));
           pinfo.add_primref(prim);
           prims[k++] = prim;

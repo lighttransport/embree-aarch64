@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -26,22 +26,6 @@ namespace embree
     vertices.resize(numTimeSteps);
     if (getType() == GTY_ORIENTED_DISC_POINT)
       normals.resize(numTimeSteps);
-  }
-
-  void Points::enabling()
-  {
-    if (numTimeSteps == 1)
-      scene->world.numPoints += numPrimitives;
-    else
-      scene->worldMB.numPoints += numPrimitives;
-  }
-
-  void Points::disabling()
-  {
-    if (numTimeSteps == 1)
-      scene->world.numPoints -= numPrimitives;
-    else
-      scene->worldMB.numPoints -= numPrimitives;
   }
 
   void Points::setMask(unsigned mask)
@@ -136,15 +120,15 @@ namespace embree
     if (type == RTC_BUFFER_TYPE_VERTEX) {
       if (slot >= vertices.size())
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid buffer slot");
-      vertices[slot].setModified(true);
+      vertices[slot].setModified();
     } else if (type == RTC_BUFFER_TYPE_NORMAL) {
       if (slot >= normals.size())
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid buffer slot");
-      normals[slot].setModified(true);
+      normals[slot].setModified();
     } else if (type == RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE) {
       if (slot >= vertexAttribs.size())
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid buffer slot");
-      vertexAttribs[slot].setModified(true);
+      vertexAttribs[slot].setModified();
     } else {
       throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "unknown buffer type");
     }
@@ -152,7 +136,7 @@ namespace embree
     Geometry::update();
   }
 
-  void Points::preCommit()
+  void Points::commit()
   {
     /* verify that stride of all time steps are identical */
     for (unsigned int t = 0; t < numTimeSteps; t++)
@@ -167,21 +151,15 @@ namespace embree
     if (getType() == GTY_ORIENTED_DISC_POINT)
       normals0 = normals[0];
 
-    Geometry::preCommit();
+    Geometry::commit();
   }
 
-  void Points::postCommit()
+  void Points::addElementsToCount (GeometryCounts & counts) const 
   {
-    scene->vertices[geomID] = (float*)vertices0.getPtr();
-
-    for (auto& buf : vertices)
-      buf.setModified(false);
-    for (auto& buf : normals)
-      buf.setModified(false);
-    for (auto& attrib : vertexAttribs)
-      attrib.setModified(false);
-
-    Geometry::postCommit();
+    if (numTimeSteps == 1)
+      counts.numPoints += numPrimitives;
+    else
+      counts.numMBPoints += numPrimitives;
   }
 
   bool Points::verify()

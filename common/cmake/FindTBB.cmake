@@ -1,5 +1,5 @@
 ## ======================================================================== ##
-## Copyright 2009-2018 Intel Corporation                                    ##
+## Copyright 2009-2020 Intel Corporation                                    ##
 ##                                                                          ##
 ## Licensed under the Apache License, Version 2.0 (the "License");          ##
 ## you may not use this file except in compliance with the License.         ##
@@ -123,6 +123,7 @@ ELSE ()
     ELSE()
       FIND_PATH(TBB_INCLUDE_DIR tbb/task_scheduler_init.h PATHS ${EMBREE_TBB_ROOT}/include NO_DEFAULT_PATH)
       SET(TBB_HINTS HINTS
+          ${EMBREE_TBB_ROOT}/lib/intel64/gcc4.8
           ${EMBREE_TBB_ROOT}/lib/intel64/gcc4.7
           ${EMBREE_TBB_ROOT}/lib/intel64/gcc4.4
           ${EMBREE_TBB_ROOT}/lib/intel64/gcc4.1
@@ -157,9 +158,9 @@ IF (EMBREE_INSTALL_DEPENDENCIES)
     INSTALL(PROGRAMS ${TBB_BINDIR}/tbb.dll ${TBB_BINDIR}/tbbmalloc.dll DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT examples)
     INSTALL(PROGRAMS ${TBB_LIBDIR}/tbb.lib ${TBB_LIBDIR}/tbbmalloc.lib DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT lib)
   ELSEIF (APPLE)
-    INSTALL(PROGRAMS ${EMBREE_TBB_ROOT}/lib/libtbb.dylib ${EMBREE_TBB_ROOT}/lib/libtbbmalloc.dylib DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT lib)
+    INSTALL(PROGRAMS ${TBB_LIBRARY} ${TBB_LIBRARY_MALLOC} DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT lib)
   ELSE()
-    INSTALL(PROGRAMS ${EMBREE_TBB_ROOT}/lib/intel64/gcc4.4/libtbb.so.2 ${EMBREE_TBB_ROOT}/lib/intel64/gcc4.4/libtbbmalloc.so.2 DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT lib)
+    INSTALL(PROGRAMS ${TBB_LIBRARY}.2 ${TBB_LIBRARY_MALLOC}.2 DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT lib)
   ENDIF()
 ENDIF()
 
