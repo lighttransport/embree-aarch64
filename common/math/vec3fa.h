@@ -57,7 +57,7 @@ namespace embree
     __forceinline Vec3fa( const Vec3fa& other, const int      a1) { m128 = other.m128; a = a1; }
     __forceinline Vec3fa( const Vec3fa& other, const unsigned a1) { m128 = other.m128; u = a1; }
     __forceinline Vec3fa( const Vec3fa& other, const float    w1) {      
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
         m128 = insert<3>(other.m128, w1);
 #elif defined (__SSE4_1__)
       m128 = _mm_insert_ps(other.m128, _mm_set_ss(w1),3 << 4);
@@ -75,7 +75,7 @@ namespace embree
     __forceinline operator const __m128&() const { return m128; }
     __forceinline operator       __m128&()       { return m128; }
 
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
       friend __forceinline Vec3fa copy_a( const Vec3fa& a, const Vec3fa& b ) {
           Vec3fa c = a;
           float b_a = extract<3>((const vfloat4)b.m128);
@@ -93,10 +93,10 @@ namespace embree
     ////////////////////////////////////////////////////////////////////////////////
 
     static __forceinline Vec3fa load( const void* const a ) {
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
         static const uint32x4_t mask = { 0xffffffff, 0xffffffff, 0xffffffff, 0x00000000 };
         __m128 t = _mm_load_ps((float*)a);
-        t = _mm_and_ps(t, mask);
+        t = _mm_and_ps(t, (__m128)mask);
         return Vec3fa(t);
 #else
       return Vec3fa(_mm_and_ps(_mm_load_ps((float*)a),_mm_castsi128_ps(_mm_set_epi32(0, -1, -1, -1))));
@@ -134,7 +134,7 @@ namespace embree
 
   __forceinline Vec3fa operator +( const Vec3fa& a ) { return a; }
   __forceinline Vec3fa operator -( const Vec3fa& a ) {
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
     static const __m128 mask = _mm_castsi128_ps(_mm_set1_epi32(0x80000000));
 #else
     const __m128 mask = _mm_castsi128_ps(_mm_set1_epi32(0x80000000));
@@ -142,7 +142,7 @@ namespace embree
     return _mm_xor_ps(a.m128, mask);
   }
   __forceinline Vec3fa abs  ( const Vec3fa& a ) {
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
     return _mm_abs_ps(a.m128);
 #else
     const __m128 mask = _mm_castsi128_ps(_mm_set1_epi32(0x7fffffff));
@@ -235,7 +235,7 @@ namespace embree
   __forceinline Vec3fa min( const Vec3fa& a, const Vec3fa& b ) { return _mm_min_ps(a.m128,b.m128); }
   __forceinline Vec3fa max( const Vec3fa& a, const Vec3fa& b ) { return _mm_max_ps(a.m128,b.m128); }
 
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
     __forceinline Vec3fa mini(const Vec3fa& a, const Vec3fa& b) {
       return _mm_min_ps(a, b);
     }
@@ -248,7 +248,7 @@ namespace embree
     }
 #endif
 
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
     __forceinline Vec3fa maxi(const Vec3fa& a, const Vec3fa& b) {
       return _mm_max_ps(a, b);
     }
@@ -276,7 +276,7 @@ namespace embree
   __forceinline Vec3fa nmsub ( const Vec3fa& a, const Vec3fa& b, const Vec3fa& c) { return _mm_fnmsub_ps(a,b,c); }
 #else
                                                                                 
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
   __forceinline Vec3fa madd  ( const Vec3fa& a, const Vec3fa& b, const Vec3fa& c) {
         return _mm_madd_ps(a.m128, b.m128, c.m128);  //a*b+c;
     }
@@ -439,7 +439,7 @@ namespace embree
   /// Rounding Functions
   ////////////////////////////////////////////////////////////////////////////////
 
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
   __forceinline Vec3fa floor(const Vec3fa& a) { return vrndmq_f32(a); }
   __forceinline Vec3fa ceil (const Vec3fa& a) { return vrndpq_f32(a); }
   __forceinline Vec3fa trunc(const Vec3fa& a) { return vrndq_f32(a); }
