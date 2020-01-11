@@ -160,7 +160,7 @@ namespace embree
 
   __forceinline Vec3fa rcp  ( const Vec3fa& a )
   {
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
     __m128 reciprocal = _mm_rcp_ps(a.m128);
     reciprocal = vmulq_f32(vrecpsq_f32(a.m128, reciprocal), reciprocal);
     reciprocal = vmulq_f32(vrecpsq_f32(a.m128, reciprocal), reciprocal);
@@ -189,7 +189,7 @@ namespace embree
 
   __forceinline Vec3fa rsqrt( const Vec3fa& a )
   {
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
         __m128 r = _mm_rsqrt_ps(a.m128);
         r = vmulq_f32(r, vrsqrtsq_f32(vmulq_f32(a.m128, r), r));
         r = vmulq_f32(r, vrsqrtsq_f32(vmulq_f32(a.m128, r), r));
