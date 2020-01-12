@@ -27,7 +27,7 @@ jobs:
           cd ..
           cd test/curve
           make EXTRA_CXXFLAGS="-fsanitize=address" EXTRA_LDFLAGS="-fsanitize=address" EMBREE_LIB_PATH=../../build-aarch64
-          ./run.sh ../../build-aarch64
+          ./run.sh ../../build-aarch64 > /dev/null
 
   # Cross-compile Embree for aarch64 target
   build-cross-aarch64:
@@ -73,7 +73,7 @@ jobs:
             cd ..
             cd test/curve
             make EXTRA_CXXFLAGS="-fsanitize=address" EXTRA_LDFLAGS="-fsanitize=address" EMBREE_LIB_PATH=../../build-aarch64
-            ./run.sh ../../build
+            ./run.sh ../../build > /dev/null
             cd ..
 
   # iOS build
