@@ -276,7 +276,7 @@ namespace embree
   __forceinline vfloat4 operator -(const vfloat4& a) { return _mm_xor_ps(a, _mm_castsi128_ps(_mm_set1_epi32(0x80000000))); }
 #endif
 
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
   __forceinline vfloat4 abs(const vfloat4& a) { return _mm_abs_ps(a); }
 #else
   __forceinline vfloat4 abs(const vfloat4& a) { return _mm_and_ps(a, _mm_castsi128_ps(_mm_set1_epi32(0x7fffffff))); }

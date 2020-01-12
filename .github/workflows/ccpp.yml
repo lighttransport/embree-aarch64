@@ -16,12 +16,17 @@ jobs:
       with:
         architecture: aarch64
         distribution: ubuntu18.04
+        # TODO(LTE): Run test in separate step
         run: |
           apt-get update
           apt-get install -y cmake gcc g++
           ./scripts/bootstrap-aarch64-linux.sh
           cd build-aarch64
           make VERBOSE=1
+          ./verify
+          cd test/curve
+          make EXTRA_CXXFLAGS="-fsanitize=address" EXTRA_LDFLAGS="-fsanitize=address" EMBREE_LIB_PATH=../../build-aarch64
+          ./run.sh ../../build-aarch64
 
   # Cross-compile Embree for aarch64 target
   build-cross-aarch64:
@@ -58,6 +63,16 @@ jobs:
             ./scripts/bootstrap-clang-linux.sh
             cd build
             make VERBOSE=1
+            cd ..
+      - name: Test
+        run: |
+            cd build
+            ./verify
+            cd ..
+            cd test/curve
+            make EXTRA_CXXFLAGS="-fsanitize=address" EXTRA_LDFLAGS="-fsanitize=address" EMBREE_LIB_PATH=../../build-aarch64
+            ./run.sh ../../build
+            cd ..
 
   # iOS build
   build-ios:
