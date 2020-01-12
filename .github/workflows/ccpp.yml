@@ -24,6 +24,7 @@ jobs:
           cd build-aarch64
           make VERBOSE=1
           ./verify
+          cd ..
           cd test/curve
           make EXTRA_CXXFLAGS="-fsanitize=address" EXTRA_LDFLAGS="-fsanitize=address" EMBREE_LIB_PATH=../../build-aarch64
           ./run.sh ../../build-aarch64
