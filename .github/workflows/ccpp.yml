@@ -68,6 +68,7 @@ jobs:
       - name: Test
         run: |
             cd build
+            cat /proc/cpuinfo
             ./verify
             cd ..
             cd test/curve
