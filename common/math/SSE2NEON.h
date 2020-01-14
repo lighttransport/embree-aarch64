@@ -116,7 +116,7 @@
 
 #include <stdint.h>
 #include "arm_neon.h"
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
 #include "constants.h"
 #endif
 
@@ -130,7 +130,7 @@
 /* places in fp1 of result. fp0 is the same for fp0 of */
 /* result                                              */
 /*******************************************************/
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
 #define _MN_SHUFFLE(fp3,fp2,fp1,fp0) ( (uint8x16_t){ (((fp3)*4)+0), (((fp3)*4)+1), (((fp3)*4)+2), (((fp3)*4)+3),  (((fp2)*4)+0), (((fp2)*4)+1), (((fp2)*4)+2), (((fp2)*4)+3),  (((fp1)*4)+0), (((fp1)*4)+1), (((fp1)*4)+2), (((fp1)*4)+3),  (((fp0)*4)+0), (((fp0)*4)+1), (((fp0)*4)+2), (((fp0)*4)+3) } )
 #define _MF_SHUFFLE(fp3,fp2,fp1,fp0) ( (uint8x16_t){ (((fp3)*4)+0), (((fp3)*4)+1), (((fp3)*4)+2), (((fp3)*4)+3),  (((fp2)*4)+0), (((fp2)*4)+1), (((fp2)*4)+2), (((fp2)*4)+3),  (((fp1)*4)+16+0), (((fp1)*4)+16+1), (((fp1)*4)+16+2), (((fp1)*4)+16+3),  (((fp0)*4)+16+0), (((fp0)*4)+16+1), (((fp0)*4)+16+2), (((fp0)*4)+16+3) } )
 #endif
@@ -479,8 +479,8 @@ FORCE_INLINE int _mm_movemask_ps(__m128 a)
   return (ia[0] >> 31) | ((ia[1] >> 30) & 2) | ((ia[2] >> 29) & 4) | ((ia[3] >> 28) & 8);
 #else
     
-#if defined(__aarch64__) && defined(BUILD_IOS)
-    uint32x4_t t2 = vandq_u32(a, embree::movemask_mask);
+#if defined(__aarch64__)
+    uint32x4_t t2 = vandq_u32(vreinterpretq_u32_f32(a), embree::movemask_mask);
     return vaddvq_u32(t2);
 #else
   static const uint32x4_t movemask = { 1, 2, 4, 8 };
@@ -495,11 +495,11 @@ FORCE_INLINE int _mm_movemask_ps(__m128 a)
 #endif
 }
 
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
 FORCE_INLINE int _mm_movemask_popcnt_ps(__m128 a)
 {
-    uint32x4_t t2 = vandq_u32(a, embree::movemask_mask);
-    t2 = vcntq_u8(t2);
+    uint32x4_t t2 = vandq_u32(vreinterpretq_u32_f32(a), embree::movemask_mask);
+    t2 = vreinterpretq_u32_u8(vcntq_u8(vreinterpretq_u8_u32(t2)));
     return vaddvq_u32(t2);
     
 }
@@ -844,7 +844,7 @@ FORCE_INLINE __m128i _mm_shufflehi_epi16_function(__m128i a)
 // Based on SIMDe
 FORCE_INLINE __m128i _mm_slli_epi32(__m128i a, const int imm8)
 {
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
     const int32x4_t s = vdupq_n_s32(imm8);
     return vshlq_s32(a, s);
 #else
@@ -893,7 +893,7 @@ FORCE_INLINE __m128i _mm_srli_epi32(__m128i a, const int imm8)
 // Based on SIMDe
 FORCE_INLINE __m128i _mm_srai_epi32(__m128i a, const int imm8)
 {
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__) 
     const int32x4_t s = vdupq_n_s32(-imm8);
     return vshlq_s32(a, s);
 #else
