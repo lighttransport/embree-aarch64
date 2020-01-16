@@ -45,9 +45,9 @@ namespace embree
     __forceinline vfloat(float a, float b, float c, float d) : v(_mm_set_ps(d, c, b, a)) {}
 
     __forceinline explicit vfloat(const vint4& a) : v(_mm_cvtepi32_ps(a)) {}
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
     __forceinline explicit vfloat(const vuint4& x) {
-        v = vcvtq_f32_u32(x);
+        v = vcvtq_f32_u32(vreinterpretq_u32_s32(x.v));
     }
 #else
     __forceinline explicit vfloat(const vuint4& x) {
@@ -268,9 +268,9 @@ namespace embree
   __forceinline vuint4  asUInt (const vfloat4& a) { return _mm_castps_si128(a); }
 
   __forceinline vfloat4 operator +(const vfloat4& a) { return a; }
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
   __forceinline vfloat4 operator -(const vfloat4& a) {
-    return _mm_xor_ps(a, v0x80000000);
+    return _mm_xor_ps(a, vreinterpretq_f32_u32(v0x80000000));
   }
 #else
   __forceinline vfloat4 operator -(const vfloat4& a) { return _mm_xor_ps(a, _mm_castsi128_ps(_mm_set1_epi32(0x80000000))); }
@@ -288,8 +288,8 @@ namespace embree
   __forceinline vfloat4 sign(const vfloat4& a) { return blendv_ps(vfloat4(one), -vfloat4(one), _mm_cmplt_ps(a, vfloat4(zero))); }
 #endif
                                                                         
-#if defined(__aarch64__) && defined(BUILD_IOS)
-  __forceinline vfloat4 signmsk(const vfloat4& a) { return _mm_and_ps(a, v0x80000000); }
+#if defined(__aarch64__)
+  __forceinline vfloat4 signmsk(const vfloat4& a) { return _mm_and_ps(a, vreinterpretq_f32_u32(v0x80000000)); }
 #else
   __forceinline vfloat4 signmsk(const vfloat4& a) { return _mm_and_ps(a,_mm_castsi128_ps(_mm_set1_epi32(0x80000000))); }
 #endif
@@ -347,8 +347,8 @@ namespace embree
   }
 
   __forceinline vboolf4 isnan(const vfloat4& a) {
-#if defined(__aarch64__) && defined(BUILD_IOS)
-    const vfloat4 b = _mm_and_ps(a, v0x7fffffff);
+#if defined(__aarch64__)
+    const vfloat4 b = _mm_and_ps(a, vreinterpretq_f32_u32(v0x7fffffff));
 #else
     const vfloat4 b = _mm_and_ps(a, _mm_castsi128_ps(_mm_set1_epi32(0x7fffffff)));
 #endif
@@ -449,7 +449,7 @@ __forceinline vfloat4 maxi(const vfloat4& a, const vfloat4& b)
   __forceinline vfloat4 nmsub(const vfloat4& a, const vfloat4& b, const vfloat4& c) { return _mm_fnmsub_ps(a,b,c); }
 #else
                                                                         
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
   __forceinline vfloat4 madd (const vfloat4& a, const vfloat4& b, const vfloat4& c) {
     return _mm_madd_ps(a, b, c);  //a*b+c;
   }
@@ -556,54 +556,54 @@ __forceinline vfloat4 maxi(const vfloat4& a, const vfloat4& b)
 #endif
   }
       
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
     template<> __forceinline vfloat4 select<0>(const vfloat4& t, const vfloat4& f) {
-        return _mm_blendv_ps(f, t, vzero);
+        return _mm_blendv_ps(f, t, vreinterpretq_f32_u32(vzero));
     }
     template<> __forceinline vfloat4 select<1>(const vfloat4& t, const vfloat4& f) {
-        return _mm_blendv_ps(f, t, v000F);
+        return _mm_blendv_ps(f, t, vreinterpretq_f32_u32(v000F));
     }
     template<> __forceinline vfloat4 select<2>(const vfloat4& t, const vfloat4& f) {
-        return _mm_blendv_ps(f, t, v00F0);
+        return _mm_blendv_ps(f, t, vreinterpretq_f32_u32(v00F0));
     }
     template<> __forceinline vfloat4 select<3>(const vfloat4& t, const vfloat4& f) {
-        return _mm_blendv_ps(f, t, v00FF);
+        return _mm_blendv_ps(f, t, vreinterpretq_f32_u32(v00FF));
     }
     template<> __forceinline vfloat4 select<4>(const vfloat4& t, const vfloat4& f) {
-        return _mm_blendv_ps(f, t, v0F00);
+        return _mm_blendv_ps(f, t, vreinterpretq_f32_u32(v0F00));
     }
     template<> __forceinline vfloat4 select<5>(const vfloat4& t, const vfloat4& f) {
-        return _mm_blendv_ps(f, t, v0F0F);
+        return _mm_blendv_ps(f, t, vreinterpretq_f32_u32(v0F0F));
     }
     template<> __forceinline vfloat4 select<6>(const vfloat4& t, const vfloat4& f) {
-        return _mm_blendv_ps(f, t, v0FF0);
+        return _mm_blendv_ps(f, t, vreinterpretq_f32_u32(v0FF0));
     }
     template<> __forceinline vfloat4 select<7>(const vfloat4& t, const vfloat4& f) {
-        return _mm_blendv_ps(f, t, v0FFF);
+        return _mm_blendv_ps(f, t, vreinterpretq_f32_u32(v0FFF));
     }
     template<> __forceinline vfloat4 select<8>(const vfloat4& t, const vfloat4& f) {
-        return _mm_blendv_ps(f, t, vF000);
+        return _mm_blendv_ps(f, t, vreinterpretq_f32_u32(vF000));
     }
     template<> __forceinline vfloat4 select<9>(const vfloat4& t, const vfloat4& f) {
-        return _mm_blendv_ps(f, t, vF00F);
+        return _mm_blendv_ps(f, t, vreinterpretq_f32_u32(vF00F));
     }
     template<> __forceinline vfloat4 select<10>(const vfloat4& t, const vfloat4& f) {
-        return _mm_blendv_ps(f, t, vF0F0);
+        return _mm_blendv_ps(f, t, vreinterpretq_f32_u32(vF0F0));
     }
     template<> __forceinline vfloat4 select<11>(const vfloat4& t, const vfloat4& f) {
-        return _mm_blendv_ps(f, t, vF0FF);
+        return _mm_blendv_ps(f, t, vreinterpretq_f32_u32(vF0FF));
     }
     template<> __forceinline vfloat4 select<12>(const vfloat4& t, const vfloat4& f) {
-        return _mm_blendv_ps(f, t, vFF00);
+        return _mm_blendv_ps(f, t, vreinterpretq_f32_u32(vFF00));
     }
     template<> __forceinline vfloat4 select<13>(const vfloat4& t, const vfloat4& f) {
-        return _mm_blendv_ps(f, t, vFF0F);
+        return _mm_blendv_ps(f, t, vreinterpretq_f32_u32(vFF0F));
     }
     template<> __forceinline vfloat4 select<14>(const vfloat4& t, const vfloat4& f) {
-        return _mm_blendv_ps(f, t, vFFF0);
+        return _mm_blendv_ps(f, t, vreinterpretq_f32_u32(vFFF0));
     }
     template<> __forceinline vfloat4 select<15>(const vfloat4& t, const vfloat4& f) {
-        return _mm_blendv_ps(f, t, vFFFF);
+        return _mm_blendv_ps(f, t, vreinterpretq_f32_u32(vFFFF));
     }
 #endif
   
