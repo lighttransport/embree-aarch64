@@ -2,6 +2,9 @@ name: BuildCI
 
 on: [push, pull_request]
 
+# Disable running verify for a while
+# https://github.com/lighttransport/embree-aarch64/issues/18
+
 jobs:
   # Build Embree on qemu-emulated aarch64 Ubuntu
   build-native-aarch64:
@@ -23,7 +26,7 @@ jobs:
           ./scripts/bootstrap-aarch64-linux.sh
           cd build-aarch64
           make VERBOSE=1
-          ./verify
+          #./verify
           cd ..
           cd test/curve
           make EXTRA_CXXFLAGS="-fsanitize=address" EXTRA_LDFLAGS="-fsanitize=address" EMBREE_LIB_PATH=../../build-aarch64
@@ -69,7 +72,7 @@ jobs:
         run: |
             cd build
             cat /proc/cpuinfo
-            ./verify
+            #./verify
             cd ..
             cd test/curve
             make EXTRA_CXXFLAGS="-fsanitize=address" EXTRA_LDFLAGS="-fsanitize=address" EMBREE_LIB_PATH=../../build-aarch64
