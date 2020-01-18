@@ -142,7 +142,7 @@ SET(EMBREE_CURVE_SELF_INTERSECTION_AVOIDANCE_FACTOR 2.0 CACHE STRING "Self inter
 # Mobile Support (support arm64 / aarch64 on Android and iOS)
 ##############################################################
 
-OPTION(EMBREE_USE_EMBEDDED_TBB "Build TBB from source(using third_party/tbb submodule." ON)
+OPTION(EMBREE_USE_EMBEDDED_TBB "Build TBB from source(using third_party/tbb submodule." OFF)
 
 # We forward-assign these variables for sanity and ease of debugging the build system.
 # They are not directly being used.
