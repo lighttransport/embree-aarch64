@@ -64,6 +64,19 @@ $ make
 
 `EMBREE_TASKING_SYSTEM=TASKING_GCD` is provided for iOS platform.
 
+Build monolithc embree with TBB(experimental)
+---------------------------------------------
+
+`EMBREE_USE_EMBEDDED_TBB=On` builds the embree with embedded(submoduled) tbb.
+This will enable building monolithic embree library with single cmake build procedure.
+(Would make embree build with TBB support for emerging architecures and cross compiling easier)  
+
+```
+  -DEMBREE_TASKING_SYSTEM=Internal \
+  -DEMBREE_USE_EMBEDDED_TBB=On \
+```
+
+
 Status
 ------
 

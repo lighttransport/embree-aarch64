@@ -141,6 +141,9 @@ SET(EMBREE_CURVE_SELF_INTERSECTION_AVOIDANCE_FACTOR 2.0 CACHE STRING "Self inter
 ##############################################################
 # Mobile Support (support arm64 / aarch64 on Android and iOS)
 ##############################################################
+
+OPTION(EMBREE_USE_EMBEDDED_TBB "Build TBB from source(using third_party/tbb submodule." ON)
+
 # We forward-assign these variables for sanity and ease of debugging the build system.
 # They are not directly being used.
 SET(EMBREE_ANDROID ${ANDROID})
@@ -495,8 +498,15 @@ CONFIGURE_FILE(
 # Search paths
 ##############################################################
 IF (TASKING_TBB)
-  FIND_PACKAGE(TBB REQUIRED)
+  if (EMBREE_USE_EMBEDDED_TBB)
+    # Build TBB using `add_subdirectory`
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/deps/tbb)
+  else (EMBREE_USE_EMBEDDED_TBB)
+    FIND_PACKAGE(TBB REQUIRED)
+  endif (EMBREE_USE_EMBEDDED_TBB)
   INCLUDE_DIRECTORIES(${TBB_INCLUDE_DIRS})
+  message(STATUS "TBB inc: " ${TBB_INCLUDE_DIRS})
+  message(STATUS "TBB lib: " ${TBB_LIBRARIES})
 ENDIF()
 
 ##############################################################
@@ -516,8 +526,12 @@ IF (EMBREE_TUTORIALS)
   ADD_SUBDIRECTORY(tutorials)
 ENDIF()
 IF (EMBREE_BUILD_VERIFY)
-  ADD_SUBDIRECTORY(tutorials/common)
-  ADD_SUBDIRECTORY(tutorials/verify)
+  IF (EMBREE_TUTORIALS)
+    # `verify` is already included in subdirectories.
+  ELSE ()
+    ADD_SUBDIRECTORY(tutorials/common)
+    ADD_SUBDIRECTORY(tutorials/verify)
+  ENDIF()
 ENDIF()
 
 ##############################################################
