@@ -22,12 +22,16 @@
 #include "scene.h"
 #include "scene_device.h"
 
+#if defined(EMBREE_TUTORIAL_GLFW)
+
 /* include GLFW for window management */
 #include <GLFW/glfw3.h>
 
 /* include ImGUI */
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_impl_glfw_gl2.h"
+
+#endif // EMBREE_TUTORIAL_GLFW
 
 namespace embree
 {
@@ -107,6 +111,7 @@ namespace embree
     /* set scene to use */
     void set_scene (TutorialScene* in);
 
+#if defined(EMBREE_TUTORIAL_GLFW)
     /* create a fullscreen window */
     GLFWwindow* createFullScreenWindow();
 
@@ -121,6 +126,7 @@ namespace embree
     virtual void displayFunc();
     virtual void reshapeFunc(GLFWwindow* window, int width, int height);
     virtual void drawGUI() {}; 
+#endif
 
   public:
     std::string tutorialName;
@@ -147,7 +153,9 @@ namespace embree
 
     unsigned window_width;
     unsigned window_height;
+#if defined(EMBREE_TUTORIAL_GLFW)
     GLFWwindow* window;
+#endif
 
     double time0;
     int debug_int0;

@@ -751,6 +751,7 @@ extern "C" bool device_pick(const float x,
   }
 }
 
+#if defined(EMBREE_TUTORIAL_GLFW)
 /* called when a key is pressed */
 extern "C" void device_key_pressed_default(int key)
 {
@@ -811,6 +812,7 @@ extern "C" void device_key_pressed_default(int key)
     g_changed = true;
   }
 }
+#endif
 
 /* called when a key is pressed */
 void (* key_pressed_handler)(int key) = nullptr;

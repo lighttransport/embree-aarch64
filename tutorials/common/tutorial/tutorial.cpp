@@ -108,7 +108,9 @@ namespace embree
 
       window_width(512),
       window_height(512),
+#if defined(EMBREE_TUTORIAL_GLFW)
       window(nullptr),
+#endif
 
       time0(getSeconds()),
       debug_int0(0),
@@ -720,6 +722,7 @@ namespace embree
   void errorFunc(int error, const char* description) {
     throw std::runtime_error(std::string("Error: ")+description);
   }
+#if defined(EMBREE_TUTORIAL_GLFW)
   void keyboardFunc(GLFWwindow* window, int key, int scancode, int action, int mods) {
     TutorialApplication::instance->keyboardFunc(window,key,scancode,action,mods);
   }
@@ -992,6 +995,7 @@ namespace embree
     glViewport(0, 0, width, height);
     this->width = width; this->height = height;
   }
+#endif // EMBREE_TUTORIAL_GLFW
 
   void TutorialApplication::run(int argc, char** argv)
   {
@@ -1031,6 +1035,7 @@ namespace embree
     /* interactive mode */
     if (interactive)
     {
+#if defined(EMBREE_TUTORIAL_GLFW)
       window_width = width;
       window_height = height;
       glfwSetErrorCallback(errorFunc);
@@ -1086,6 +1091,7 @@ namespace embree
       
       glfwDestroyWindow(window);
       glfwTerminate();
+#endif
     }
   }
 
