@@ -516,8 +516,10 @@ IF (EMBREE_TUTORIALS)
   ADD_SUBDIRECTORY(tutorials)
 ENDIF()
 IF (EMBREE_BUILD_VERIFY)
-  ADD_SUBDIRECTORY(tutorials/common)
-  ADD_SUBDIRECTORY(tutorials/verify)
+  IF (NOT EMBREE_TUTORIALS)
+    ADD_SUBDIRECTORY(tutorials/common)
+    ADD_SUBDIRECTORY(tutorials/verify)
+  ENDIF()
 ENDIF()
 
 ##############################################################
