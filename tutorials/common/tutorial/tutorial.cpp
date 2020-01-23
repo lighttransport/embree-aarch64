@@ -18,6 +18,8 @@
 #include "scene.h"
 #include "statistics.h"
 
+#if defined(EMBREE_TUTORIAL_GLFW)
+
 /* include GL */
 #if defined(__MACOSX__)
 #  include <OpenGL/gl.h>
@@ -27,6 +29,9 @@
 #else
 #  include <GL/gl.h>
 #endif
+
+#endif
+
 
 #include "tutorial_device.h"
 #include "../scenegraph/scenegraph.h"
@@ -40,7 +45,7 @@ namespace embree
   extern "C"
   {
     RTCDevice g_device = nullptr;
-    
+
     float g_debug = 0.0f;
     Mode g_mode = MODE_NORMAL;
     ISPCScene* g_ispc_scene = nullptr;
@@ -66,7 +71,7 @@ namespace embree
   {
     if (code == RTC_ERROR_NONE)
       return;
-    
+
     printf("Embree: ");
     switch (code) {
     case RTC_ERROR_UNKNOWN          : printf("RTC_ERROR_UNKNOWN"); break;
@@ -84,7 +89,7 @@ namespace embree
     }
     exit(1);
   }
-  
+
   TutorialApplication* TutorialApplication::instance = nullptr;
 
   TutorialApplication::TutorialApplication (const std::string& tutorialName, int features)
@@ -361,7 +366,7 @@ namespace embree
     registerOption("convert-round-to-flat-curves", [this] (Ref<ParseStream> cin, const FileName& path) {
         sgop.push_back(CONVERT_ROUND_TO_FLAT_CURVES);
       }, "--convert-round-to-flat-curves: converts all round curves to flat curves");
-    
+
     registerOption("convert-bezier-to-bspline", [this] (Ref<ParseStream> cin, const FileName& path) {
         sgop.push_back(CONVERT_BEZIER_TO_BSPLINE);
       }, "--convert-bezier-to-bspline: converts all bezier curves to bsplines curves");
@@ -378,7 +383,7 @@ namespace embree
         sgop.push_back(CONVERT_TRIANGLES_TO_QUADS);
         sgop.push_back(MERGE_QUADS_TO_GRIDS);
       }, "--merge-triangles-to-grids: merges quads to grids");
-    
+
     registerOption("merge-quads-to-grids", [this] (Ref<ParseStream> cin, const FileName& path) {
         sgop.push_back(MERGE_QUADS_TO_GRIDS);
       }, "--merge-quads-to-grids: merges quads to grids");
@@ -404,13 +409,13 @@ namespace embree
 
     registerOption("grid-res", [this] (Ref<ParseStream> cin, const FileName& path) {
         grid_resX = min(max(cin->getInt(),2),0x7fff);
-        grid_resY = min(max(cin->getInt(),2),0x7fff);        
+        grid_resY = min(max(cin->getInt(),2),0x7fff);
       }, "--grid-res: sets tessellation resolution for the grid primitive");
 
     registerOption("convert-mblur-to-nonmblur", [this] (Ref<ParseStream> cin, const FileName& path) {
          sgop.push_back(CONVERT_MBLUR_TO_NONMBLUR);
       }, "--convert-mblur-to-nonmblur: converts all motion blur geometry to non-motion blur geometry");
-    
+
     registerOption("remove-mblur", [this] (Ref<ParseStream> cin, const FileName& path) {
          remove_mblur = true;
       }, "--remove-mblur: removes all motion blur geometry");
@@ -545,7 +550,7 @@ namespace embree
         const float  r = cin->getFloat();
         const size_t numPhi = cin->getInt();
         Ref<SceneGraph::Node> mesh = SceneGraph::createQuadSphere(p,r,numPhi,new OBJMaterial);
-        mesh->set_motion_vector(dp); 
+        mesh->set_motion_vector(dp);
         scene->add(mesh);
       }, "--quad-sphere-mb p.x p.y p.z d.x d.y d.z r numPhi : adds a motion blurred sphere build of quadrilaterals at position p, with motion vector d, radius r, and tesselation numPhi.");
 
@@ -775,7 +780,7 @@ namespace embree
   {
     ImGui_ImplGlfw_KeyCallback(window_in,key,scancode,action,mods);
     if (ImGui::GetIO().WantCaptureKeyboard) return;
-      
+
     if (action == GLFW_PRESS)
     {
       /* call tutorial keyboard handler */
@@ -804,7 +809,7 @@ namespace embree
         case GLFW_KEY_S : moveDelta.z = -1.0f; break;
         case GLFW_KEY_A : moveDelta.x = -1.0f; break;
         case GLFW_KEY_D : moveDelta.x = +1.0f; break;
-          
+
         case GLFW_KEY_F :
           glfwDestroyWindow(window);
           if (fullscreen) {
@@ -820,19 +825,19 @@ namespace embree
           glfwMakeContextCurrent(window);
           fullscreen = !fullscreen;
           break;
-          
+
         case GLFW_KEY_C : std::cout << camera.str() << std::endl; break;
         case GLFW_KEY_HOME: g_debug=clamp(g_debug+0.01f); PRINT(g_debug); break;
         case GLFW_KEY_END : g_debug=clamp(g_debug-0.01f); PRINT(g_debug); break;
-          
+
         case GLFW_KEY_SPACE: {
           Ref<Image> image = new Image4uc(width, height, (Col4uc*)pixels, true, "", true);
           storeImage(image, "screenshot.tga");
           break;
         }
-          
+
         case GLFW_KEY_ESCAPE:
-        case GLFW_KEY_Q: 
+        case GLFW_KEY_Q:
           glfwSetWindowShouldClose(window,1);
           break;
         }
@@ -849,15 +854,15 @@ namespace embree
       }
     }
   }
-    
+
   void TutorialApplication::clickFunc(GLFWwindow* window, int button, int action, int mods)
   {
     ImGui_ImplGlfw_MouseButtonCallback(window,button,action,mods);
     if (ImGui::GetIO().WantCaptureMouse) return;
-  
+
     double x,y;
     glfwGetCursorPos(window,&x,&y);
-    
+
     if (action == GLFW_RELEASE)
     {
       mouseMode = 0;
@@ -890,7 +895,7 @@ namespace embree
   void TutorialApplication::motionFunc(GLFWwindow* window, double x, double y)
   {
     if (ImGui::GetIO().WantCaptureMouse) return;
-  
+
     float dClickX = float(clickX - x), dClickY = float(clickY - y);
     clickX = x; clickY = y;
 
@@ -923,7 +928,7 @@ namespace embree
     glDrawPixels(width,height,GL_RGBA,GL_UNSIGNED_BYTE,pixels);
 
     ImGui_ImplGlfwGL2_NewFrame();
-    
+
     ImGuiWindowFlags window_flags = 0;
     window_flags |= ImGuiWindowFlags_NoTitleBar;
     //window_flags |= ImGuiWindowFlags_NoScrollbar;
@@ -944,12 +949,12 @@ namespace embree
     ImGui::Text("%3.2f Mray/s",avg_mrayps.get());
 #endif
     ImGui::End();
-     
+
     //ImGui::ShowDemoWindow();
-        
+
     ImGui::Render();
     ImGui_ImplGlfwGL2_RenderDrawData(ImGui::GetDrawData());
-    
+
     glfwSwapBuffers(window);
 
 #ifdef __APPLE__
@@ -984,7 +989,7 @@ namespace embree
       stream << dt1*1000.0f << " ms, ";
       stream << width << "x" << height << " pixels";
       std::cout << stream.str() << std::endl;
-    } 
+    }
   }
 
   void TutorialApplication::reshapeFunc(GLFWwindow* window, int, int)
@@ -1042,10 +1047,10 @@ namespace embree
       glfwInit();
       glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,2);
       glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,0);
-     
+
       if (fullscreen) window = createFullScreenWindow();
       else            window = createStandardWindow(width,height);
-     
+
       glfwMakeContextCurrent(window);
       glfwSwapInterval(1);
       reshapeFunc(window,0,0);
@@ -1055,14 +1060,14 @@ namespace embree
       ImGuiIO& io = ImGui::GetIO(); (void)io;
       //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
       ImGui_ImplGlfwGL2_Init(window, false);
-      
+
       // Setup style
       ImGui::StyleColorsDark();
       //ImGui::StyleColorsClassic();
-      
+
       // Load Fonts
-      // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them. 
-      // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple. 
+      // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
+      // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
       // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
       // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
       // - Read 'misc/fonts/README.txt' for more instructions and details.
@@ -1074,7 +1079,7 @@ namespace embree
       //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
       //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
       //IM_ASSERT(font != NULL);
-      
+
       while (!glfwWindowShouldClose(window))
       {
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -1088,7 +1093,7 @@ namespace embree
 
       ImGui_ImplGlfwGL2_Shutdown();
       ImGui::DestroyContext();
-      
+
       glfwDestroyWindow(window);
       glfwTerminate();
 #endif
@@ -1109,7 +1114,7 @@ namespace embree
 
     /* set error handler */
     rtcSetDeviceErrorFunction(g_device,error_handler,nullptr);
-  
+
     /* start tutorial */
     run(argc,argv);
     return 0;
@@ -1142,9 +1147,9 @@ namespace embree
 
     /* set error handler */
     rtcSetDeviceErrorFunction(g_device,error_handler,nullptr);
-  
+
     log(1,"application start");
-    
+
     /* load scene */
     if (sceneFilename != "")
     {
@@ -1159,15 +1164,15 @@ namespace embree
     /* load key frames for animation */
     for (size_t i=0; i<keyFramesFilenames.size(); i++)
     {
-      if (verbosity >= 1) 
+      if (verbosity >= 1)
         std::cout << "Adding ["<< keyFramesFilenames[i] << "] to scene..." << std::flush;
-      
+
       if (toLowerCase(keyFramesFilenames[i].ext()) == std::string("obj"))
         scene->add(loadOBJ(keyFramesFilenames[i],subdiv_mode != "",true));
       else if (keyFramesFilenames[i].ext() != "")
         scene->add(SceneGraph::load(keyFramesFilenames[i]));
-      
-      if (verbosity >= 1) 
+
+      if (verbosity >= 1)
         std::cout << " [DONE]" << std::endl << std::flush;
     }
 
@@ -1212,7 +1217,7 @@ namespace embree
       SceneGraph::calculateStatistics(scene.dynamicCast<SceneGraph::Node>()).print();
       std::cout << std::endl;
     }
-    
+
     Ref<SceneGraph::GroupNode> flattened_scene = SceneGraph::flatten(scene,instancing_mode);
     Application::instance->log(1,"flattening scene done");
 
@@ -1222,13 +1227,13 @@ namespace embree
       SceneGraph::calculateStatistics(flattened_scene.dynamicCast<SceneGraph::Node>()).print();
       std::cout << std::endl;
     }
-   
+
     /* convert model */
     obj_scene.add(flattened_scene);
     flattened_scene = nullptr;
     scene = nullptr;
     Application::instance->log(1,"populating tutorial scene done");
-    
+
     /* print all cameras */
     if (print_scene_cameras) {
       obj_scene.print_camera_names();

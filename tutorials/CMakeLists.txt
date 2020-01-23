@@ -39,16 +39,18 @@ IF (WIN32)
   )
 
 ELSE (WIN32)
-  
-  FIND_PACKAGE(PkgConfig)
-  IF (PKG_CONFIG_FOUND)
-    PKG_SEARCH_MODULE(GLFW QUIET glfw3)
-    IF (NOT GLFW_FOUND)
-      MESSAGE(WARNING "GLFW not found! tutorials with GUI won't be built. Please either install GLFW or disable EMBREE_TUTORIALS.")
-    ENDIF()
 
-    LINK_DIRECTORIES(${GLFW_LIBRARY_DIRS})
-  ENDIF (PKG_CONFIG_FOUND)
+  IF (NOT ANDROID)
+    FIND_PACKAGE(PkgConfig)
+    IF (PKG_CONFIG_FOUND)
+      PKG_SEARCH_MODULE(GLFW QUIET glfw3)
+      IF (NOT GLFW_FOUND)
+        MESSAGE(WARNING "GLFW not found! tutorials with GUI won't be built. Please either install GLFW or disable EMBREE_TUTORIALS.")
+      ENDIF()
+
+      LINK_DIRECTORIES(${GLFW_LIBRARY_DIRS})
+    ENDIF (PKG_CONFIG_FOUND)
+  ENDIF (NOT ANDROID)
 ENDIF (WIN32)
 
 IF (GLFW_FOUND)
