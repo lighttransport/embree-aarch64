@@ -100,7 +100,7 @@ namespace embree
     static __forceinline void storeu(const vboolf4& mask, void* ptr, const vuint4& i) { storeu(ptr,select(mask,i,loadu(ptr))); }
 #endif
 
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
     static __forceinline vuint4 load(const uint8_t* ptr) {
         return _mm_load4epu8_epi32(((__m128i*)ptr));
     }

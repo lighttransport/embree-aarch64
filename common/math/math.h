@@ -66,7 +66,7 @@ namespace embree
 
   __forceinline float rcp  ( const float x )
   {
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
       // Move scalar to vector register and do rcp.
       __m128 a;
       a[0] = x;
@@ -90,7 +90,7 @@ namespace embree
     return _mm_cvtss_f32(_mm_mul_ss(r,_mm_sub_ss(_mm_set_ss(2.0f), _mm_mul_ss(r, a))));
 #endif
       
-#endif  //defined(__aarch64__) && defined(BUILD_IOS)
+#endif  //defined(__aarch64__)
   }
 
   __forceinline float signmsk ( const float x ) {
@@ -134,7 +134,7 @@ namespace embree
   }
   __forceinline float rsqrt( const float x )
   {
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
       // FP and Neon shares same vector register in arm64
       __m128 a;
       a[0] = x;

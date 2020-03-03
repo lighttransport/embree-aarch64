@@ -116,7 +116,7 @@
 
 #include <stdint.h>
 #include "arm_neon.h"
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
 #include "constants.h"
 #endif
 
@@ -130,7 +130,7 @@
 /* places in fp1 of result. fp0 is the same for fp0 of */
 /* result                                              */
 /*******************************************************/
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
 #define _MN_SHUFFLE(fp3,fp2,fp1,fp0) ( (uint8x16_t){ (((fp3)*4)+0), (((fp3)*4)+1), (((fp3)*4)+2), (((fp3)*4)+3),  (((fp2)*4)+0), (((fp2)*4)+1), (((fp2)*4)+2), (((fp2)*4)+3),  (((fp1)*4)+0), (((fp1)*4)+1), (((fp1)*4)+2), (((fp1)*4)+3),  (((fp0)*4)+0), (((fp0)*4)+1), (((fp0)*4)+2), (((fp0)*4)+3) } )
 #define _MF_SHUFFLE(fp3,fp2,fp1,fp0) ( (uint8x16_t){ (((fp3)*4)+0), (((fp3)*4)+1), (((fp3)*4)+2), (((fp3)*4)+3),  (((fp2)*4)+0), (((fp2)*4)+1), (((fp2)*4)+2), (((fp2)*4)+3),  (((fp1)*4)+16+0), (((fp1)*4)+16+1), (((fp1)*4)+16+2), (((fp1)*4)+16+3),  (((fp0)*4)+16+0), (((fp0)*4)+16+1), (((fp0)*4)+16+2), (((fp0)*4)+16+3) } )
 #endif
@@ -479,8 +479,8 @@ FORCE_INLINE int _mm_movemask_ps(__m128 a)
   return (ia[0] >> 31) | ((ia[1] >> 30) & 2) | ((ia[2] >> 29) & 4) | ((ia[3] >> 28) & 8);
 #else
     
-#if defined(__aarch64__) && defined(BUILD_IOS)
-    uint32x4_t t2 = vandq_u32(a, embree::movemask_mask);
+#if defined(__aarch64__)
+    uint32x4_t t2 = vandq_u32(vreinterpretq_u32_f32(a), embree::movemask_mask);
     return vaddvq_u32(t2);
 #else
   static const uint32x4_t movemask = { 1, 2, 4, 8 };
@@ -495,11 +495,11 @@ FORCE_INLINE int _mm_movemask_ps(__m128 a)
 #endif
 }
 
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
 FORCE_INLINE int _mm_movemask_popcnt_ps(__m128 a)
 {
-    uint32x4_t t2 = vandq_u32(a, embree::movemask_mask);
-    t2 = vcntq_u8(t2);
+    uint32x4_t t2 = vandq_u32(vreinterpretq_u32_f32(a), embree::movemask_mask);
+    t2 = vreinterpretq_u32_u8(vcntq_u8(vreinterpretq_u8_u32(t2)));
     return vaddvq_u32(t2);
     
 }
@@ -844,7 +844,7 @@ FORCE_INLINE __m128i _mm_shufflehi_epi16_function(__m128i a)
 // Based on SIMDe
 FORCE_INLINE __m128i _mm_slli_epi32(__m128i a, const int imm8)
 {
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
     const int32x4_t s = vdupq_n_s32(imm8);
     return vshlq_s32(a, s);
 #else
@@ -893,7 +893,7 @@ FORCE_INLINE __m128i _mm_srli_epi32(__m128i a, const int imm8)
 // Based on SIMDe
 FORCE_INLINE __m128i _mm_srai_epi32(__m128i a, const int imm8)
 {
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__) 
     const int32x4_t s = vdupq_n_s32(-imm8);
     return vshlq_s32(a, s);
 #else
@@ -1050,11 +1050,8 @@ FORCE_INLINE __m128 _mm_div_ps(__m128 a, __m128 b)
 {
   float32x4_t reciprocal = _mm_rcp_ps(b);
     
-  // Refinements are done here for div in aarch64 embree.
-#if defined(__aarch64__) && defined(BUILD_IOS)
   reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
   reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
-#endif
     
   return vmulq_f32(a, reciprocal);
 }
@@ -1073,11 +1070,8 @@ FORCE_INLINE __m128 _mm_rsqrt_ps(__m128 in)
 {
   float32x4_t value = vrsqrteq_f32(in);
   
-    // Refinements are done outside for vector rsqrt in aarch64 embree.
-#if !defined(__aarch64__) && defined(BUILD_IOS)
   value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
   value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
-#endif
 
   return value;
 }
@@ -1086,14 +1080,9 @@ FORCE_INLINE __m128 _mm_rsqrt_ss(__m128 in)
 {
   float32x4_t result = in;
   
-  // Refinements are done here for scalar rsqrt in aarch64 embree.
-#if defined(__aarch64__) && defined(BUILD_IOS)
   __m128 value = _mm_rsqrt_ps(in);
   value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
   value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
-#else
-  float32x4_t value = _mm_rsqrt_ps(in);
-#endif
   return vsetq_lane_f32(vgetq_lane_f32(value, 0), result, 0);
 }
 
@@ -1101,14 +1090,9 @@ FORCE_INLINE __m128 _mm_rsqrt_ss(__m128 in)
 // Computes the approximations of square roots of the four single-precision, floating-point values of a. First computes reciprocal square roots and then reciprocals of the four values. https://msdn.microsoft.com/en-us/library/vstudio/8z67bwwk(v=vs.100).aspx
 FORCE_INLINE __m128 _mm_sqrt_ps(__m128 in)
 {
-    // Refinements are done outside for vector sqrt in embree.
-#if defined(__aarch64__) && defined(BUILD_IOS)
   __m128 reciprocal = _mm_rsqrt_ps(in);
   reciprocal = vmulq_f32(reciprocal, vrsqrtsq_f32(vmulq_f32(in, reciprocal), reciprocal));
   reciprocal = vmulq_f32(reciprocal, vrsqrtsq_f32(vmulq_f32(in, reciprocal), reciprocal));
-#else
-  float32x4_t reciprocal = _mm_rsqrt_ps(in);
-#endif
   return vmulq_f32(in, reciprocal);
 }
 
@@ -1556,10 +1540,10 @@ FORCE_INLINE __m128i _mm_set1_epi64x(int64_t _i)
   return (__m128i)vmovq_n_s64(_i);
 }
 
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
 FORCE_INLINE __m128 _mm_blendv_ps(__m128 a, __m128 b, __m128 c)
 {
-    return vbslq_f32( c, b, a);
+    return vbslq_f32( vreinterpretq_u32_f32(c), b, a);
 }
 
 FORCE_INLINE __m128i _mm_load4epu8_epi32(__m128i *ptr)
@@ -1567,14 +1551,14 @@ FORCE_INLINE __m128i _mm_load4epu8_epi32(__m128i *ptr)
     uint8x8_t  t0 = vld1_u8((uint8_t*)ptr);
     uint16x8_t t1 = vmovl_u8(t0);
     uint32x4_t t2 = vmovl_u16(vget_low_u16(t1));
-    return t2;
+    return vreinterpretq_s32_u32(t2);
 }
 
 FORCE_INLINE __m128i _mm_load4epu16_epi32(__m128i *ptr)
 {
     uint16x8_t t0 = vld1q_u16((uint16_t*)ptr);
     uint32x4_t t1 = vmovl_u16(vget_low_u16(t0));
-    return t1;
+    return vreinterpretq_s32_u32(t1);
 }
 
 FORCE_INLINE __m128i _mm_load4epi8_f32(__m128i *ptr)
@@ -1583,7 +1567,7 @@ FORCE_INLINE __m128i _mm_load4epi8_f32(__m128i *ptr)
     int16x8_t   t1 = vmovl_s8(t0);
     int32x4_t   t2 = vmovl_s16(vget_low_s16(t1));
     float32x4_t t3 = vcvtq_f32_s32(t2);
-    return t3;
+    return vreinterpretq_s32_f32(t3);
 }
 
 FORCE_INLINE __m128i _mm_load4epu8_f32(__m128i *ptr)
@@ -1591,8 +1575,7 @@ FORCE_INLINE __m128i _mm_load4epu8_f32(__m128i *ptr)
     uint8x8_t   t0 = vld1_u8((uint8_t*)ptr);
     uint16x8_t  t1 = vmovl_u8(t0);
     uint32x4_t  t2 = vmovl_u16(vget_low_u16(t1));
-    float32x4_t t3 = vcvtq_f32_s32(t2);
-    return t3;
+    return vreinterpretq_s32_u32(t2);
 }
 
 FORCE_INLINE __m128i _mm_load4epi16_f32(__m128i *ptr)
@@ -1600,34 +1583,34 @@ FORCE_INLINE __m128i _mm_load4epi16_f32(__m128i *ptr)
     int16x8_t   t0 = vld1q_s16((int16_t*)ptr);
     int32x4_t   t1 = vmovl_s16(vget_low_s16(t0));
     float32x4_t t2 = vcvtq_f32_s32(t1);
-    return t2;
+    return vreinterpretq_s32_f32(t2);
 }
 
 FORCE_INLINE __m128i _mm_packus_epi32(__m128i a, __m128i b)
 {
-    return vcombine_u16( vqmovun_s32(a), vqmovun_s32(b));
+    return (__m128i)vcombine_u8(vqmovun_s16((int16x8_t)a), vqmovun_s16((int16x8_t)b));
 }
 
 FORCE_INLINE __m128i _mm_stream_load_si128(__m128i* ptr)
 {
     // No non-temporal load on a single register on ARM.
-    return vld1q_u8((uint8_t*)ptr);
+    return vreinterpretq_s32_u8(vld1q_u8((uint8_t*)ptr));
 }
 
 FORCE_INLINE void _mm_stream_ps(float* ptr, __m128i a)
 {
     // No non-temporal store on a single register on ARM.
-    vst1q_f32((float*)ptr, a);
+    vst1q_f32((float*)ptr, vreinterpretq_f32_s32(a));
 }
 
 FORCE_INLINE __m128i _mm_min_epu32(__m128i a, __m128i b)
 {
-    return vminq_u32(a, b);
+    return vreinterpretq_s32_u32(vminq_u32(vreinterpretq_u32_s32(a), vreinterpretq_u32_s32(b)));
 }
 
 FORCE_INLINE __m128i _mm_max_epu32(__m128i a, __m128i b)
 {
-    return vmaxq_u32(a, b);
+    return vreinterpretq_s32_u32(vmaxq_u32(vreinterpretq_u32_s32(a), vreinterpretq_u32_s32(b)));
 }
 
 FORCE_INLINE __m128 _mm_abs_ps(__m128 a)
@@ -1647,7 +1630,7 @@ FORCE_INLINE __m128 _mm_msub_ps(__m128 a, __m128 b, __m128 c)
 
 FORCE_INLINE __m128 _mm_abs_epi32(__m128 a)
 {
-    return vabsq_s32(a);
+    return vreinterpretq_f32_s32(vabsq_s32(vreinterpretq_s32_f32(a)));
 }
 #endif  //defined(__aarch64__)
 
