@@ -5200,6 +5200,12 @@ namespace embree
 #if defined(EMBREE_TARGET_AVX512SKX)
     if (hasISA(AVX512SKX)) isas.push_back(AVX512SKX);
 #endif
+
+#if defined(__aarch64__)
+    // NEON should be available
+    assert(hasISA(NEON));
+    isas.push_back(NEON);
+#endif
     
     /* create list of all intersect modes to test */
     intersectModes.push_back(MODE_INTERSECT1);
