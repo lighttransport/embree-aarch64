@@ -263,13 +263,17 @@ namespace embree
 #endif
   }
   
-#if defined(__X86_64__)
+#if defined(__X86_64__) || defined(__aarch64__)
   __forceinline unsigned bsf(unsigned v) 
   {
+#if defined(__ARM_NEON)
+    return __builtin_ctz(v);
+#else
 #if defined(__AVX2__) 
     return _tzcnt_u32(v);
 #else
     unsigned r = 0; asm ("bsf %1,%0" : "=r"(r) : "r"(v)); return r;
+#endif
 #endif
   }
 #endif
@@ -295,7 +299,7 @@ namespace embree
     return i;
   }
   
-#if defined(__X86_64__)
+#if defined(__X86_64__) || defined(__aarch64__)
   __forceinline unsigned int bscf(unsigned int& v) 
   {
     unsigned int i = bsf(v);
@@ -321,10 +325,12 @@ namespace embree
 #endif
   }
   
-#if defined(__X86_64__)
+#if defined(__X86_64__) || defined(__aarch64__)
   __forceinline unsigned bsr(unsigned v) {
 #if defined(__AVX2__) 
     return 31 - _lzcnt_u32(v);
+#elif defined(__ARM_NEON)
+    return __builtin_clz(v)^31;
 #else
     unsigned r = 0; asm ("bsr %1,%0" : "=r"(r) : "r"(v)); return r;
 #endif
@@ -338,8 +344,8 @@ namespace embree
 #else
     return 31 - _lzcnt_u32(v);
 #endif
-#elif defined(__ARM_NEON)
-    return sizeof(v)*8 - 1 - __builtin_clz(v);
+#elif defined(__aarch64__)
+    return (sizeof(v) * 8 - 1) - __builtin_clzl(v);
 #else
     size_t r = 0; asm ("bsr %1,%0" : "=r"(r) : "r"(v)); return r;
 #endif
