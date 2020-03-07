@@ -514,12 +514,12 @@ RTC_NAMESPACE_BEGIN;
 
     IntersectContext context(scene,user_context);
 #if !defined(EMBREE_RAY_PACKETS)
-    Ray4* ray4 = (Ray4*) rayhit;
+    RayHit4* rayhit4 = (RayHit4*)rayhit;
     for (size_t i=0; i<4; i++) {
       if (!valid[i]) continue;
-      RayHit ray1; ray4->get(i,ray1);
+      RayHit ray1; rayhit4->get(i,ray1);
       scene->intersectors.intersect((RTCRayHit&)ray1,&context);
-      ray4->set(i,ray1);
+      rayhit4->set(i,ray1);
     }
 #else
     scene->intersectors.intersect4(valid,*rayhit,&context);
@@ -545,12 +545,12 @@ RTC_NAMESPACE_BEGIN;
 
     IntersectContext context(scene,user_context);
 #if !defined(EMBREE_RAY_PACKETS)
-    Ray8* ray8 = (Ray8*) rayhit;
+    RayHit8* rayhit8 = (RayHit8*) rayhit;
     for (size_t i=0; i<8; i++) {
       if (!valid[i]) continue;
-      RayHit ray1; ray8->get(i,ray1);
+      RayHit ray1; rayhit8->get(i,ray1);
       scene->intersectors.intersect((RTCRayHit&)ray1,&context);
-      ray8->set(i,ray1);
+      rayhit8->set(i,ray1);
     }
 #else
     if (likely(scene->intersectors.intersector8))
@@ -578,12 +578,12 @@ RTC_NAMESPACE_BEGIN;
 
     IntersectContext context(scene,user_context);
 #if !defined(EMBREE_RAY_PACKETS)
-    Ray16* ray16 = (Ray16*) rayhit;
+    RayHit16* rayhit16 = (RayHit16*) rayhit;
     for (size_t i=0; i<16; i++) {
       if (!valid[i]) continue;
-      RayHit ray1; ray16->get(i,ray1);
+      RayHit ray1; rayhit16->get(i,ray1);
       scene->intersectors.intersect((RTCRayHit&)ray1,&context);
-      ray16->set(i,ray1);
+      rayhit16->set(i,ray1);
     }
 #else
     if (likely(scene->intersectors.intersector16))
@@ -765,12 +765,12 @@ RTC_NAMESPACE_BEGIN;
 
     IntersectContext context(scene,user_context);
 #if !defined(EMBREE_RAY_PACKETS)
-    RayHit4* ray4 = (RayHit4*) ray;
+    Ray4* ray4 = (Ray4*) ray;
     for (size_t i=0; i<4; i++) {
       if (!valid[i]) continue;
-      RayHit ray1; ray4->get(i,ray1);
+      Ray ray1; ray4->get(i,ray1);
       scene->intersectors.occluded((RTCRay&)ray1,&context);
-      ray4->geomID[i] = ray1.geomID; 
+      ray4->set(i,ray1);
     }
 #else
     scene->intersectors.occluded4(valid,*ray,&context);
@@ -796,10 +796,10 @@ RTC_NAMESPACE_BEGIN;
 
     IntersectContext context(scene,user_context);
 #if !defined(EMBREE_RAY_PACKETS)
-    RayHit8* ray8 = (RayHit8*) ray;
+    Ray8* ray8 = (Ray8*) ray;
     for (size_t i=0; i<8; i++) {
       if (!valid[i]) continue;
-      RayHit ray1; ray8->get(i,ray1);
+      Ray ray1; ray8->get(i,ray1);
       scene->intersectors.occluded((RTCRay&)ray1,&context);
       ray8->set(i,ray1);
     }
@@ -830,10 +830,10 @@ RTC_NAMESPACE_BEGIN;
 
     IntersectContext context(scene,user_context);
 #if !defined(EMBREE_RAY_PACKETS)
-    RayHit16* ray16 = (RayHit16*) ray;
+    Ray16* ray16 = (Ray16*) ray;
     for (size_t i=0; i<16; i++) {
       if (!valid[i]) continue;
-      RayHit ray1; ray16->get(i,ray1);
+      Ray ray1; ray16->get(i,ray1);
       scene->intersectors.occluded((RTCRay&)ray1,&context);
       ray16->set(i,ray1);
     }
