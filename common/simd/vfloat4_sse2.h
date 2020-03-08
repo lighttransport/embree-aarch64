@@ -635,10 +635,10 @@ __forceinline vfloat4 maxi(const vfloat4& a, const vfloat4& b)
   ////////////////////////////////////////////////////////////////////////////////
 
 #if defined(__aarch64__) && defined(BUILD_IOS)
-  __forceinline vfloat4 floor(const vfloat4& a) { return vrndmq_f32(a); }
-  __forceinline vfloat4 ceil (const vfloat4& a) { return vrndpq_f32(a); }
+  __forceinline vfloat4 floor(const vfloat4& a) { return vrndmq_f32(a); } // towards -inf
+  __forceinline vfloat4 ceil (const vfloat4& a) { return vrndpq_f32(a); } // toward +inf
   __forceinline vfloat4 trunc(const vfloat4& a) { return vrndq_f32(a); } // towards 0
-  __forceinline vfloat4 round(const vfloat4& a) { return vrndqn_f32(a); } // to nearest, ties to even
+  __forceinline vfloat4 round(const vfloat4& a) { return vrndnq_f32(a); } // to nearest, ties to even. NOTE(LTE): arm clang uses vrndnq, old gcc uses vrndqn?
 #elif defined (__SSE4_1__)
   __forceinline vfloat4 floor(const vfloat4& a) { return _mm_round_ps(a, _MM_FROUND_TO_NEG_INF   ); }
   __forceinline vfloat4 ceil (const vfloat4& a) { return _mm_round_ps(a, _MM_FROUND_TO_POS_INF   ); }
