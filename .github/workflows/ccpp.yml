@@ -72,10 +72,11 @@ jobs:
         run: |
             cd build
             cat /proc/cpuinfo
-            #./verify
+            # `verify` now should pass starting from v3.8.0(still some `ignored` tests exist though)
+            ./verify
             cd ..
             cd test/curve
-            make EXTRA_CXXFLAGS="-fsanitize=address" EXTRA_LDFLAGS="-fsanitize=address" EMBREE_LIB_PATH=../../build-aarch64
+            make EXTRA_CXXFLAGS="-fsanitize=address" EXTRA_LDFLAGS="-fsanitize=address" EMBREE_LIB_PATH=../../build
             ./run.sh ../../build > /dev/null
             cd ..
 
