@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -116,6 +116,9 @@ namespace embree
 
       Node (const std::string& name) 
         : name(name), indegree(0), closed(false), id(-1), geometry(nullptr) {}
+
+      /* prints scenegraph */
+      virtual void print(std::ostream& cout, int depth = 0) = 0;
 
       /* sets material */
       virtual void setMaterial(Ref<MaterialNode> material) {};
@@ -235,28 +238,96 @@ namespace embree
         for (size_t i=0; i<other.size(); i++) spaces.push_back(other[i]);
       }
 
-      friend __forceinline Transformations operator* ( const Transformations& a, const Transformations& b ) 
+      static __forceinline bool isIdentity(AffineSpace3fa const& M, bool q)
       {
-        if (a.size() == 1) 
+        if (M.l.vx.x      != 1.f) return false;
+        if (M.l.vx.y      != 0.f) return false;
+        if (M.l.vx.z      != 0.f) return false;
+        if (q && M.l.vx.w != 0.f) return false;
+
+        if (M.l.vy.x      != 0.f) return false;
+        if (M.l.vy.y      != 1.f) return false;
+        if (M.l.vy.z      != 0.f) return false;
+        if (q && M.l.vy.w != 0.f) return false;
+
+        if (M.l.vz.x      != 0.f) return false;
+        if (M.l.vz.y      != 0.f) return false;
+        if (M.l.vz.z      != 1.f) return false;
+        if (q && M.l.vz.w != 0.f) return false;
+
+        if (M.p.x         != 0.f) return false;
+        if (M.p.y         != 0.f) return false;
+        if (M.p.z         != 0.f) return false;
+        if (q && M.p.w    != 1.f) return false;
+
+        return true;
+      }
+
+      static __forceinline AffineSpace3fa mul(AffineSpace3fa const& M0, AffineSpace3fa const& M1, bool q0, bool q1, bool& q)
+      {
+        q = false;
+        if (isIdentity(M0, q0)) { q = q1; return M1; }
+        if (isIdentity(M1, q1)) { q = q0; return M0; }
+
+        // simple case non of the transformations is a quaternion
+        if (q0 == false && q1 == false)
+        {
+          return M0 * M1;
+        }
+        else if (q0 == true && q1 == true)
+        {
+          std::cout << "warning: cannot multiply two quaternion decompositions. will convert to regular transforms and multiply" << std::endl;
+          return quaternionDecompositionToAffineSpace(M0) * quaternionDecompositionToAffineSpace(M1);
+        }
+        else if (q0 == true && q1 == false)
+        {
+          AffineSpace3fa S; Quaternion3f Q; Vec3fa T;
+          quaternionDecomposition(M0, T, Q, S);
+          S = S * M1;
+          if (S.l.vx.y != 0.f || S.l.vx.z != 0 || S.l.vy.z != 0)
+            std::cout << "warning: cannot multiply quaternion and general transformation matrix. will ignore lower diagonal" << std::endl;
+          q = true;
+          return quaternionDecomposition(T, Q, S);
+        }
+        else {
+          if (M0.l.vx.y != 0.f || M0.l.vx.z != 0 || M0.l.vy.z != 0 || M0.l.vy.x != 0.f || M0.l.vz.x != 0 || M0.l.vz.y != 0)
+            std::cout << "warning: cannot multiply general transformation matrix and quaternion. will only consider translation and diagonal as scale factors" << std::endl;
+          AffineSpace3fa M = M1;
+          M.l.vx.y += M0.p.x;
+          M.l.vx.z += M0.p.y;
+          M.l.vy.z += M0.p.z;
+          M.l.vx.x *= M0.l.vx.x;
+          M.l.vy.y *= M0.l.vy.y;
+          M.l.vz.z *= M0.l.vz.z;
+          q = true;
+          return M;
+        }
+      }
+
+      friend __forceinline Transformations operator* ( const Transformations& a, const Transformations& b )
+      {
+        if (a.size() == 1)
         {
           Transformations c(intersect(a.time_range,b.time_range),b.size());
-          for (size_t i=0; i<b.size(); i++) c[i] = a[0] * b[i];
+          for (size_t i=0; i<b.size(); i++) c[i] = mul(a[0], b[i], a.quaternion, b.quaternion, c.quaternion);
           return c;
         } 
-        else if (b.size() == 1) 
+        else if (b.size() == 1)
         {
           Transformations c(intersect(a.time_range,b.time_range),a.size());
-          for (size_t i=0; i<a.size(); i++) c[i] = a[i] * b[0];
+          c.quaternion = a.quaternion || b.quaternion;
+          for (size_t i=0; i<a.size(); i++) c[i] = mul(a[i], b[0], a.quaternion, b.quaternion, c.quaternion);
           return c;
         }
         else if (a.size() == b.size())
         {
           Transformations c(intersect(a.time_range,b.time_range),a.size());
-          for (size_t i=0; i<a.size(); i++) c[i] = a[i] * b[i];
+          c.quaternion = a.quaternion || b.quaternion;
+          for (size_t i=0; i<a.size(); i++) c[i] = mul(a[i], b[i], a.quaternion, b.quaternion, c.quaternion);
           return c;
         }
         else
-          THROW_RUNTIME_ERROR("number of transformations does not match");        
+          THROW_RUNTIME_ERROR("number of transformations does not match");
       }
 
       AffineSpace3fa interpolate (const float gtime) const
@@ -275,6 +346,7 @@ namespace embree
     public:
       BBox1f time_range;
       avector<AffineSpace3fa> spaces;
+      bool quaternion = false;
     };
 
     template<typename Vertex>
@@ -405,6 +477,8 @@ namespace embree
       PerspectiveCameraNode (const Ref<PerspectiveCameraNode>& other, const AffineSpace3fa& space, const std::string& id)
         : Node(id), from(xfmPoint(space,other->from)), to(xfmPoint(space,other->to)), up(xfmVector(space,other->up)), fov(other->fov) {}
 
+      virtual void print(std::ostream& cout, int depth);
+      
       virtual void calculateStatistics(Statistics& stat);
       virtual bool calculateClosed(bool group_instancing);
             
@@ -435,6 +509,8 @@ namespace embree
         child->setMaterial(material);
       }
 
+      virtual void print(std::ostream& cout, int depth);
+      
       virtual void calculateStatistics(Statistics& stat);
       virtual void calculateInDegree();
       virtual bool calculateClosed(bool group_instancing);
@@ -579,6 +655,8 @@ namespace embree
         for (auto& child : children) child->setMaterial(material);
       }
 
+      virtual void print(std::ostream& cout, int depth);
+      
       virtual void calculateStatistics(Statistics& stat);
       virtual void calculateInDegree();
       virtual bool calculateClosed(bool group_instancing);
@@ -593,6 +671,7 @@ namespace embree
       LightNode (Ref<Light> light)
         : light(light) {}
 
+      virtual void print(std::ostream& cout, int depth);
       virtual void calculateStatistics(Statistics& stat);
       virtual bool calculateClosed(bool group_instancing);
       
@@ -608,6 +687,7 @@ namespace embree
 
       virtual Material* material() = 0;
 
+      virtual void print(std::ostream& cout, int depth);
       virtual void calculateStatistics(Statistics& stat);
     };
 
@@ -695,6 +775,7 @@ namespace embree
 
       void verify() const;
 
+      virtual void print(std::ostream& cout, int depth);
       virtual void calculateStatistics(Statistics& stat);
       virtual void calculateInDegree();
       virtual void resetInDegree();
@@ -781,6 +862,7 @@ namespace embree
       
       void verify() const;
 
+      virtual void print(std::ostream& cout, int depth);
       virtual void calculateStatistics(Statistics& stat);
       virtual void calculateInDegree();
       virtual void resetInDegree();
@@ -896,6 +978,7 @@ namespace embree
       
       void verify() const;
 
+      virtual void print(std::ostream& cout, int depth);
       virtual void calculateStatistics(Statistics& stat);
       virtual void calculateInDegree();
       virtual void resetInDegree();
@@ -1008,6 +1091,7 @@ namespace embree
 
       void verify() const;
 
+      virtual void print(std::ostream& cout, int depth);
       virtual void calculateStatistics(Statistics& stat);
       virtual void calculateInDegree();
       virtual void resetInDegree();
@@ -1094,6 +1178,7 @@ namespace embree
 
       void verify() const;
 
+      virtual void print(std::ostream& cout, int depth);
       virtual void calculateStatistics(Statistics& stat);
       virtual void calculateInDegree();
       virtual void resetInDegree();
@@ -1186,6 +1271,7 @@ namespace embree
 
       void verify() const;
 
+      virtual void print(std::ostream& cout, int depth);
       virtual void calculateStatistics(Statistics& stat);
       virtual void calculateInDegree();
       virtual void resetInDegree();

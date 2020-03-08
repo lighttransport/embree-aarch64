@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -34,18 +34,16 @@ namespace embree
     CurveGeometry (Device* device, Geometry::GType gtype);
     
   public:
-    void enabling();
-    void disabling();
     void setMask(unsigned mask);
     void setNumTimeSteps (unsigned int numTimeSteps);
     void setVertexAttributeCount (unsigned int N);
     void setBuffer(RTCBufferType type, unsigned int slot, RTCFormat format, const Ref<Buffer>& buffer, size_t offset, size_t stride, unsigned int num);
     void* getBuffer(RTCBufferType type, unsigned int slot);
     void updateBuffer(RTCBufferType type, unsigned int slot);
-    void preCommit();
-    void postCommit();
+    void commit();
     bool verify();
     void setTessellationRate(float N);
+    void addElementsToCount (GeometryCounts & counts) const;
 
   public:
     

@@ -207,7 +207,7 @@ float displacement(const Vec3fa& P)
 {
   float dN = 0.0f;
   for (float freq = 1.0f; freq<40.0f; freq*= 2) {
-    float n = abs(noise(freq*P));
+    float n = std::abs(noise(freq*P));
     dN += 1.4f*n*n/freq;
   }
   return dN;

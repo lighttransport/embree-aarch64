@@ -10,7 +10,7 @@ Linux and macOS
 To compile Embree you need a modern C++ compiler that supports C++11.
 Embree is tested with Intel® Compiler 17.0 (Update\ 1), Intel®
 Compiler 16.0 (Update\ 1), Clang 3.8.0 (supports AVX2), Clang 4.0.0
-(supports AVX512) and GCC 5.4.0. If the GCC that comes with your
+(supports AVX512) and GCC 5.4.0 (Linux only). If the GCC that comes with your
 Fedora/Red Hat/CentOS distribution is too old then you can run the
 provided script `scripts/install_linux_gcc.sh` to locally install a
 recent GCC into `$HOME/devtools-2`.
@@ -271,6 +271,22 @@ parameters that can be configured in CMake:
   Building Blocks (TBB), Parallel Patterns Library (PPL) (Windows
   only), or an internal tasking system (INTERNAL). By default TBB is
   used.
+
++ `EMBREE_TBB_ROOT`: If Intel® Threading TBB Building Blocks (TBB)
+  is used as a tasking system, search the library in this directory
+  tree.
+
++ `EMBREE_TBB_POSTFIX`: If Intel® Threading TBB Building Blocks (TBB)
+  is used as a tasking system, link to tbb<EMBREE_TBB_POSTFIX>.(so,dll,lib).
+  Defaults to the empty string.
+
++ `EMBREE_TBB_DEBUG_ROOT`: If Intel® Threading TBB Building Blocks (TBB)
+  is used as a tasking system, search the library in this directory
+  tree in Debug mode. Defaults to `EMBREE_TBB_ROOT`.
+
++ `EMBREE_TBB_DEBUG_POSTFIX`: If Intel® Threading TBB Building Blocks (TBB)
+  is used as a tasking system, link to tbb<EMBREE_TBB_DEBUG_POSTFIX>.(so,dll,lib)
+  in Debug mode. Defaults to "_debug".
 
 + `EMBREE_MAX_ISA`: Select highest supported ISA (SSE2, SSE4.2, AVX,
   AVX2, AVX512KNL, AVX512SKX, or NONE). When set to NONE the

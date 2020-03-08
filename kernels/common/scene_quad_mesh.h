@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -45,18 +45,16 @@ namespace embree
   
     /* geometry interface */
   public:
-    void enabling();
-    void disabling();
     void setMask(unsigned mask);
     void setNumTimeSteps (unsigned int numTimeSteps);
     void setVertexAttributeCount (unsigned int N);
     void setBuffer(RTCBufferType type, unsigned int slot, RTCFormat format, const Ref<Buffer>& buffer, size_t offset, size_t stride, unsigned int num);
     void* getBuffer(RTCBufferType type, unsigned int slot);
     void updateBuffer(RTCBufferType type, unsigned int slot);
-    void preCommit();
-    void postCommit();
+    void commit();
     bool verify();
     void interpolate(const RTCInterpolateArguments* const args);
+    void addElementsToCount (GeometryCounts & counts) const;
 
   public:
 
@@ -205,9 +203,30 @@ namespace embree
       return true;
     }
 
+    /*! get fast access to first vertex buffer */
+    __forceinline float * getCompactVertexArray () const {
+      return (float*) vertices0.getPtr();
+    }
+
+    /* gets version info of topology */
+    unsigned int getTopologyVersion() const {
+      return quads.modCounter;
+    }
+    
     /* returns true if topology changed */
-    bool topologyChanged() const {
-      return quads.isModified() || numPrimitivesChanged;
+    bool topologyChanged(unsigned int otherVersion) const {
+      return quads.isModified(otherVersion); // || numPrimitivesChanged;
+    }
+
+    /* returns the projected area */
+    __forceinline float projectedPrimitiveArea(const size_t i) const {
+      const Quad& q = quad(i);
+      const Vec3fa v0 = vertex(q.v[0]);
+      const Vec3fa v1 = vertex(q.v[1]);
+      const Vec3fa v2 = vertex(q.v[2]);
+      const Vec3fa v3 = vertex(q.v[3]);
+      return areaProjectedTriangle(v0,v1,v3) +
+	areaProjectedTriangle(v1,v2,v3);
     }
 
   public:
@@ -224,7 +243,7 @@ namespace embree
       QuadMeshISA (Device* device)
         : QuadMesh(device) {}
 
-      PrimInfo createPrimRefArray(mvector<PrimRef>& prims, const range<size_t>& r, size_t k) const
+      PrimInfo createPrimRefArray(mvector<PrimRef>& prims, const range<size_t>& r, size_t k, unsigned int geomID) const
       {
         PrimInfo pinfo(empty);
         for (size_t j=r.begin(); j<r.end(); j++)
@@ -238,7 +257,7 @@ namespace embree
         return pinfo;
       }
 
-      PrimInfo createPrimRefArrayMB(mvector<PrimRef>& prims, size_t itime, const range<size_t>& r, size_t k) const
+      PrimInfo createPrimRefArrayMB(mvector<PrimRef>& prims, size_t itime, const range<size_t>& r, size_t k, unsigned int geomID) const
       {
         PrimInfo pinfo(empty);
         for (size_t j=r.begin(); j<r.end(); j++)
@@ -252,13 +271,13 @@ namespace embree
         return pinfo;
       }
       
-      PrimInfoMB createPrimRefMBArray(mvector<PrimRefMB>& prims, const BBox1f& t0t1, const range<size_t>& r, size_t k) const
+      PrimInfoMB createPrimRefMBArray(mvector<PrimRefMB>& prims, const BBox1f& t0t1, const range<size_t>& r, size_t k, unsigned int geomID) const
       {
         PrimInfoMB pinfo(empty);
         for (size_t j=r.begin(); j<r.end(); j++)
         {
           if (!valid(j, timeSegmentRange(t0t1))) continue;
-          const PrimRefMB prim(linearBounds(j,t0t1),this->numTimeSegments(),this->time_range,this->numTimeSegments(),this->geomID,unsigned(j));
+          const PrimRefMB prim(linearBounds(j,t0t1),this->numTimeSegments(),this->time_range,this->numTimeSegments(),geomID,unsigned(j));
           pinfo.add_primref(prim);
           prims[k++] = prim;
         }

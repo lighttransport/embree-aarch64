@@ -1,5 +1,5 @@
 ## ======================================================================== ##
-## Copyright 2009-2018 Intel Corporation                                    ##
+## Copyright 2009-2020 Intel Corporation                                    ##
 ##                                                                          ##
 ## Licensed under the Apache License, Version 2.0 (the "License");          ##
 ## you may not use this file except in compliance with the License.         ##
@@ -15,5 +15,4 @@
 ## ======================================================================== ##
 
 set(CTEST_PROJECT_NAME "Embree")
-set(CTEST_NIGHTLY_START_TIME "22:00:00 UTC")
-set(TEST_MODELS_HASH a5736fc55fe9b8cfe2b34e6f49b236896242801a)
+set(TEST_MODELS_HASH 9e68895769d9b7ac188f25852ab7616e5353bbf7)

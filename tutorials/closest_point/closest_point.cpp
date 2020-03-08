@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -28,8 +28,8 @@ namespace embree
     Tutorial()
       : TutorialApplication("closest_point",FEATURE_RTCORE | FEATURE_STREAM) 
     {
-      camera.from = Vec3fa(8.74064, 8.84506, 7.48329);
-      camera.to = Vec3fa(-0.106665, -1.8421, -6.5347);
+      camera.from = Vec3fa(8.74064f, 8.84506f, 7.48329f);
+      camera.to = Vec3fa(-0.106665f, -1.8421f, -6.5347f);
       camera.fov  = 60;
     }
     

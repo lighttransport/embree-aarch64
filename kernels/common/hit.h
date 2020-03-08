@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -24,7 +24,7 @@ namespace embree
 {
   /* Hit structure for K hits */
   template<int K>
-  struct HitK
+    struct HitK
   {
     /* Default construction does nothing */
     __forceinline HitK() {}
@@ -52,7 +52,7 @@ namespace embree
 
   /* Specialization for a single hit */
   template<>
-  struct HitK<1>
+    struct __aligned(16) HitK<1>
   {
      /* Default construction does nothing */
     __forceinline HitK() {}

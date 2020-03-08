@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -207,7 +207,7 @@ namespace embree
 
   extern MAYBE_UNUSED UndefinedTy undefined;
     
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
   extern const uint32x4_t movemask_mask;
   extern const uint32x4_t vzero;
   extern const uint32x4_t v0x80000000;

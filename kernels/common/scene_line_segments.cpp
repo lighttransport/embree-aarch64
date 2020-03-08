@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -25,18 +25,6 @@ namespace embree
     : Geometry(device,gtype,0,1), tessellationRate(4)
   {
     vertices.resize(numTimeSteps);
-  }
-
-  void LineSegments::enabling()
-  {
-    if (numTimeSteps == 1) scene->world.numLineSegments += numPrimitives;
-    else                   scene->worldMB.numLineSegments += numPrimitives;
-  }
-
-  void LineSegments::disabling()
-  {
-    if (numTimeSteps == 1) scene->world.numLineSegments -= numPrimitives;
-    else                   scene->worldMB.numLineSegments -= numPrimitives;
   }
 
   void LineSegments::setMask (unsigned mask)
@@ -169,31 +157,31 @@ namespace embree
     {
       if (slot != 0)
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid buffer slot");
-      segments.setModified(true);
+      segments.setModified();
     }
     else if (type == RTC_BUFFER_TYPE_VERTEX)
     {
       if (slot >= vertices.size())
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid buffer slot");
-      vertices[slot].setModified(true);
+      vertices[slot].setModified();
     }
     else if (type == RTC_BUFFER_TYPE_NORMAL)
     {
       if (slot >= normals.size())
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid buffer slot");
-      normals[slot].setModified(true);
+      normals[slot].setModified();
     }
     else if (type == RTC_BUFFER_TYPE_VERTEX_ATTRIBUTE)
     {
       if (slot >= vertexAttribs.size())
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid buffer slot");
-      vertexAttribs[slot].setModified(true);
+      vertexAttribs[slot].setModified();
     }
     else if (type == RTC_BUFFER_TYPE_FLAGS) 
     {
       if (slot != 0)
         throw_RTCError(RTC_ERROR_INVALID_ARGUMENT, "invalid buffer slot");
-      flags.setModified(true);
+      flags.setModified();
     }
     else
     {
@@ -208,7 +196,7 @@ namespace embree
     tessellationRate = clamp((int)N,1,16);
   }
 
-  void LineSegments::preCommit() 
+  void LineSegments::commit() 
   {
     /* verify that stride of all time steps are identical */
     for (unsigned int t=0; t<numTimeSteps; t++)
@@ -223,20 +211,13 @@ namespace embree
     if (getCurveType() == GTY_SUBTYPE_ORIENTED_CURVE)
       normals0 = normals[0];
         
-    Geometry::preCommit();
+    Geometry::commit();
   }
-
-  void LineSegments::postCommit() 
+  
+  void LineSegments::addElementsToCount (GeometryCounts & counts) const 
   {
-    scene->vertices[geomID] = (float*) vertices0.getPtr();
-
-    segments.setModified(false);
-    for (auto& buf : vertices) buf.setModified(false);
-    for (auto& buf : normals)  buf.setModified(false);
-    for (auto& attrib : vertexAttribs) attrib.setModified(false);
-    flags.setModified(false);
-
-    Geometry::postCommit();
+    if (numTimeSteps == 1) counts.numLineSegments += numPrimitives;
+    else                   counts.numMBLineSegments += numPrimitives;
   }
 
   bool LineSegments::verify ()

@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -336,8 +336,9 @@ namespace embree
     spaces = (AffineSpace3fa*) alignedMalloc(in->spaces.size()*sizeof(AffineSpace3fa),16);
     geom.geomID = scene->geometryID(in->child);
     child = ISPCScene::convertGeometry(scene,in->child);
-    startTime = in->spaces.time_range.lower;
-    endTime   = in->spaces.time_range.upper;
+    startTime  = in->spaces.time_range.lower;
+    endTime    = in->spaces.time_range.upper;
+    quaternion = in->spaces.quaternion;
     for (size_t i=0; i<numTimeSteps; i++)
       spaces[i] = in->spaces[i];
   }
@@ -402,6 +403,7 @@ namespace embree
       rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, t, RTC_FORMAT_FLOAT3, mesh->positions[t], 0, sizeof(Vec3fa), mesh->numVertices);
     }
     rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, mesh->triangles, 0, sizeof(ISPCTriangle), mesh->numTriangles);
+    rtcSetGeometryUserData(geom, mesh);
     rtcCommitGeometry(geom);
     rtcAttachGeometryByID(scene_out,geom,geomID);
     mesh->geom.geometry = geom;
@@ -420,6 +422,7 @@ namespace embree
       rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, t, RTC_FORMAT_FLOAT3, mesh->positions[t], 0, sizeof(Vec3fa), mesh->numVertices);
     }
     rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT4, mesh->quads, 0, sizeof(ISPCQuad), mesh->numQuads);
+    rtcSetGeometryUserData(geom, mesh);
     rtcCommitGeometry(geom);
     rtcAttachGeometryByID(scene_out,geom,geomID);
     mesh->geom.geometry = geom;
@@ -438,6 +441,7 @@ namespace embree
       rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX, t, RTC_FORMAT_FLOAT3, mesh->positions[t], 0, sizeof(Vec3fa), mesh->numVertices);
     }    
     rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_GRID, 0, RTC_FORMAT_GRID, mesh->grids, 0, sizeof(ISPCGrid), mesh->numGrids);
+    rtcSetGeometryUserData(geom, mesh);
     rtcCommitGeometry(geom);
     rtcAttachGeometryByID(scene_out,geom,geomID);
     mesh->geom.geometry = geom;
@@ -492,6 +496,7 @@ namespace embree
     rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_EDGE_CREASE_WEIGHT,   0, RTC_FORMAT_FLOAT,  mesh->edge_crease_weights,   0, sizeof(float),          mesh->numEdgeCreases);
     rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX_CREASE_INDEX,  0, RTC_FORMAT_UINT,   mesh->vertex_creases,        0, sizeof(unsigned int),   mesh->numVertexCreases);
     rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_VERTEX_CREASE_WEIGHT, 0, RTC_FORMAT_FLOAT,  mesh->vertex_crease_weights, 0, sizeof(float),          mesh->numVertexCreases);
+    rtcSetGeometryUserData(geom, mesh);
     rtcCommitGeometry(geom);
 
     rtcAttachGeometryByID(scene_out,geom,geomID);
@@ -535,6 +540,7 @@ namespace embree
       rtcSetGeometryTessellationRate(geom,(float)mesh->tessellation_rate);
 
     rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_FLAGS, 0, RTC_FORMAT_UCHAR, mesh->flags, 0, sizeof(unsigned char), mesh->numHairs);
+    rtcSetGeometryUserData(geom, mesh);
     rtcCommitGeometry(geom);
 
     rtcAttachGeometryByID(scene_out,geom,geomID);
@@ -558,6 +564,7 @@ namespace embree
         rtcSetSharedGeometryBuffer(geom, RTC_BUFFER_TYPE_NORMAL, t, RTC_FORMAT_FLOAT3, mesh->normals[t], 0, sizeof(Vec3fa), mesh->numVertices);
       }
     }
+    rtcSetGeometryUserData(geom, mesh);
     rtcCommitGeometry(geom);
 
     rtcAttachGeometryByID(scene_out,geom,geomID);
@@ -599,7 +606,13 @@ namespace embree
       RTCGeometry geom = rtcNewGeometry (device, RTC_GEOMETRY_TYPE_INSTANCE);
       rtcSetGeometryInstancedScene(geom,scene_inst);
       rtcSetGeometryTimeStepCount(geom,1);
-      rtcSetGeometryTransform(geom,0,RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR,&instance->spaces[0].l.vx.x);
+      if (instance->quaternion) {
+        QuaternionDecomposition qd = quaternionDecomposition(instance->spaces[0]);
+        rtcSetGeometryTransformQuaternion(geom,0,(RTCQuaternionDecomposition*)&qd);
+      } else {
+        rtcSetGeometryTransform(geom,0,RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR,&instance->spaces[0].l.vx.x);
+      }
+      rtcSetGeometryUserData(geom, instance);
       rtcCommitGeometry(geom);
       rtcAttachGeometryByID(scene_out,geom,geomID);
       instance->geom.geometry = geom;
@@ -613,8 +626,15 @@ namespace embree
       rtcSetGeometryInstancedScene(geom,scene_inst);
       rtcSetGeometryTimeStepCount(geom,instance->numTimeSteps);
       rtcSetGeometryTimeRange(geom,instance->startTime,instance->endTime);
-      for (size_t t=0; t<instance->numTimeSteps; t++)
-        rtcSetGeometryTransform(geom,(unsigned int)t,RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR,&instance->spaces[t].l.vx.x);
+      for (size_t t=0; t<instance->numTimeSteps; t++) {
+        if (instance->quaternion) {
+          QuaternionDecomposition qd = quaternionDecomposition(instance->spaces[t]);
+          rtcSetGeometryTransformQuaternion(geom,t,(RTCQuaternionDecomposition*)&qd);
+        } else {
+          rtcSetGeometryTransform(geom,(unsigned int)t,RTC_FORMAT_FLOAT4X4_COLUMN_MAJOR,&instance->spaces[t].l.vx.x);
+        }
+      }
+      rtcSetGeometryUserData(geom, instance);
       rtcCommitGeometry(geom);
       rtcAttachGeometryByID(scene_out,geom,geomID);
       instance->geom.geometry = geom;

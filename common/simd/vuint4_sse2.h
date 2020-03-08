@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -24,6 +24,8 @@ namespace embree
   template<>
   struct vuint<4>
   {
+    ALIGNED_STRUCT_(16);
+    
     typedef vboolf4 Bool;
     typedef vuint4   Int;
     typedef vfloat4 Float;
@@ -98,7 +100,7 @@ namespace embree
     static __forceinline void storeu(const vboolf4& mask, void* ptr, const vuint4& i) { storeu(ptr,select(mask,i,loadu(ptr))); }
 #endif
 
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
     static __forceinline vuint4 load(const uint8_t* ptr) {
         return _mm_load4epu8_epi32(((__m128i*)ptr));
     }

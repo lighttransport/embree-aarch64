@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -105,7 +105,7 @@ uniform Point* uniform createPoints (RTCScene scene, uniform unsigned int N)
 
   RandomSampler rs;
   RandomSampler_init(rs, 42);
-  for (int i = 0; i < N; ++i) 
+  for (unsigned int i = 0; i < N; ++i) 
   {
     float xi1 = RandomSampler_getFloat(rs);
     float xi2 = RandomSampler_getFloat(rs);

@@ -21,6 +21,9 @@ def escape(str):
   str = str.replace("\"",r"\"")
   return str
 
+def parse_version(v):
+  return tuple(map(int, v.split(".")))
+
 # detect platform
 if sys.platform.startswith("win"):
   dash = '\\'
@@ -111,6 +114,7 @@ def runConfig(config):
     elif (compiler == "ICC17-VC14"):
       conf.append("-G \"Visual Studio 14 2015"+ext+"\"")
       conf.append("-T \"Intel C++ Compiler 17.0\"")
+      ispc_ext = "-vs2015"
     elif (compiler == "ICC17-VC12"):
       conf.append("-G \"Visual Studio 12 2013"+ext+"\"")
       conf.append("-T \"Intel C++ Compiler 17.0\"")
@@ -123,9 +127,15 @@ def runConfig(config):
     elif (compiler == "ICC15"):
       conf.append("-G \"Visual Studio 12 2013"+ext+"\"")
       conf.append("-T \"Intel C++ Compiler XE 15.0\"")
-    elif (compiler == "CLANG"):
-      conf.append("-G \"Visual Studio 12 2013"+ext+"\"")
-      conf.append("-T \"LLVM-vs2013\"")
+    elif (compiler == "LLVM_CLANG"):
+      conf.append("-G \"Visual Studio 16 2019\"")
+      conf.append("-A "+platform)
+      conf.append("-T \"LLVM_v142\"")
+      ispc_ext = "-vs2015"
+    elif (compiler == "V141_CLANG"):
+      conf.append("-G \"Visual Studio 15 2017"+ext+"\"")
+      conf.append("-T \"v141_clang_c2\"")
+      ispc_ext = "-vs2015"
     else:
       raise ValueError('unknown compiler: ' + compiler + '')
     
@@ -153,14 +163,21 @@ def runConfig(config):
 
   ispc_compiler = config["ispc"]
   if ispc_compiler.startswith("ispc"):
+    
     ispc_version = ispc_compiler[4:]
+          
     if ispc_version != "":
+      
+      if OS == "windows": bin_folder = "bin\\"
+      else              : bin_folder = "bin/"
+      if parse_version(ispc_version) < parse_version("1.11.0"): bin_folder = ""
+      
       if OS == "linux":
-        conf.append("-D EMBREE_ISPC_EXECUTABLE=/NAS/packages/apps/ispc/"+ispc_version+"-linux/ispc")
+        conf.append("-D EMBREE_ISPC_EXECUTABLE=/NAS/packages/apps/ispc/"+ispc_version+"-linux/"+bin_folder+"ispc")
       elif OS == "macosx":
-        conf.append("-D EMBREE_ISPC_EXECUTABLE=/NAS/packages/apps/ispc/"+ispc_version+"-osx/ispc")
+        conf.append("-D EMBREE_ISPC_EXECUTABLE=/NAS/packages/apps/ispc/"+ispc_version+"-osx/"+bin_folder+"ispc")
       elif OS == "windows":
-        conf.append("-D EMBREE_ISPC_EXECUTABLE=\\\\vis-nassie.an.intel.com\\NAS\\packages\\apps\\ispc\\"+ispc_version+"-windows"+ispc_ext+"\\ispc.exe")
+        conf.append("-D EMBREE_ISPC_EXECUTABLE=\\\\vis-nassie.an.intel.com\\NAS\\packages\\apps\\ispc\\"+ispc_version+"-windows"+ispc_ext+"\\"+bin_folder+"ispc.exe")
       else:
         sys.stderr.write("unknown operating system "+OS)
         sys.exit(1)
@@ -195,34 +212,29 @@ def runConfig(config):
       conf.append("-D EMBREE_TASKING_SYSTEM=TBB")
 
       if OS == "linux":
-        if tasking == "TBB2019.2":
-          conf.append("-D EMBREE_TBB_ROOT=/NAS/packages/apps/tbb/tbb-2019.2-linux")
-        elif tasking == "TBB2017":
-          conf.append("-D EMBREE_TBB_ROOT=/NAS/packages/apps/tbb/tbb-2017-linux")
-        elif tasking == "TBB":
+        if tasking == "TBB":
           conf.append("-D EMBREE_TBB_ROOT=/usr")
+        elif tasking.startswith("TBB"):
+          conf.append("-D EMBREE_TBB_ROOT=/NAS/packages/apps/tbb/tbb-"+tasking[3:]+"-linux")
         else:
           raise ValueError('unknown tasking system: ' + tasking + '')
       
       elif OS == "macosx":
-        if tasking == "TBB2019.2":
-          conf.append("-D EMBREE_TBB_ROOT=/NAS/packages/apps/tbb/tbb-2019.2-osx")
-        elif tasking == "TBB2017":
-          conf.append("-D EMBREE_TBB_ROOT=/NAS/packages/apps/tbb/tbb-2017-osx")
-        elif tasking == "TBB":
+        if tasking == "TBB":
           conf.append("-D EMBREE_TBB_ROOT=/opt/local")
+        elif tasking.startswith("TBB"):
+          conf.append("-D EMBREE_TBB_ROOT=/NAS/packages/apps/tbb/tbb-"+tasking[3:]+"-osx")
         else:
           raise ValueError('unknown tasking system: ' + tasking + '')
       
       elif OS == "windows":
-        if tasking == "TBB2019.2": 
-          tbb_path = "\\\\vis-nassie.an.intel.com\\NAS\\packages\\apps\\tbb\\tbb-2019.2-windows"
-        elif tasking == "TBB2017": 
-          tbb_path = "\\\\vis-nassie.an.intel.com\\NAS\\packages\\apps\\tbb\\tbb-2017-windows"
-          conf.append("-D EMBREE_TBB_ROOT="+tbb_path)
+        if tasking.startswith("TBB"):
+          tbb_path = "\\\\vis-nassie.an.intel.com\\NAS\\packages\\apps\\tbb\\tbb-"+tasking[3:]+"-windows"          
         else:
           raise ValueError('unknown tasking system: ' + tasking + '')
 
+        conf.append("-D EMBREE_TBB_ROOT="+tbb_path)
+        
         if platform == "x64":
           env.append("set PATH="+tbb_path+"\\bin\\intel64\\vc12;"+tbb_path+"\\bin\\intel64\\vc14;%PATH%")
         else:
@@ -316,7 +328,6 @@ def runConfig(config):
       conf.append("-D CMAKE_INSTALL_LIBDIR=lib")
       conf.append("-D CMAKE_INSTALL_DOCDIR=../../Applications/Embree3/doc")
       conf.append("-D CMAKE_INSTALL_BINDIR=../../Applications/Embree3/bin")
-      conf.append("-D EMBREE_TBB_ROOT=/opt/local")
     elif OS == "windows" and config["package"] == "ZIP":
       conf.append("-D EMBREE_SIGN_FILE=\\\\vis-nassie.an.intel.com\\NAS\\packages\\apps\\signfile\\windows\\SignFile.exe")
       conf.append("-D EMBREE_INSTALL_DEPENDENCIES=ON")
@@ -342,6 +353,8 @@ def runConfig(config):
   ctest =  "ctest -VV -S scripts/test.cmake"
   if g_cdash != "": ctest += " -D CTEST_DROP_SITE="+g_cdash
   ctest += " -D EMBREE_TESTING_INTENSITY="+str(g_intensity)
+  if "klocwork" in config:
+    ctest += " -D EMBREE_TESTING_KLOCWORK="+config["klocwork"]
   ctest += " -D CTEST_CONFIGURATION_TYPE=\""+build+"\""
   ctest += " -D CTEST_BUILD_OPTIONS=\"" + escape(" ".join(conf))+"\""
   if g_debugMode:

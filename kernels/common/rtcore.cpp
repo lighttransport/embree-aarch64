@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -327,6 +327,26 @@ RTC_NAMESPACE_BEGIN;
     RTC_CATCH_END2(scene);
   }
 
+  RTC_API void rtcCollide (RTCScene hscene0, RTCScene hscene1, RTCCollideFunc callback, void* userPtr)
+  {
+    Scene* scene0 = (Scene*) hscene0;
+    Scene* scene1 = (Scene*) hscene1;
+    RTC_CATCH_BEGIN;
+    RTC_TRACE(rtcCollide);
+#if defined(DEBUG)
+    RTC_VERIFY_HANDLE(hscene0);
+    RTC_VERIFY_HANDLE(hscene1);
+    if (scene0->isModified()) throw_RTCError(RTC_ERROR_INVALID_OPERATION,"scene got not committed");
+    if (scene1->isModified()) throw_RTCError(RTC_ERROR_INVALID_OPERATION,"scene got not committed");
+    if (scene0->device != scene1->device) throw_RTCError(RTC_ERROR_INVALID_OPERATION,"scenes are from different devices");
+    auto nUserPrims0 = scene0->getNumPrimitives (Geometry::MTY_USER_GEOMETRY, false);
+    auto nUserPrims1 = scene1->getNumPrimitives (Geometry::MTY_USER_GEOMETRY, false);
+    if (scene0->numPrimitives() != nUserPrims0 && scene1->numPrimitives() != nUserPrims1) throw_RTCError(RTC_ERROR_INVALID_OPERATION,"scenes must only contain user geometries with a single timestep");
+#endif
+    scene0->intersectors.collide(scene0,scene1,callback,userPtr);
+    RTC_CATCH_END(scene0->device);
+  }
+  
   inline bool pointQuery(Scene* scene, RTCPointQuery* query, RTCPointQueryContext* userContext, RTCPointQueryFunction queryFunc, void* userPtr)
   {
     bool changed = false;
@@ -494,12 +514,12 @@ RTC_NAMESPACE_BEGIN;
 
     IntersectContext context(scene,user_context);
 #if !defined(EMBREE_RAY_PACKETS)
-    Ray4* ray4 = (Ray4*) rayhit;
+    RayHit4* rayhit4 = (RayHit4*)rayhit;
     for (size_t i=0; i<4; i++) {
       if (!valid[i]) continue;
-      RayHit ray1; ray4->get(i,ray1);
+      RayHit ray1; rayhit4->get(i,ray1);
       scene->intersectors.intersect((RTCRayHit&)ray1,&context);
-      ray4->set(i,ray1);
+      rayhit4->set(i,ray1);
     }
 #else
     scene->intersectors.intersect4(valid,*rayhit,&context);
@@ -525,12 +545,12 @@ RTC_NAMESPACE_BEGIN;
 
     IntersectContext context(scene,user_context);
 #if !defined(EMBREE_RAY_PACKETS)
-    Ray8* ray8 = (Ray8*) rayhit;
+    RayHit8* rayhit8 = (RayHit8*) rayhit;
     for (size_t i=0; i<8; i++) {
       if (!valid[i]) continue;
-      RayHit ray1; ray8->get(i,ray1);
+      RayHit ray1; rayhit8->get(i,ray1);
       scene->intersectors.intersect((RTCRayHit&)ray1,&context);
-      ray8->set(i,ray1);
+      rayhit8->set(i,ray1);
     }
 #else
     if (likely(scene->intersectors.intersector8))
@@ -558,12 +578,12 @@ RTC_NAMESPACE_BEGIN;
 
     IntersectContext context(scene,user_context);
 #if !defined(EMBREE_RAY_PACKETS)
-    Ray16* ray16 = (Ray16*) rayhit;
+    RayHit16* rayhit16 = (RayHit16*) rayhit;
     for (size_t i=0; i<16; i++) {
       if (!valid[i]) continue;
-      RayHit ray1; ray16->get(i,ray1);
+      RayHit ray1; rayhit16->get(i,ray1);
       scene->intersectors.intersect((RTCRayHit&)ray1,&context);
-      ray16->set(i,ray1);
+      rayhit16->set(i,ray1);
     }
 #else
     if (likely(scene->intersectors.intersector16))
@@ -745,12 +765,12 @@ RTC_NAMESPACE_BEGIN;
 
     IntersectContext context(scene,user_context);
 #if !defined(EMBREE_RAY_PACKETS)
-    RayHit4* ray4 = (RayHit4*) ray;
+    Ray4* ray4 = (Ray4*) ray;
     for (size_t i=0; i<4; i++) {
       if (!valid[i]) continue;
-      RayHit ray1; ray4->get(i,ray1);
+      Ray ray1; ray4->get(i,ray1);
       scene->intersectors.occluded((RTCRay&)ray1,&context);
-      ray4->geomID[i] = ray1.geomID; 
+      ray4->set(i,ray1);
     }
 #else
     scene->intersectors.occluded4(valid,*ray,&context);
@@ -776,10 +796,10 @@ RTC_NAMESPACE_BEGIN;
 
     IntersectContext context(scene,user_context);
 #if !defined(EMBREE_RAY_PACKETS)
-    RayHit8* ray8 = (RayHit8*) ray;
+    Ray8* ray8 = (Ray8*) ray;
     for (size_t i=0; i<8; i++) {
       if (!valid[i]) continue;
-      RayHit ray1; ray8->get(i,ray1);
+      Ray ray1; ray8->get(i,ray1);
       scene->intersectors.occluded((RTCRay&)ray1,&context);
       ray8->set(i,ray1);
     }
@@ -810,10 +830,10 @@ RTC_NAMESPACE_BEGIN;
 
     IntersectContext context(scene,user_context);
 #if !defined(EMBREE_RAY_PACKETS)
-    RayHit16* ray16 = (RayHit16*) ray;
+    Ray16* ray16 = (Ray16*) ray;
     for (size_t i=0; i<16; i++) {
       if (!valid[i]) continue;
-      RayHit ray1; ray16->get(i,ray1);
+      Ray ray1; ray16->get(i,ray1);
       scene->intersectors.occluded((RTCRay&)ray1,&context);
       ray16->set(i,ray1);
     }
@@ -1059,6 +1079,39 @@ RTC_NAMESPACE_BEGIN;
     RTC_VERIFY_HANDLE(xfm);
     const AffineSpace3fa transform = loadTransform(format, (const float*)xfm);
     geometry->setTransform(transform, timeStep);
+    RTC_CATCH_END2(geometry);
+  }
+
+  RTC_API void rtcSetGeometryTransformQuaternion(RTCGeometry hgeometry, unsigned int timeStep, const RTCQuaternionDecomposition* qd)
+  {
+    Geometry* geometry = (Geometry*) hgeometry;
+    RTC_CATCH_BEGIN;
+    RTC_TRACE(rtcSetGeometryTransformQuaternion);
+    RTC_VERIFY_HANDLE(hgeometry);
+    RTC_VERIFY_HANDLE(qd);
+    AffineSpace3fa transform;
+    transform.l.vx.x = qd->scale_x;
+    transform.l.vy.y = qd->scale_y;
+    transform.l.vz.z = qd->scale_z;
+    transform.l.vy.x = qd->skew_xy;
+    transform.l.vz.x = qd->skew_xz;
+    transform.l.vz.y = qd->skew_yz;
+    transform.l.vx.y = qd->translation_x;
+    transform.l.vx.z = qd->translation_y;
+    transform.l.vy.z = qd->translation_z;
+    transform.p.x    = qd->shift_x;
+    transform.p.y    = qd->shift_y;
+    transform.p.z    = qd->shift_z;
+
+    // normalize quaternion
+    Quaternion3f q(qd->quaternion_r, qd->quaternion_i, qd->quaternion_j, qd->quaternion_k);
+    q = normalize(q);
+    transform.l.vx.w = q.i;
+    transform.l.vy.w = q.j;
+    transform.l.vz.w = q.k;
+    transform.p.w    = q.r;
+
+    geometry->setQuaternionDecomposition(transform, timeStep);
     RTC_CATCH_END2(geometry);
   }
 

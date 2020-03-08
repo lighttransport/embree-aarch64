@@ -1,5 +1,5 @@
 ## ======================================================================== ##
-## Copyright 2009-2018 Intel Corporation                                    ##
+## Copyright 2009-2020 Intel Corporation                                    ##
 ##                                                                          ##
 ## Licensed under the Apache License, Version 2.0 (the "License");          ##
 ## you may not use this file except in compliance with the License.         ##
@@ -19,7 +19,7 @@ ADD_SUBDIRECTORY(scenegraph)
 ADD_SUBDIRECTORY(lights)
 ADD_SUBDIRECTORY(texture)
 
-IF ((NOT EMBREE_BUILD_VERIFY) OR EMBREE_TUTORIALS)
+IF (EMBREE_TUTORIALS OR (NOT EMBREE_BUILD_VERIFY))
   ADD_SUBDIRECTORY(tutorial)
   ADD_SUBDIRECTORY(imgui)
 ENDIF()

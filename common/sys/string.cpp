@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -41,5 +41,15 @@ namespace embree
     const float y = std::stof(str,&next); str = str.substr(next+1);
     const float z = std::stof(str,&next); 
     return Vec3f(x,y,z);
+  }
+  
+  Vec4f string_to_Vec4f ( std::string str )
+  {
+    size_t next = 0;
+    const float x = std::stof(str,&next); str = str.substr(next+1);
+    const float y = std::stof(str,&next); str = str.substr(next+1);
+    const float z = std::stof(str,&next); str = str.substr(next+1);
+    const float w = std::stof(str,&next);
+    return Vec4f(x,y,z,w);
   }
 }

@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -54,6 +54,9 @@ namespace embree
     union { float f; int i; } v; v.i = i; return v.f;
   }
 
+  __forceinline int   toInt  (const float& a) { return int(a); }
+  __forceinline float toFloat(const int&   a) { return float(a); }
+
 #if defined(__WIN32__)
   __forceinline bool finite ( const float x ) { return _finite(x) != 0; }
 #endif
@@ -63,7 +66,7 @@ namespace embree
 
   __forceinline float rcp  ( const float x )
   {
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
       // Move scalar to vector register and do rcp.
       __m128 a;
       a[0] = x;
@@ -87,7 +90,7 @@ namespace embree
     return _mm_cvtss_f32(_mm_mul_ss(r,_mm_sub_ss(_mm_set_ss(2.0f), _mm_mul_ss(r, a))));
 #endif
       
-#endif  //defined(__aarch64__) && defined(BUILD_IOS)
+#endif  //defined(__aarch64__)
   }
 
   __forceinline float signmsk ( const float x ) {
@@ -131,7 +134,7 @@ namespace embree
   }
   __forceinline float rsqrt( const float x )
   {
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
       // FP and Neon shares same vector register in arm64
       __m128 a;
       a[0] = x;
@@ -370,6 +373,7 @@ namespace embree
   __forceinline int   select(bool s, int   t,   int f) { return s ? t : f; }
   __forceinline float select(bool s, float t, float f) { return s ? t : f; }
 
+  __forceinline bool all(bool s) { return s; }
 
   __forceinline float lerp(const float v0, const float v1, const float t) {
     return madd(1.0f-t,v0,t*v1);

@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -318,7 +318,7 @@ namespace embree {
   BarrierSys barrier;
   volatile bool term = false;
   
-  void perform_work(int threadID)
+  void perform_work(size_t threadID)
   {
     setAffinity(threadID); 
     while (true) {

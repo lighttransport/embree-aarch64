@@ -109,8 +109,8 @@ Changes to the geometry always must be committed using the
 a geometry is not included in any scene. A geometry can be added to
 a scene by using the `rtcAttachGeometry` function (to automatically
 assign a geometry ID) or using the `rtcAttachGeometryById` function
-(to specify the geometry ID manually). A geometry can only be attached
-to a single scene at a time.
+(to specify the geometry ID manually). A geometry can get attached
+to multiple scenes.
 
 All geometry types support multi-segment motion blur with an arbitrary
 number of equidistant time steps (in the range of 2 to 129) inside a
@@ -166,17 +166,31 @@ trace single rays and ray packets. Also have a look at the tutorial
 [Stream Viewer] for an example of how to trace ray streams.
 
 Point Queries
------------
+-------------
 
 The API supports traversal of the BVH using a point query object that
 specifies a location and a query radius. For all primitives intersecting the
 according domain, a user defined callback function is called which allows
 queries such as finding the closest point on the surface geometries of the
-scene (see Tutorial [ClosestPoint]) or nearest neighbour queries (see
+scene (see Tutorial [Closest Point]) or nearest neighbour queries (see
 Tutorial [Voronoi]).
 
 See Section [rtcPointQuery] for a detailed description of how to set up
 point queries.
+
+Collision Detection
+-------------------
+
+The Embree API also supports collision detection queries between two
+scenes consisting only of user geometries. Embree only performs
+broadphase collision detection, the narrow phase detection can be
+performed through a callback function.
+
+See Section [rtcCollide] for a detailed description of how to set up collision
+detection.
+
+Seen tutorial [Collision Detection] for a complete example of collsion 
+detection being used on a simple cloth solver.
 
 
 Miscellaneous
@@ -298,7 +312,7 @@ Geometry
     `rtcGetGeometry`.
 
 *   Geometries are not included inside a scene anymore but can be
-    attached to a single scene using the `rtcAttachGeomety` or
+    attached to a multiple scenes using the `rtcAttachGeomety` or
     `rtcAttachGeometryByID` functions.
 
 *   As geometries are separate objects, commit semantics got introduced
@@ -783,6 +797,11 @@ Embree API Reference
 ```
 \pagebreak
 
+## rtcSetGeometryTransformQuaternion
+``` {include=src/api/rtcSetGeometryTransformQuaternion.md}
+```
+\pagebreak
+
 ## rtcGetGeometryTransform
 ``` {include=src/api/rtcGetGeometryTransform.md}
 ```
@@ -980,6 +999,12 @@ Embree API Reference
 
 \pagebreak
 
+## rtcCollide
+``` {include=src/api/rtcCollide.md}
+```
+
+\pagebreak
+
 ## rtcNewBVH
 ``` {include=src/api/rtcNewBVH.md}
 ```
@@ -997,6 +1022,16 @@ Embree API Reference
 
 ## rtcBuildBVH
 ``` {include=src/api/rtcBuildBVH.md}
+```
+\pagebreak
+
+## RTCQuaternionDecomposition
+``` {include=src/api/RTCQuaternionDecomposition.md}
+```
+\pagebreak
+
+## rtcInitQuaternionDecomposition
+``` {include=src/api/rtcInitQuaternionDecomposition.md}
 ```
 \pagebreak
 

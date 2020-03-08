@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2009-2018 Intel Corporation                                    //
+// Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -14,7 +14,7 @@
 // limitations under the License.                                           //
 // ======================================================================== //
 
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
 #include <arm_neon.h>
 #endif
 
@@ -42,7 +42,7 @@ namespace embree
   EmptyTy empty;
   UndefinedTy undefined;
 
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
 const uint32x4_t movemask_mask = { 1, 2, 4, 8 };
 const uint32x4_t vzero = { 0, 0, 0, 0 };
 const uint32x4_t v0x80000000 = { 0x80000000, 0x80000000, 0x80000000, 0x80000000 };

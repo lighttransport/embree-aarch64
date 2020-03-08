@@ -1,5 +1,5 @@
 ## ======================================================================== ##
-## Copyright 2009-2019 Intel Corporation                                    ##
+## Copyright 2009-2020 Intel Corporation                                    ##
 ##                                                                          ##
 ## Licensed under the Apache License, Version 2.0 (the "License");          ##
 ## you may not use this file except in compliance with the License.         ##
@@ -14,7 +14,7 @@
 ## limitations under the License.                                           ##
 ## ======================================================================== ##
 
-ADD_EXECUTABLE(minimal minimal.cpp)
+ADD_EXECUTABLE(minimal ../../kernels/embree.rc minimal.cpp)
 TARGET_LINK_LIBRARIES(minimal embree)
 TARGET_INCLUDE_DIRECTORIES(minimal PRIVATE ${PROJECT_SOURCE_DIR}/include)
 SET_PROPERTY(TARGET minimal PROPERTY FOLDER tutorials/single)
