@@ -103,7 +103,6 @@ jobs:
 
     runs-on: ubuntu-18.04
     name: Build for Android(arm64v8a)
-
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -126,7 +125,7 @@ jobs:
     runs-on: windows-latest
     name: Build for Windows(x64, MSVC)
 
-    # Use system installed cmake 
+    # Use system installed cmake
     # https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners
     steps:
       - name: Checkout
@@ -135,3 +134,17 @@ jobs:
         run: .\vcsetup-2019.bat
       - name: Build
         run: cmake --build build --config Release
+
+  # macOS(x64) + clang build
+  build-macos-x64:
+
+    runs-on: macos-latest
+    name: Build for macOS(x64, Clang)
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Configure
+        run: ./scripts/bootstrap-macos-clang.sh
+      - name: Build
+        run: cmake --build build
