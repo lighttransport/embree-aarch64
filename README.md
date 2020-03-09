@@ -9,6 +9,8 @@ Embree-aarch64 Overview
 Embree-aarch64 is a port of Embree library(version 3.x) to AARCH64 platform(includes Android arm64-v8a).
 Porting was done using similar approach by existing embree-arm effort. https://mightynotes.wordpress.com/2017/01/24/porting-intel-embree-to-arm/
 
+Embree-aarch64 can also be used for x86-64 target. x86-64 code path should be mostly identical to original Intel Embree.
+
 How to cross-compile for AARCH64 Linux
 ----------------------------------
 
@@ -69,7 +71,7 @@ Build monolithc embree with TBB(experimental)
 
 `EMBREE_USE_EMBEDDED_TBB=On` builds the embree with embedded(submoduled) tbb.
 This will enable building monolithic embree library with single cmake build procedure.
-(Would make embree build with TBB support for emerging architecures and cross compiling easier)  
+(Would make embree build with TBB support for emerging architecures and cross compiling easier)
 
 ```
   -DEMBREE_TASKING_SYSTEM=Internal \
@@ -102,7 +104,7 @@ TODO
 ----
 
 * [ ] Write Android/iOS samples
-* [ ] Support the build on Windows and macOS
+* [x] Support the build on Windows and macOS
 * [ ] Provide a build script for gradle
 * [ ] Support ISPC interop
 * [x] Raspberry Pi3 with 64bit kernel(HypriotOS)
@@ -7193,9 +7195,9 @@ rtcCollide
       size_t num_collisions);
 
     void rtcCollide (
-        RTCScene hscene0, 
-        RTCScene hscene1, 
-        RTCCollideFunc callback, 
+        RTCScene hscene0,
+        RTCScene hscene1,
+        RTCCollideFunc callback,
         void* userPtr
     );
 
@@ -8132,7 +8134,7 @@ Collision Detection
 This tutorial demonstrates how to implement collision detection using
 the collide API. A simple cloth solver is setup to collide with a sphere.
 
-The cloth can be reset with the `space` bar.  The sim stepped once with `n` 
+The cloth can be reset with the `space` bar.  The sim stepped once with `n`
 and continuous simulation started and paused with `p`.
 
 BVH Builder
