@@ -16,12 +16,9 @@ SOURCE_GROUP("Source Files\\builders" "/builders.*/" )
 SOURCE_GROUP("Source Files\\common" "/kernels/common/" )
 SOURCE_GROUP("Source Files\\tasking" "/tasking/" )
 SOURCE_GROUP("Source Files\\algorithms" "/algorithms/")
-SOURCE_GROUP("" FILES embree.rc)
 
 SET(EMBREE_LIBRARY_FILES
  
-  embree.rc
-
   common/device.cpp
   common/stat.cpp
   common/acceln.cpp
@@ -71,6 +68,15 @@ SET(EMBREE_LIBRARY_FILES
 
   bvh/bvh_intersector1_bvh4.cpp
   )
+
+IF (MSVC)
+  SOURCE_GROUP("" FILES embree.rc)
+
+  LIST(APPEND EMBREE_LIBRARY_FILES 
+    embree.rc
+  )
+ENDIF()
+
 
 IF (EMBREE_GEOMETRY_SUBDIVISION)
   SET(EMBREE_LIBRARY_FILES ${EMBREE_LIBRARY_FILES}
