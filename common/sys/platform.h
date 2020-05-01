@@ -105,7 +105,7 @@
 #define dll_import __declspec(dllimport)
 #else
 #define dll_export __attribute__ ((visibility ("default")))
-#define dll_import 
+#define dll_import
 #endif
 
 #ifdef __WIN32__
@@ -120,10 +120,15 @@
 #define __restrict__           //__restrict // causes issues with MSVC
 #endif
 #if !defined(__thread)
+// NOTE: Require `-fms-extensions` for clang
 #define __thread               __declspec(thread)
 #endif
 #if !defined(__aligned)
+#if defined(__MINGW32__)
+#define __aligned(...)           __attribute__((aligned(__VA_ARGS__)))
+#else
 #define __aligned(...)           __declspec(align(__VA_ARGS__))
+#endif
 #endif
 //#define __FUNCTION__           __FUNCTION__
 #define debugbreak()           __debugbreak()
@@ -321,7 +326,7 @@ __forceinline std::string toString(long long value) {
 /// Some macros for static profiling
 ////////////////////////////////////////////////////////////////////////////////
 
-#if defined (__GNUC__) 
+#if defined (__GNUC__)
 #define IACA_SSC_MARK( MARK_ID )						\
 __asm__ __volatile__ (									\
 					  "\n\t  movl $"#MARK_ID", %%ebx"	\
@@ -360,7 +365,7 @@ namespace embree
     bool active;
     const Closure f;
   };
-  
+
   template <typename Closure>
     OnScopeExitHelper<Closure> OnScopeExit(const Closure f) {
     return OnScopeExitHelper<Closure>(f);

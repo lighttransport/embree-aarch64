@@ -204,7 +204,8 @@ namespace embree
 #if !defined(__ARM_NEON)
   __noinline int64_t get_xcr0()
   {
-#if defined (__WIN32__)
+    // https://github.com/opencv/opencv/blob/master/modules/core/src/system.cpp#L466
+#if defined (__WIN32__) && defined(_XCR_XFEATURE_ENABLED_MASK)
     int64_t xcr0 = 0; // int64_t is workaround for compiler bug under VS2013, Win32
     xcr0 = _xgetbv(0);
     return xcr0;

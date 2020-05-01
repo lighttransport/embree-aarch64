@@ -29,7 +29,7 @@
 #include <immintrin.h>
 #endif
 
-#if defined(__WIN32__)
+#if defined(__WIN32__) && !defined(__MINGW32__)
 #if (__MSV_VER <= 1700)
 namespace std
 {
@@ -57,7 +57,7 @@ namespace embree
   __forceinline int   toInt  (const float& a) { return int(a); }
   __forceinline float toFloat(const int&   a) { return float(a); }
 
-#if defined(__WIN32__)
+#if defined(__WIN32__) && !defined(__MINGW32__)
   __forceinline bool finite ( const float x ) { return _finite(x) != 0; }
 #endif
 
@@ -75,7 +75,7 @@ namespace embree
       reciprocal = vmulq_f32(vrecpsq_f32(a, reciprocal), reciprocal);
       return reciprocal[0];
 #else
-      
+
     const __m128 a = _mm_set_ss(x);
 
 #if defined(__AVX512VL__)
@@ -89,7 +89,7 @@ namespace embree
 #else
     return _mm_cvtss_f32(_mm_mul_ss(r,_mm_sub_ss(_mm_set_ss(2.0f), _mm_mul_ss(r, a))));
 #endif
-      
+
 #endif  //defined(__aarch64__)
   }
 
@@ -143,7 +143,7 @@ namespace embree
       value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(a, value), value));
       return value[0];
 #else
-      
+
     const __m128 a = _mm_set_ss(x);
 #if defined(__AVX512VL__)
     const __m128 r = _mm_rsqrt14_ss(_mm_set_ss(0.0f),a);
@@ -156,7 +156,7 @@ namespace embree
 #endif
   }
 
-#if defined(__WIN32__) && (__MSC_VER <= 1700)
+#if defined(__WIN32__) && (__MSC_VER <= 1700) && !defined(__MINGW32__)
   __forceinline float nextafter(float x, float y) { if ((x<y) == (x>0)) return x*(1.1f+float(ulp)); else return x*(0.9f-float(ulp)); }
   __forceinline double nextafter(double x, double y) { return _nextafter(x, y); }
   __forceinline int roundf(float f) { return (int)(f + 0.5f); }

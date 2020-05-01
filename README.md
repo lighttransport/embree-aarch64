@@ -109,6 +109,11 @@ TODO
 * [ ] Support ISPC interop
 * [x] Raspberry Pi3 with 64bit kernel(HypriotOS)
 * [ ] Support the build with Android version of TBB.
+* [ ] MinGW build
+  * [x] LLVM/MinGW https://github.com/mstorsjo/llvm-mingw
+  * [ ] MinGW gcc
+    * Memory alignment seems not working well when compiling with MinGW-gcc
+
 
 Third party licenses
 --------------------
