@@ -1,18 +1,5 @@
-// ======================================================================== //
-// Copyright 2009-2020 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
+// Copyright 2009-2020 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 
 #include "bvh_collider.h"
 #include "../geometry/triangle_triangle_intersector.h"
@@ -181,7 +168,7 @@ namespace embree
         {
           parallel_for(size_t(N), [&] ( size_t i ) {
               if (mask & ( 1 << i)) {
-                node0->child(i).prefetch(BVH_FLAG_ALIGNED_NODE);
+                BVHN<N>::prefetch(node0->child(i),BVH_FLAG_ALIGNED_NODE);
                 collide_recurse(node0->child(i),node0->bounds(i),ref1,bounds1,depth0+1,depth1);
               }
             });
@@ -190,7 +177,7 @@ namespace embree
 #endif
         {
           for (size_t m=mask, i=bsf(m); m!=0; m=btc(m,i), i=bsf(m)) {
-            node0->child(i).prefetch(BVH_FLAG_ALIGNED_NODE);
+            BVHN<N>::prefetch(node0->child(i),BVH_FLAG_ALIGNED_NODE);
             collide_recurse(node0->child(i),node0->bounds(i),ref1,bounds1,depth0+1,depth1);
           }
         }
@@ -208,7 +195,7 @@ namespace embree
         {
           parallel_for(size_t(N), [&] ( size_t i ) {
               if (mask & ( 1 << i)) {
-                node1->child(i).prefetch(BVH_FLAG_ALIGNED_NODE);
+                BVHN<N>::prefetch(node1->child(i),BVH_FLAG_ALIGNED_NODE);
                 collide_recurse(ref0,bounds0,node1->child(i),node1->bounds(i),depth0,depth1+1);
               }
             });
@@ -217,7 +204,7 @@ namespace embree
 #endif
         {
           for (size_t m=mask, i=bsf(m); m!=0; m=btc(m,i), i=bsf(m)) {
-            node1->child(i).prefetch(BVH_FLAG_ALIGNED_NODE);
+            BVHN<N>::prefetch(node1->child(i),BVH_FLAG_ALIGNED_NODE);
             collide_recurse(ref0,bounds0,node1->child(i),node1->bounds(i),depth0,depth1+1);
           }
         }
@@ -348,26 +335,26 @@ namespace embree
       bool run ()
       {
         bool passed = true;
-        passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(-0.008815, 0.041848, -2.49875e-06), Vec3fa(-0.008276, 0.053318, -2.49875e-06), Vec3fa(0.003023, 0.048969, -2.49875e-06),
-                                               Vec3fa(0.00245, 0.037612, -2.49875e-06), Vec3fa(0.01434, 0.042634, -2.49875e-06), Vec3fa(0.013499, 0.031309, -2.49875e-06)) == false;
+        passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(-0.008815f, 0.041848f, -2.49875e-06f), Vec3fa(-0.008276f, 0.053318f, -2.49875e-06f), Vec3fa(0.003023f, 0.048969f, -2.49875e-06f),
+                                                                            Vec3fa(0.00245f, 0.037612f, -2.49875e-06f), Vec3fa(0.01434f, 0.042634f, -2.49875e-06f), Vec3fa(0.013499f, 0.031309f, -2.49875e-06f)) == false;
         passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0)) == true;
         passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), Vec3fa(0,0,1),Vec3fa(1,0,1),Vec3fa(0,1,1)) == false;
         passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), Vec3fa(0,0,1),Vec3fa(1,0,0),Vec3fa(0,1,0)) == true;
         passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), Vec3fa(0,0,0),Vec3fa(1,0,1),Vec3fa(0,1,1)) == true;
-        passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), Vec3fa(0.1,0.1,0),Vec3fa(1,0,1),Vec3fa(0,1,1)) == true;
-        passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), Vec3fa(0.1,0.1,-0.1),Vec3fa(1,0,1),Vec3fa(0,1,1)) == true;
+        passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), Vec3fa(0.1f,0.1f,0),Vec3fa(1,0,1),Vec3fa(0,1,1)) == true;
+        passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), Vec3fa(0.1f,0.1f,-0.1f),Vec3fa(1,0,1),Vec3fa(0,1,1)) == true;
         passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0)) == true;
-        passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), Vec3fa(0,0,0),Vec3fa(0.5,0,0),Vec3fa(0,0.5,0)) == true;
-        passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), Vec3fa(0.1,0.1,0),Vec3fa(0.5,0,0),Vec3fa(0,0.5,0)) == true;
-        passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), Vec3fa(0.1,0.1,0),Vec3fa(0.5,0.1,0),Vec3fa(0.1,0.5,0)) == true;
-        passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), Vec3fa(0.1,-0.1,0),Vec3fa(0.5,0.1,0),Vec3fa(0.1,0.5,0)) == true;
-        passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), Vec3fa(-0.1,0.1,0),Vec3fa(0.5,0.1,0),Vec3fa(0.1,0.5,0)) == true;
+        passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), Vec3fa(0,0,0),Vec3fa(0.5f,0,0),Vec3fa(0,0.5f,0)) == true;
+        passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), Vec3fa(0.1f,0.1f,0),Vec3fa(0.5f,0,0),Vec3fa(0,0.5f,0)) == true;
+        passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), Vec3fa(0.1f,0.1f,0),Vec3fa(0.5f,0.1f,0),Vec3fa(0.1f,0.5f,0)) == true;
+        passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), Vec3fa(0.1f,-0.1f,0),Vec3fa(0.5f,0.1f,0),Vec3fa(0.1f,0.5f,0)) == true;
+        passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), Vec3fa(-0.1f,0.1f,0),Vec3fa(0.5f,0.1f,0),Vec3fa(0.1f,0.5f,0)) == true;
         passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), 
-                                               Vec3fa(-1,1,0) + Vec3fa(0,0,0),Vec3fa(-1,1,0) + Vec3fa(0.1,0,0),Vec3fa(-1,1,0) + Vec3fa(0,0.1,0)) == false;
+                                               Vec3fa(-1,1,0) + Vec3fa(0,0,0),Vec3fa(-1,1,0) + Vec3fa(0.1f,0,0),Vec3fa(-1,1,0) + Vec3fa(0,0.1f,0)) == false;
         passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), 
-                                               Vec3fa( 2,0.5,0) + Vec3fa(0,0,0),Vec3fa( 2,0.5,0) + Vec3fa(0.1,0,0),Vec3fa( 2,0.5,0) + Vec3fa(0,0.1,0)) == false;
+                                               Vec3fa( 2,0.5f,0) + Vec3fa(0,0,0),Vec3fa( 2,0.5f,0) + Vec3fa(0.1f,0,0),Vec3fa( 2,0.5f,0) + Vec3fa(0,0.1f,0)) == false;
         passed &= TriangleTriangleIntersector::intersect_triangle_triangle (Vec3fa(0,0,0),Vec3fa(1,0,0),Vec3fa(0,1,0), 
-                                               Vec3fa(0.5,-2.0f,0) + Vec3fa(0,0,0),Vec3fa(0.5f,-2.0f,0) + Vec3fa(0.1,0,0),Vec3fa(0.5f,-2.0f,0) + Vec3fa(0,0.1,0)) == false;
+                                               Vec3fa(0.5f,-2.0f,0) + Vec3fa(0,0,0),Vec3fa(0.5f,-2.0f,0) + Vec3fa(0.1f,0,0),Vec3fa(0.5f,-2.0f,0) + Vec3fa(0,0.1f,0)) == false;
         return passed;
       }
     };

@@ -1,18 +1,5 @@
-// ======================================================================== //
-// Copyright 2009-2020 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
+// Copyright 2009-2020 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 
 #pragma once
 
@@ -72,12 +59,12 @@ inline Vec3fa cosineSampleHemisphere(const Vec2f s)
 
 inline float cosineSampleHemispherePDF(const Vec3fa &dir)
 {
-  return dir.z / float(pi);
+  return dir.z / float(M_PI);
 }
 
 inline float cosineSampleHemispherePDF(float cosTheta)
 {
-  return cosTheta / float(pi);
+  return cosTheta / float(M_PI);
 }
 
 /*! Cosine weighted hemisphere sampling. Up direction is provided as argument. */
@@ -102,12 +89,12 @@ inline Vec3fa powerCosineSampleHemisphere(const float n, const Vec2f &s)
 
 inline float powerCosineSampleHemispherePDF(const float cosTheta, const float n) // TODO: order of arguments
 {
-  return (n + 1.0f) * (0.5f / float(pi)) * pow(cosTheta, n);
+  return (n + 1.0f) * (0.5f / float(M_PI)) * pow(cosTheta, n);
 }
 
 inline float powerCosineSampleHemispherePDF(const Vec3fa& dir, const float n) // TODO: order of arguments
 {
-  return (n + 1.0f) * (0.5f / float(pi)) * pow(dir.z, n);
+  return (n + 1.0f) * (0.5f / float(M_PI)) * pow(dir.z, n);
 }
 
 /// sampling of cone of directions oriented along the +z-axis
@@ -146,12 +133,12 @@ inline Vec3fa uniformSampleDisk(const float radius, const Vec2f &s)
 
 inline float uniformSampleDiskPDF(const float radius)
 {
-  return rcp(float(pi) * sqr(radius));
+  return rcp(float(M_PI) * sqr(radius));
 }
 
 inline float _uniformSampleDiskPDF(const float radius)
 {
-  return rcp(float(pi) * sqr(radius));
+  return rcp(float(M_PI) * sqr(radius));
 }
 
 

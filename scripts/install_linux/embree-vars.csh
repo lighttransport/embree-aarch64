@@ -1,4 +1,8 @@
 #!/bin/tcsh
+
+## Copyright 2009-2020 Intel Corporation
+## SPDX-License-Identifier: Apache-2.0
+
 pushd . > /dev/null
 set SCRIPT_PATH=($_)
 set SCRIPT_PATH="$SCRIPT_PATH[2]"

@@ -540,6 +540,11 @@ Embree API Reference
 ```
 \pagebreak
 
+## rtcGetSceneDevice
+``` {include=src/api/rtcGetSceneDevice.md}
+```
+\pagebreak
+
 ## rtcRetainScene
 ``` {include=src/api/rtcRetainScene.md}
 ```
@@ -653,6 +658,11 @@ Embree API Reference
 
 ## RTC_GEOMETRY_TYPE_INSTANCE
 ``` {include=src/api/RTC_GEOMETRY_TYPE_INSTANCE.md}
+```
+\pagebreak
+
+## RTCCurveFlags
+``` {include=src/api/RTCCurveFlags.md}
 ```
 \pagebreak
 

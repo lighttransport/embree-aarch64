@@ -1,18 +1,5 @@
-// ======================================================================== //
-// Copyright 2009-2020 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
+// Copyright 2009-2020 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 
 #pragma once
 
@@ -58,12 +45,16 @@ namespace embree
       return segments[i];
     }
 
-    /*! returns the i'th segment */
-    __forceinline unsigned int getStartEndBitMask(size_t i) const {
-      unsigned int mask = 0;
-      if (flags) 
-        mask |= (flags[i] & 0x3) << 30;
-      return mask;
+    /*! returns the segment to the left of the i'th segment */
+    __forceinline bool segmentLeftExists(size_t i) const {
+      assert (flags);
+      return (flags[i] & RTC_CURVE_FLAG_NEIGHBOR_LEFT) != 0;
+    }
+
+    /*! returns the segment to the right of the i'th segment */
+    __forceinline bool segmentRightExists(size_t i) const {
+      assert (flags);
+      return (flags[i] & RTC_CURVE_FLAG_NEIGHBOR_RIGHT) != 0;
     }
 
      /*! returns i'th vertex of the first time step */

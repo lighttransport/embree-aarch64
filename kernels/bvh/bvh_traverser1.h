@@ -1,18 +1,5 @@
-// ======================================================================== //
-// Copyright 2009-2020 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
+// Copyright 2009-2020 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 
 #pragma once
 
@@ -70,8 +57,7 @@ namespace embree
       distance = vfloat16::compact((int)mask,distance,tNear);
 
       cur = toScalar(children);
-      cur.prefetch(types);
-
+      BVHN<N>::prefetch(cur,types);
 
       mask &= mask-1;
       if (likely(mask == 0)) return;
@@ -85,7 +71,7 @@ namespace embree
       const vfloat16 d1(distance);
 
       cur = toScalar(children);
-      cur.prefetch(types);
+      BVHN<N>::prefetch(cur,types);
 
       /* a '<' keeps the order for equal distances, scenes like powerplant largely benefit from it */
       const vboolf16 m_dist  = d0 < d1;
@@ -112,7 +98,7 @@ namespace embree
       const vfloat16 d2(distance);
 
       cur = toScalar(children);
-      cur.prefetch(types);
+      BVHN<N>::prefetch(cur,types);
 
       const vboolf16 m_dist1     = dist_A0 <= d2;
       const vfloat16 dist_tmp_B1 = select(m_dist1, d2, dist_A0);
@@ -147,7 +133,7 @@ namespace embree
       const vfloat16 d3(distance);
 
       cur = toScalar(children);
-      cur.prefetch(types);
+      BVHN<N>::prefetch(cur,types);
 
       const vboolf16 m_dist3     = dist_A1 <= d3;
       const vfloat16 dist_tmp_B2 = select(m_dist3, d3, dist_A1);
@@ -198,7 +184,7 @@ namespace embree
         distance = align_shift_right<1>(distance,distance);
 
         cur = toScalar(children);
-        cur.prefetch(types);
+        BVHN<N>::prefetch(cur,types);
 
         const vfloat16 new_dist(permute(distance,vint16(zero)));
         const vllong8 new_ptr(permute(children,vllong8(zero)));
@@ -288,7 +274,7 @@ namespace embree
         /*! one child is hit, continue with that child */
         size_t r = bscf(mask);
         cur = node->child(r);
-        cur.prefetch(types);
+        BVH::prefetch(cur,types);
         if (likely(mask == 0)) {
           assert(cur != BVH::emptyNode);
           return;
@@ -299,7 +285,7 @@ namespace embree
         const unsigned int d0 = ((unsigned int*)&tNear)[r];
         r = bscf(mask);
         NodeRef c1 = node->child(r);
-        c1.prefetch(types);
+        BVH::prefetch(c1,types);
         const unsigned int d1 = ((unsigned int*)&tNear)[r];
         assert(c0 != BVH::emptyNode);
         assert(c1 != BVH::emptyNode);
@@ -313,7 +299,7 @@ namespace embree
         vint4 s0((size_t)c0,(size_t)d0);
         vint4 s1((size_t)c1,(size_t)d1);
         r = bscf(mask);
-        NodeRef c2 = node->child(r); c2.prefetch(types); unsigned int d2 = ((unsigned int*)&tNear)[r]; 
+        NodeRef c2 = node->child(r); BVH::prefetch(c2,types); unsigned int d2 = ((unsigned int*)&tNear)[r]; 
         vint4 s2((size_t)c2,(size_t)d2);
         /* 3 hits */
         if (likely(mask == 0)) {
@@ -324,7 +310,7 @@ namespace embree
           return;
         }
         r = bscf(mask);
-        NodeRef c3 = node->child(r); c3.prefetch(types); unsigned int d3 = ((unsigned int*)&tNear)[r]; 
+        NodeRef c3 = node->child(r); BVH::prefetch(c3,types); unsigned int d3 = ((unsigned int*)&tNear)[r]; 
         vint4 s3((size_t)c3,(size_t)d3);
         /* 4 hits */
         StackItemT<NodeRef>::sort4(s0,s1,s2,s3);
@@ -342,7 +328,7 @@ namespace embree
         /*! three children are hit, push all onto stack and sort 3 stack items, continue with closest child */
         assert(stackPtr < stackEnd);
         r = bscf(mask);
-        NodeRef c = node->child(r); c.prefetch(types); unsigned int d = ((unsigned int*)&tNear)[r]; stackPtr->ptr = c; stackPtr->dist = d; stackPtr++;
+        NodeRef c = node->child(r); BVH::prefetch(c,types); unsigned int d = ((unsigned int*)&tNear)[r]; stackPtr->ptr = c; stackPtr->dist = d; stackPtr++;
         assert(c != BVH::emptyNode);
         if (likely(mask == 0)) {
           sort(stackPtr[-1],stackPtr[-2],stackPtr[-3]);
@@ -353,7 +339,7 @@ namespace embree
         /*! four children are hit, push all onto stack and sort 4 stack items, continue with closest child */
         assert(stackPtr < stackEnd);
         r = bscf(mask);
-        c = node->child(r); c.prefetch(types); d = *(unsigned int*)&tNear[r]; stackPtr->ptr = c; stackPtr->dist = d; stackPtr++;
+        c = node->child(r); BVH::prefetch(c,types); d = *(unsigned int*)&tNear[r]; stackPtr->ptr = c; stackPtr->dist = d; stackPtr++;
         assert(c != BVH::emptyNode);
         sort(stackPtr[-1],stackPtr[-2],stackPtr[-3],stackPtr[-4]);
         cur = (NodeRef) stackPtr[-1].ptr; stackPtr--;
@@ -373,7 +359,7 @@ namespace embree
         /*! one child is hit, continue with that child */
         size_t r = bscf(mask);
         cur = node->child(r); 
-        cur.prefetch(types);
+        BVH::prefetch(cur,types);
 
         /* simpler in sequence traversal order */
         assert(cur != BVH::emptyNode);
@@ -384,7 +370,7 @@ namespace embree
         for (; ;)
         {
           r = bscf(mask);
-          cur = node->child(r); cur.prefetch(types);
+          cur = node->child(r); BVH::prefetch(cur,types);
           assert(cur != BVH::emptyNode);
           if (likely(mask == 0)) return;
           assert(stackPtr < stackEnd);
@@ -416,7 +402,7 @@ namespace embree
         vint8 distance_i = (asInt(tNear) & 0xfffffff8) | vint8(step);
         distance_i = vint8::compact((int)mask,distance_i,distance_i);
         cur = permuteExtract(distance_i,n0,n1);
-        cur.prefetch(types);
+        BVH::prefetch(cur,types);
 
         mask &= mask-1;
         if (likely(mask == 0)) return;
@@ -425,7 +411,7 @@ namespace embree
         const vint8 d0(distance_i);
         const vint8 d1(shuffle<1>(distance_i));
         cur = permuteExtract(d1,n0,n1);
-        cur.prefetch(types);
+        BVH::prefetch(cur,types);
 
         const vint8 dist_A0 = min(d0, d1);
         const vint8 dist_B0 = max(d0, d1);
@@ -444,7 +430,7 @@ namespace embree
 
         const vint8 d2(shuffle<2>(distance_i));
         cur = permuteExtract(d2,n0,n1);
-        cur.prefetch(types);
+        BVH::prefetch(cur,types);
 
         const vint8 dist_A1     = min(dist_A0,d2);
         const vint8 dist_tmp_B1 = max(dist_A0,d2);
@@ -468,7 +454,7 @@ namespace embree
 
         const vint8 d3(shuffle<3>(distance_i));
         cur = permuteExtract(d3,n0,n1);
-        cur.prefetch(types);
+        BVH::prefetch(cur,types);
 
         const vint8 dist_A2     = min(dist_A1,d3);
         const vint8 dist_tmp_B2 = max(dist_A1,d3);
@@ -508,7 +494,7 @@ namespace embree
 
           distance_i = align_shift_right<1>(distance_i,distance_i);
           cur = permuteExtract(distance_i,n0,n1);
-          cur.prefetch(types);
+          BVH::prefetch(cur,types);
           const vint8 new_dist(permute(distance_i,vint8(zero)));
           mask &= mask-1;
           isort_update(dist,new_dist);
@@ -548,7 +534,7 @@ namespace embree
         /*! one child is hit, continue with that child */
         size_t r = bscf(mask);
         cur = node->child(r);
-        cur.prefetch(types);
+        BVH::prefetch(cur,types);
         if (likely(mask == 0)) {
           assert(cur != BVH::emptyNode);
           return;
@@ -559,7 +545,7 @@ namespace embree
         const unsigned int d0 = ((unsigned int*)&tNear)[r];
         r = bscf(mask);
         NodeRef c1 = node->child(r);
-        c1.prefetch(types);
+        BVH::prefetch(c1,types);
         const unsigned int d1 = ((unsigned int*)&tNear)[r];
 
         assert(c0 != BVH::emptyNode);
@@ -574,7 +560,7 @@ namespace embree
         vint4 s1((size_t)c1,(size_t)d1);
 
         r = bscf(mask);
-        NodeRef c2 = node->child(r); c2.prefetch(types); unsigned int d2 = ((unsigned int*)&tNear)[r]; 
+        NodeRef c2 = node->child(r); BVH::prefetch(c2,types); unsigned int d2 = ((unsigned int*)&tNear)[r]; 
         vint4 s2((size_t)c2,(size_t)d2);
         /* 3 hits */
         if (likely(mask == 0)) {
@@ -585,7 +571,7 @@ namespace embree
           return;
         }
         r = bscf(mask);
-        NodeRef c3 = node->child(r); c3.prefetch(types); unsigned int d3 = ((unsigned int*)&tNear)[r]; 
+        NodeRef c3 = node->child(r); BVH::prefetch(c3,types); unsigned int d3 = ((unsigned int*)&tNear)[r]; 
         vint4 s3((size_t)c3,(size_t)d3);
         /* 4 hits */
         if (likely(mask == 0)) {
@@ -603,7 +589,7 @@ namespace embree
         {
           assert(stackPtr < stackEnd);
           r = bscf(mask);
-          NodeRef c = node->child(r); c.prefetch(types); unsigned int d = *(unsigned int*)&tNear[r]; 
+          NodeRef c = node->child(r); BVH::prefetch(c,types); unsigned int d = *(unsigned int*)&tNear[r]; 
           const vint4 s((size_t)c,(size_t)d);
           *(vint4*)stackPtr++ = s;
           assert(c != BVH::emptyNode);
@@ -622,7 +608,7 @@ namespace embree
         /*! three children are hit, push all onto stack and sort 3 stack items, continue with closest child */
         assert(stackPtr < stackEnd);
         r = bscf(mask);
-        NodeRef c = node->child(r); c.prefetch(types); unsigned int d = ((unsigned int*)&tNear)[r]; stackPtr->ptr = c; stackPtr->dist = d; stackPtr++;
+        NodeRef c = node->child(r); BVH::prefetch(c,types); unsigned int d = ((unsigned int*)&tNear)[r]; stackPtr->ptr = c; stackPtr->dist = d; stackPtr++;
         assert(c != BVH::emptyNode);
         if (likely(mask == 0)) {
           sort(stackPtr[-1],stackPtr[-2],stackPtr[-3]);
@@ -633,7 +619,7 @@ namespace embree
         /*! four children are hit, push all onto stack and sort 4 stack items, continue with closest child */
         assert(stackPtr < stackEnd);
         r = bscf(mask);
-        c = node->child(r); c.prefetch(types); d = *(unsigned int*)&tNear[r]; stackPtr->ptr = c; stackPtr->dist = d; stackPtr++;
+        c = node->child(r); BVH::prefetch(c,types); d = *(unsigned int*)&tNear[r]; stackPtr->ptr = c; stackPtr->dist = d; stackPtr++;
         assert(c != BVH::emptyNode);
         if (likely(mask == 0)) {
           sort(stackPtr[-1],stackPtr[-2],stackPtr[-3],stackPtr[-4]);
@@ -646,7 +632,7 @@ namespace embree
         {
           assert(stackPtr < stackEnd);
           r = bscf(mask);
-          c = node->child(r); c.prefetch(types); d = *(unsigned int*)&tNear[r]; stackPtr->ptr = c; stackPtr->dist = d; stackPtr++;
+          c = node->child(r); BVH::prefetch(c,types); d = *(unsigned int*)&tNear[r]; stackPtr->ptr = c; stackPtr->dist = d; stackPtr++;
           assert(c != BVH::emptyNode);
           if (unlikely(mask == 0)) break;
         }
@@ -667,7 +653,7 @@ namespace embree
         /*! one child is hit, continue with that child */
         size_t r = bscf(mask);
         cur = node->child(r);
-        cur.prefetch(types);
+        BVH::prefetch(cur,types);
 
         /* simpler in sequence traversal order */
         assert(cur != BVH::emptyNode);
@@ -678,7 +664,7 @@ namespace embree
         for (; ;)
         {
           r = bscf(mask);
-          cur = node->child(r); cur.prefetch(types);
+          cur = node->child(r); BVH::prefetch(cur,types);
           assert(cur != BVH::emptyNode);
           if (likely(mask == 0)) return;
           assert(stackPtr < stackEnd);

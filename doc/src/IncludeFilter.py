@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+## Copyright 2009-2020 Intel Corporation
+## SPDX-License-Identifier: Apache-2.0
+
 import sys
 import json
 import subprocess 

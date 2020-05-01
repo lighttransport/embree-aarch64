@@ -1,18 +1,5 @@
-// ======================================================================== //
-// Copyright 2009-2020 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
+// Copyright 2009-2020 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 
 #include "bvh_intersector_stream.h"
 
@@ -363,7 +350,7 @@ namespace embree
           size_t r = bscf(mask);
           assert(r < N);
           cur = node->child(r);         
-          cur.prefetch(types);
+          BVHN<N>::prefetch(cur,types);
           cur_mask = child_mask[r];
 
           /* simple in order sequence */
@@ -379,7 +366,7 @@ namespace embree
             assert(r < N);
 
             cur = node->child(r);          
-            cur.prefetch(types);
+            BVHN<N>::prefetch(cur,types);
             cur_mask = child_mask[r];            
             assert(cur != BVH::emptyNode);
             if (likely(mask == 0)) break;

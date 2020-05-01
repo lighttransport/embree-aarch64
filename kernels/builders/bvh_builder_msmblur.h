@@ -1,18 +1,5 @@
-// ======================================================================== //
-// Copyright 2009-2020 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
+// Copyright 2009-2020 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 
 #pragma once
 
@@ -503,15 +490,16 @@ namespace embree
             }
 
             /* create node */
-            auto node = createNode(alloc, hasTimeSplits);
+            auto node = createNode(children.children.data(),children.numChildren,alloc,hasTimeSplits);
 
             /* recurse into each child and perform reduction */
             LBBox3fa gbounds = empty;
             for (size_t i=0; i<children.size(); i++) {
               values[i] = createLargeLeaf(children[i],alloc);
               gbounds.extend(values[i].lbounds);
-              setNode(node,i,values[i]);
             }
+
+            setNode(current,children.children.data(),node,values,children.numChildren);
 
             /* calculate geometry bounds of this node */
             if (hasTimeSplits)
@@ -592,7 +580,7 @@ namespace embree
             //std::sort(&children[0],&children[children.size()],std::greater<BuildRecord>()); // FIXME: reduces traversal performance of bvh8.triangle4 (need to verified) !!
 
             /*! create an inner node */
-            auto node = createNode(alloc, hasTimeSplits);
+            auto node = createNode(children.children.data(), children.numChildren, alloc, hasTimeSplits);
             LBBox3fa gbounds = empty;
 
             /* spawn tasks */
@@ -602,7 +590,6 @@ namespace embree
               parallel_for(size_t(0), children.size(), [&] (const range<size_t>& r) {
                   for (size_t i=r.begin(); i<r.end(); i++) {
                     values[i] = recurse(children[i],nullptr,true);
-                    setNode(node,i,values[i]);
                     _mm_mfence(); // to allow non-temporal stores during build
                   }
                 });
@@ -618,9 +605,10 @@ namespace embree
               for (ssize_t i=children.size()-1; i>=0; i--) {
                 values[i] = recurse(children[i],alloc,false);
                 gbounds.extend(values[i].lbounds);
-                setNode(node,i,values[i]);
               }
             }
+
+            setNode(current,children.children.data(),node,values,children.numChildren);
 
             /* calculate geometry bounds of this node */
             if (unlikely(hasTimeSplits))

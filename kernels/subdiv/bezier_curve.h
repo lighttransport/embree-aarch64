@@ -1,18 +1,5 @@
-// ======================================================================== //
-// Copyright 2009-2020 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
+// Copyright 2009-2020 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 
 #pragma once
 
@@ -108,7 +95,7 @@ namespace embree
       
       bool hasRoot() const;
       
-      friend std::ostream& operator<<(std::ostream& cout, const LinearBezierCurve& a) {
+      friend embree_ostream operator<<(embree_ostream cout, const LinearBezierCurve& a) {
         return cout << "LinearBezierCurve (" << a.v0 << ", " << a.v1 << ")";
       }
     };
@@ -145,7 +132,7 @@ namespace embree
         return merge(BBox<V>(v0),BBox<V>(v1),BBox<V>(v2));
       }
       
-      friend std::ostream& operator<<(std::ostream& cout, const QuadraticBezierCurve& a) {
+      friend embree_ostream operator<<(embree_ostream cout, const QuadraticBezierCurve& a) {
         return cout << "QuadraticBezierCurve ( (" << a.u.lower << ", " << a.u.upper << "), " << a.v0 << ", " << a.v1 << ", " << a.v2 << ")";
       }
     };
@@ -618,7 +605,7 @@ namespace embree
         }
       }
       
-      friend inline std::ostream& operator<<(std::ostream& cout, const CubicBezierCurve& curve) {
+      friend __forceinline embree_ostream operator<<(embree_ostream cout, const CubicBezierCurve& curve) {
         return cout << "CubicBezierCurve { v0 = " << curve.v0 << ", v1 = " << curve.v1 << ", v2 = " << curve.v2 << ", v3 = " << curve.v3 << " }";
       }
     };
@@ -657,7 +644,7 @@ namespace embree
   typedef CubicBezierCurve<Vec3fa> CubicBezierCurve3fa;
   typedef CubicBezierCurve<Vec3fa> BezierCurve3fa;
   
-  template<> inline int CubicBezierCurve<float>::maxRoots() const
+  template<> __forceinline int CubicBezierCurve<float>::maxRoots() const
   {
     float eps = 1E-4f;
     bool neg0 = v0 <= 0.0f; bool zero0 = fabs(v0) < eps;

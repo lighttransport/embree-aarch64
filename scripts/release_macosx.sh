@@ -1,5 +1,8 @@
 #!/bin/bash
 
+## Copyright 2009-2020 Intel Corporation
+## SPDX-License-Identifier: Apache-2.0
+
 # to make sure we do not include nor link against wrong TBB
 export CPATH=
 export LIBRARY_PATH=

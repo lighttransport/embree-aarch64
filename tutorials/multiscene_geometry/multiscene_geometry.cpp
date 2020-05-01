@@ -1,18 +1,5 @@
-// ======================================================================== //
-// Copyright 2009-2020 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
+// Copyright 2009-2020 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 
 #include "../common/tutorial/tutorial.h"
 
@@ -35,6 +22,15 @@ namespace embree
       static const char* items[] = { "full scene", "right half", "left half" };
       ImGui::Combo("",&g_scene_id,items,IM_ARRAYSIZE(items));
     }
+
+    void keypressed(int key)
+    {
+      if (key == ' ')
+        g_scene_id = (g_scene_id+1)%3;
+      else
+        TutorialApplication::keypressed(key);
+    }
+  
   };
   
 }

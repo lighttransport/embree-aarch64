@@ -1,21 +1,8 @@
-## ======================================================================== ##
-## Copyright 2009-2020 Intel Corporation                                    ##
-##                                                                          ##
-## Licensed under the Apache License, Version 2.0 (the "License");          ##
-## you may not use this file except in compliance with the License.         ##
-## You may obtain a copy of the License at                                  ##
-##                                                                          ##
-##     http://www.apache.org/licenses/LICENSE-2.0                           ##
-##                                                                          ##
-## Unless required by applicable law or agreed to in writing, software      ##
-## distributed under the License is distributed on an "AS IS" BASIS,        ##
-## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. ##
-## See the License for the specific language governing permissions and      ##
-## limitations under the License.                                           ##
-## ======================================================================== ##
+## Copyright 2009-2020 Intel Corporation
+## SPDX-License-Identifier: Apache-2.0
 
 SET(EMBREE_VERSION_MAJOR 3)
-SET(EMBREE_VERSION_MINOR 8)
+SET(EMBREE_VERSION_MINOR 9)
 SET(EMBREE_VERSION_PATCH 0)
 SET(EMBREE_VERSION_NOTE "")
 
@@ -281,10 +268,6 @@ IF (EMBREE_MAX_ISA STREQUAL "NONE")
   TRY_COMPILE(COMPILER_SUPPORTS_AVX512KNL ${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/common/cmake/check_isa.cpp COMPILE_DEFINITIONS ${FLAGS_AVX512KNL})
   TRY_COMPILE(COMPILER_SUPPORTS_AVX512SKX ${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/common/cmake/check_isa.cpp COMPILE_DEFINITIONS ${FLAGS_AVX512SKX})
 
-  IF (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
-    SET(COMPILER_SUPPORTS_AVX512SKX OFF)  # we disable this by default as GCC agressively produces AVX512 heavy instructions which reduce CPU frequency
-  ENDIF()
-
   OPTION(EMBREE_ISA_SSE2 "Enables SSE2 ISA." ON)
   OPTION(EMBREE_ISA_SSE42 "Enables SSE4.2 ISA." ON)
   OPTION(EMBREE_ISA_AVX "Enables AVX ISA." ${COMPILER_SUPPORTS_AVX})
@@ -398,12 +381,6 @@ IF (APPLE AND EMBREE_STATIC_LIB)
         MESSAGE(FATAL_ERROR "Using Embree as static library is not supported with AppleClang 9.X when multiple ISAs are selected. Please either build a shared library or enable only one ISA.")
       ENDIF()
     ENDIF()
-  ENDIF()
-ENDIF()
-
-IF (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
-  IF (EMBREE_ISA_AVX512SKX)
-    MESSAGE(WARNING "Enabling AVX512SKX on GCC may reduce CPU frequency.")
   ENDIF()
 ENDIF()
 

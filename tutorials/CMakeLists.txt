@@ -1,20 +1,13 @@
-## ======================================================================== ##
-## Copyright 2009-2020 Intel Corporation                                    ##
-##                                                                          ##
-## Licensed under the Apache License, Version 2.0 (the "License");          ##
-## you may not use this file except in compliance with the License.         ##
-## You may obtain a copy of the License at                                  ##
-##                                                                          ##
-##     http://www.apache.org/licenses/LICENSE-2.0                           ##
-##                                                                          ##
-## Unless required by applicable law or agreed to in writing, software      ##
-## distributed under the License is distributed on an "AS IS" BASIS,        ##
-## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. ##
-## See the License for the specific language governing permissions and      ##
-## limitations under the License.                                           ##
-## ======================================================================== ##
+## Copyright 2009-2020 Intel Corporation
+## SPDX-License-Identifier: Apache-2.0
 
-IF (WIN32)
+IF (NOT WIN32 OR EMBREE_EXTERNAL_GLFW)
+
+  FIND_PACKAGE(glfw3 REQUIRED)
+  SET(GLFW_LIBRARY glfw)
+  SET(GLFW_INCLUDE_DIRS)
+  
+ELSE()
 
   # detect and select Win32 or x64
   IF (CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -40,19 +33,7 @@ IF (WIN32)
     GLFW_INCLUDE_DIR
     GLFW_LIBRARY
   )
-
-ELSE (WIN32)
-
-  FIND_PACKAGE(PkgConfig)
-  IF (PKG_CONFIG_FOUND)
-    PKG_SEARCH_MODULE(GLFW QUIET glfw3)
-    IF (NOT GLFW_FOUND)
-      MESSAGE(WARNING "GLFW not found! tutorials with GUI won't be built. Please either install GLFW or disable EMBREE_TUTORIALS.")
-    ENDIF()
-
-    LINK_DIRECTORIES(${GLFW_LIBRARY_DIRS})
-  ENDIF (PKG_CONFIG_FOUND)
-ENDIF (WIN32)
+ENDIF()
 
 IF (GLFW_FOUND)
   FIND_PACKAGE(OpenGL)

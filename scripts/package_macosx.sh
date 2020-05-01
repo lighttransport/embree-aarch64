@@ -1,5 +1,8 @@
 #!/bin/bash
 
+## Copyright 2009-2020 Intel Corporation
+## SPDX-License-Identifier: Apache-2.0
+
 # terminate if some error occurs
 set -e
 

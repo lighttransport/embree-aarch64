@@ -1,18 +1,5 @@
-// ======================================================================== //
-// Copyright 2009-2020 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
+// Copyright 2009-2020 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 
 #include "../common/tutorial/tutorial_device.h"
 
@@ -33,7 +20,7 @@ RTCScene g_scene = nullptr;
 Point* g_points = nullptr;
 Point* g_points_tmp = nullptr;
 Vec3fa* g_colors = nullptr;
-Vec3fa g_query_point(0.7f, 0.0f, 0.3f);
+extern "C" Vec3fa g_query_point;
 const int g_num_colors = 27;
 
 typedef void (*DrawGUI)(void);
@@ -179,18 +166,6 @@ Point* createPoints (RTCScene scene, unsigned int N)
   return g_points;
 }
 
-void device_key_pressed_handler(int key)
-{
-  if (key == GLFW_KEY_RIGHT) g_query_point.x += 0.01f;
-  if (key == GLFW_KEY_LEFT)  g_query_point.x -= 0.01f;
-  if (key == GLFW_KEY_UP)    g_query_point.z += 0.01f;
-  if (key == GLFW_KEY_DOWN)  g_query_point.z -= 0.01f;
-  g_query_point = max(g_query_point, Vec3fa(0.f));
-  g_query_point = min(g_query_point, Vec3fa(1.f));
-
-  device_key_pressed_default(key);
-}
-
 /* called by the C++ code for initialization */
 extern "C" void device_init (char* cfg)
 {
@@ -204,8 +179,6 @@ extern "C" void device_init (char* cfg)
   g_colors = (Vec3fa*) alignedMalloc(g_num_colors*sizeof(Point), 16);
   for (int r = 0; r < 3; ++r) for (int g = 0; g < 3; ++g) for (int b = 0; b < 3; ++b) 
     g_colors[r * 9 + g * 3 + b] = Vec3fa(0.2f + 0.3f * r, 0.2f + 0.3f * g, 0.2f + 0.3f * b); 
-
-  key_pressed_handler = device_key_pressed_handler;
 }
 
 /* renders a single screen tile */
@@ -292,6 +265,14 @@ void rebuild_bvh()
   rtcCommitGeometry(geom);
   rtcReleaseGeometry(geom);
   rtcCommitScene(g_scene);
+}
+
+extern "C" void renderFrameStandard (int* pixels,
+                          const unsigned int width,
+                          const unsigned int height,
+                          const float time,
+                          const ISPCCamera& camera)
+{
 }
 
 /* called by the C++ code to render */

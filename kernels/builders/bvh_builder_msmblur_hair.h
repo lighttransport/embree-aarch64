@@ -1,18 +1,5 @@
-// ======================================================================== //
-// Copyright 2009-2020 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
+// Copyright 2009-2020 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 
 #pragma once
 
@@ -195,6 +182,7 @@ namespace embree
 
             /* fill all children by always splitting the largest one */
             LocalChildList children(current);
+            NodeRecordMB4D values[MAX_BRANCHING_FACTOR];
 
             do {
 
@@ -239,14 +227,15 @@ namespace embree
             }
             
             /* create node */
-            NodeRef node = createAlignedNodeMB(alloc,timesplit);
+            NodeRef node = createAlignedNodeMB(children.children.data(),children.numChildren,alloc,timesplit);
 
             LBBox3fa bounds = empty;
             for (size_t i=0; i<children.size(); i++) {
-              const auto child = createLargeLeaf(children[i],alloc);
-              setAlignedNodeMB(node,i,child);
-              bounds.extend(child.lbounds);
+              values[i] = createLargeLeaf(children[i],alloc);
+              bounds.extend(values[i].lbounds);
             }
+
+            setAlignedNodeMB(current,children.children.data(),node,values,children.numChildren);
 
             if (timesplit)
               bounds = current.prims.linearBounds(recalculatePrimRef);
@@ -332,6 +321,7 @@ namespace embree
             }
 
             /* fill all children by always splitting the one with the largest surface area */
+            NodeRecordMB4D values[MAX_BRANCHING_FACTOR];
             LocalChildList children(current);
             bool aligned = true;
             bool timesplit = false;
@@ -374,15 +364,14 @@ namespace embree
             /* create time split node */
             if (timesplit)
             {
-              const NodeRef node = createAlignedNodeMB(alloc,true);
+              const NodeRef node = createAlignedNodeMB(children.children.data(),children.numChildren,alloc,true);
 
               /* spawn tasks or ... */
               if (current.size() > SINGLE_THREADED_THRESHOLD)
               {
                 parallel_for(size_t(0), children.size(), [&] (const range<size_t>& r) {
                     for (size_t i=r.begin(); i<r.end(); i++) {
-                      const auto child = recurse(children[i],nullptr,true);
-                      setAlignedNodeMB(node,i,child);
+                      values[i] = recurse(children[i],nullptr,true);
                       _mm_mfence(); // to allow non-temporal stores during build
                     }
                   });
@@ -390,10 +379,11 @@ namespace embree
               /* ... continue sequential */
               else {
                 for (size_t i=0; i<children.size(); i++) {
-                  const auto child = recurse(children[i],alloc,false);
-                  setAlignedNodeMB(node,i,child);
+                  values[i] = recurse(children[i],alloc,false);
                 }
               }
+
+              setAlignedNodeMB(current,children.children.data(),node,values,children.numChildren);
 
               const LBBox3fa bounds = current.prims.linearBounds(recalculatePrimRef);
               return NodeRecordMB4D(node,bounds,current.prims.time_range);
@@ -402,7 +392,7 @@ namespace embree
             /* create aligned node */
             else if (aligned)
             {
-              const NodeRef node = createAlignedNodeMB(alloc,false);
+              const NodeRef node = createAlignedNodeMB(children.children.data(),children.numChildren,alloc,true);
 
               /* spawn tasks or ... */
               if (current.size() > SINGLE_THREADED_THRESHOLD)
@@ -410,9 +400,8 @@ namespace embree
                 LBBox3fa cbounds[MAX_BRANCHING_FACTOR];
                 parallel_for(size_t(0), children.size(), [&] (const range<size_t>& r) {
                     for (size_t i=r.begin(); i<r.end(); i++) {
-                      const auto child = recurse(children[i],nullptr,true);
-                      setAlignedNodeMB(node,i,child);
-                      cbounds[i] = child.lbounds;
+                      values[i] = recurse(children[i],nullptr,true);
+                      cbounds[i] = values[i].lbounds;
                       _mm_mfence(); // to allow non-temporal stores during build
                     }
                   });
@@ -420,7 +409,7 @@ namespace embree
                 LBBox3fa bounds = empty;
                 for (size_t i=0; i<children.size(); i++)
                   bounds.extend(cbounds[i]);
-
+                setAlignedNodeMB(current,children.children.data(),node,values,children.numChildren);
                 return NodeRecordMB4D(node,bounds,current.prims.time_range);
               }
               /* ... continue sequentially */
@@ -428,10 +417,10 @@ namespace embree
               {
                 LBBox3fa bounds = empty;
                 for (size_t i=0; i<children.size(); i++) {
-                  const auto child = recurse(children[i],alloc,false);
-                  setAlignedNodeMB(node,i,child);
-                  bounds.extend(child.lbounds);
+                  values[i] = recurse(children[i],alloc,false);
+                  bounds.extend(values[i].lbounds);
                 }
+                setAlignedNodeMB(current,children.children.data(),node,values,children.numChildren);
                 return NodeRecordMB4D(node,bounds,current.prims.time_range);
               }
             }

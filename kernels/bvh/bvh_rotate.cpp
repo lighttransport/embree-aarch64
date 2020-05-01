@@ -1,18 +1,5 @@
-// ======================================================================== //
-// Copyright 2009-2020 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
+// Copyright 2009-2020 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 
 #include "bvh_rotate.h"
 
@@ -126,10 +113,10 @@ namespace embree
       
       /*! perform the best found tree rotation */
       AlignedNode* child2 = parent->child(bestChild2).alignedNode();
-      BVH4::swap(parent,bestChild1,child2,bestChild2Child);
+      AlignedNode::swap(parent,bestChild1,child2,bestChild2Child);
       parent->setBounds(bestChild2,child2->bounds());
-      BVH4::compact(parent);
-      BVH4::compact(child2);
+      AlignedNode::compact(parent);
+      AlignedNode::compact(child2);
       
       /*! This returned depth is conservative as the child that was
        *  pulled up in the tree could have been on the critical path. */

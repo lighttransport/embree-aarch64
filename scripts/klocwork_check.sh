@@ -1,5 +1,8 @@
 #!/bin/bash
 
+## Copyright 2009-2020 Intel Corporation
+## SPDX-License-Identifier: Apache-2.0
+
 set -e
 export KW_BUILD_NUMBER=$(cat ./kw_build_number)
 export KW_PROJECT_NAME=embree

@@ -1,18 +1,5 @@
-// ======================================================================== //
-// Copyright 2009-2020 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
+// Copyright 2009-2020 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 
 #include "scene_instance.h"
 #include "scene.h"
@@ -243,8 +230,8 @@ namespace embree
                                 float tmax)
   {
     BBox3fa delta(Vec3fa(0.f), Vec3fa(0.f));
-    float roots[8];
-    unsigned int maxNumRoots = 8;
+    float roots[32];
+    unsigned int maxNumRoots = 32;
     unsigned int numRoots;
     const Interval1f interval(tmin, tmax);
 
@@ -266,7 +253,7 @@ namespace embree
         MotionDerivative motionDerivative(motionDerivCoeffs, dim, p0, p1);
 
         numRoots = motionDerivative.findRoots(interval, bbox0.lower[dim] - bbox1.lower[dim], roots, maxNumRoots);
-        for (int r = 0; r < numRoots; ++r) {
+        for (unsigned int r = 0; r < numRoots; ++r) {
           float t = roots[r];
           const BBox3fa bt = lerp(bbox0, bbox1, t);
           const Vec3fa  pt = xfmPoint(slerp(xfm0, xfm1, t), lerp(p0, p1, t));
@@ -274,7 +261,7 @@ namespace embree
         }
 
         numRoots = motionDerivative.findRoots(interval, bbox0.upper[dim] - bbox1.upper[dim], roots, maxNumRoots);
-        for (int r = 0; r < numRoots; ++r) {
+        for (unsigned int r = 0; r < numRoots; ++r) {
           float t = roots[r];
           const BBox3fa bt = lerp(bbox0, bbox1, t);
           const Vec3fa  pt = xfmPoint(slerp(xfm0, xfm1, t), lerp(p0, p1, t));

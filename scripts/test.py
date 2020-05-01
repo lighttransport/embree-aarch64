@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+## Copyright 2009-2020 Intel Corporation
+## SPDX-License-Identifier: Apache-2.0
+
 import sys
 import os
 import ctypes
@@ -91,7 +94,12 @@ def runConfig(config):
     ext = ""
     if platform == "x64":
       ext = " Win64"
-    if (compiler == "V141"):
+    if (compiler == "V142"):
+      conf.append("-G \"Visual Studio 16 2019\"")
+      conf.append("-T \"V142\"")
+      conf.append("-A \"x64\"")
+      ispc_ext = "-vs2015"
+    elif (compiler == "V141"):
       conf.append("-G \"Visual Studio 15 2017"+ext+"\"")
       conf.append("-T \"V141\"")
       ispc_ext = "-vs2015"
@@ -105,12 +113,14 @@ def runConfig(config):
     elif (compiler == "V110"):
       conf.append("-G \"Visual Studio 11 2012"+ext+"\"")
       conf.append("-T \"V110\"")
-    elif (compiler == "ICC"):
-      conf.append("-G \"Visual Studio 12 2013"+ext+"\"")
-      conf.append("-T \"Intel C++ Compiler 17.0\"")
-    elif (compiler == "ICC18"):
-      conf.append("-G \"Visual Studio 12 2013"+ext+"\"")
+    elif (compiler == "ICC19-VC14"):
+      conf.append("-G \"Visual Studio 14 2015"+ext+"\"")
+      conf.append("-T \"Intel C++ Compiler 19.0\"")
+      ispc_ext = "-vs2015"
+    elif (compiler == "ICC18-VC14"):
+      conf.append("-G \"Visual Studio 14 2015"+ext+"\"")
       conf.append("-T \"Intel C++ Compiler 18.0\"")
+      ispc_ext = "-vs2015"
     elif (compiler == "ICC17-VC14"):
       conf.append("-G \"Visual Studio 14 2015"+ext+"\"")
       conf.append("-T \"Intel C++ Compiler 17.0\"")
@@ -367,7 +377,7 @@ def runConfig(config):
     if OS == "windows":
       try:
         subprocess.check_call(cmd, stderr=subprocess.STDOUT, shell=True)
-      except subprocess.CalledProcessError, e:
+      except subprocess.CalledProcessError as e:
         sys.stderr.write("windows test invokation failed with return code "+str(e.returncode))
         sys.exit(1)
     else:

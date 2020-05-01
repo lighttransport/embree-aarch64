@@ -1,18 +1,5 @@
-// ======================================================================== //
-// Copyright 2009-2020 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
+// Copyright 2009-2020 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 
 #include "../../kernels/common/default.h"
 #include "../../include/embree3/rtcore.h"
@@ -254,16 +241,16 @@ namespace embree
   }
 
   /* Outputs ray to stream */
-  __forceinline std::ostream& operator<<(std::ostream& cout, const RTCRayHit& rh)
+  __forceinline embree_ostream operator<<(embree_ostream cout, const RTCRayHit& rh)
   {
-    cout << "Ray { " << std::endl
-         << "  org = " << rh.ray.org_x << " " << rh.ray.org_y << " " << rh.ray.org_z << std::endl
-         << "  dir = " << rh.ray.dir_x << " " << rh.ray.dir_y << " " << rh.ray.dir_z << std::endl
-         << "  near = " << rh.ray.tnear << std::endl
-         << "  far = " << rh.ray.tfar << std::endl
-         << "  time = " << rh.ray.time << std::endl
-         << "  mask = " << rh.ray.mask << std::endl
-         << "  id = " << rh.ray.id << std::endl
+    cout << "Ray { " << embree_endl
+         << "  org = " << rh.ray.org_x << " " << rh.ray.org_y << " " << rh.ray.org_z << embree_endl
+         << "  dir = " << rh.ray.dir_x << " " << rh.ray.dir_y << " " << rh.ray.dir_z << embree_endl
+         << "  near = " << rh.ray.tnear << embree_endl
+         << "  far = " << rh.ray.tfar << embree_endl
+         << "  time = " << rh.ray.time << embree_endl
+         << "  mask = " << rh.ray.mask << embree_endl
+         << "  id = " << rh.ray.id << embree_endl
          << "  instID =";
     for (unsigned l = 0; l < RTC_MAX_INSTANCE_LEVEL_COUNT; ++l)
     {
@@ -271,12 +258,12 @@ namespace embree
       if (rh.hit.instID[l] == RTC_INVALID_GEOMETRY_ID)
         break;
     }
-    cout << std::endl
-         << "  geomID = " << rh.hit.geomID << std::endl
-         << "  primID = " << rh.hit.primID <<  std::endl
-         << "  u = " << rh.hit.u <<  std::endl
-         << "  v = " << rh.hit.v << std::endl
-         << "  Ng = " << rh.hit.Ng_x << " " << rh.hit.Ng_y << " " << rh.hit.Ng_z << std::endl
+    cout << embree_endl
+         << "  geomID = " << rh.hit.geomID << embree_endl
+         << "  primID = " << rh.hit.primID <<  embree_endl
+         << "  u = " << rh.hit.u <<  embree_endl
+         << "  v = " << rh.hit.v << embree_endl
+         << "  Ng = " << rh.hit.Ng_x << " " << rh.hit.Ng_y << " " << rh.hit.Ng_z << embree_endl
          << "}";
     return cout;
   }

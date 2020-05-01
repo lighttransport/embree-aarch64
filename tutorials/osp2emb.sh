@@ -1,5 +1,8 @@
 #!/bin/bash
 
+## Copyright 2009-2020 Intel Corporation
+## SPDX-License-Identifier: Apache-2.0
+
 echo Converting OSPRay code $1 to Embree code $2
 cp $1 $2
 

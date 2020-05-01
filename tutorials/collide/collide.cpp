@@ -1,18 +1,5 @@
-// ======================================================================== //
-// Copyright 2009-2020 Intel Corporation                                    //
-//                                                                          //
-// Licensed under the Apache License, Version 2.0 (the "License");          //
-// you may not use this file except in compliance with the License.         //
-// You may obtain a copy of the License at                                  //
-//                                                                          //
-//     http://www.apache.org/licenses/LICENSE-2.0                           //
-//                                                                          //
-// Unless required by applicable law or agreed to in writing, software      //
-// distributed under the License is distributed on an "AS IS" BASIS,        //
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
-// See the License for the specific language governing permissions and      //
-// limitations under the License.                                           //
-// ======================================================================== //
+// Copyright 2009-2020 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 
 #include "../common/tutorial/tutorial.h"
 #include "../common/tutorial/statistics.h"
@@ -24,6 +11,8 @@
 
 namespace embree
 {
+  void updateScene ();
+    
   // RTCDevice g_device = nullptr;
   RTCScene g_scene = nullptr;
 
@@ -43,6 +32,8 @@ namespace embree
   size_t NZ = 50;
 
   SpinLock mutex;
+
+  bool pause = false;
 
   bool intersect_triangle_triangle (unsigned geomID0, unsigned primID0, unsigned geomID1, unsigned primID1)
 {
@@ -180,7 +171,15 @@ void triangle_intersect_func(const RTCIntersectFunctionNArguments* args)
                        
       camera.from = Vec3fa(-2.5f,2.5f,-2.5f);
       camera.to   = Vec3fa(0.0f,0.0f,0.0f);
-    }   
+    }
+
+    void keypressed(int key) override
+    {
+      if (key == 32  /* */) initializeClothPositions ((collide2::ClothModel &) (*meshes[clothID]));
+      if (key == 80 /*p*/) { pause = !pause; }
+      if (pause == true && key == 78 /*n*/) { updateScene (); }
+      else TutorialApplication::keypressed(key);
+    }
   };
 }
 

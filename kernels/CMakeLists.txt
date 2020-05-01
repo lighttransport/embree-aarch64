@@ -1,18 +1,5 @@
-## ======================================================================== ##
-## Copyright 2009-2020 Intel Corporation                                    ##
-##                                                                          ##
-## Licensed under the Apache License, Version 2.0 (the "License");          ##
-## you may not use this file except in compliance with the License.         ##
-## You may obtain a copy of the License at                                  ##
-##                                                                          ##
-##     http://www.apache.org/licenses/LICENSE-2.0                           ##
-##                                                                          ##
-## Unless required by applicable law or agreed to in writing, software      ##
-## distributed under the License is distributed on an "AS IS" BASIS,        ##
-## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. ##
-## See the License for the specific language governing permissions and      ##
-## limitations under the License.                                           ##
-## ======================================================================== ##
+## Copyright 2009-2020 Intel Corporation
+## SPDX-License-Identifier: Apache-2.0
 
 MACRO(DISABLE_STACK_PROTECTOR_FOR_INTERSECTORS)
   FOREACH(src ${ARGN})
@@ -53,6 +40,7 @@ SET(EMBREE_LIBRARY_FILES
   common/scene_line_segments.cpp
   common/scene_grid_mesh.cpp
   common/scene_points.cpp
+  common/motion_derivative.cpp
 
   subdiv/bezier_curve.cpp
   subdiv/bspline_curve.cpp
@@ -61,6 +49,7 @@ SET(EMBREE_LIBRARY_FILES
   geometry/primitive4.cpp
   geometry/instance_intersector.cpp
   geometry/curve_intersector_virtual.cpp
+  geometry/curve_intersector_virtual2.cpp
   builders/primrefgen.cpp
 
   bvh/bvh.cpp
@@ -107,6 +96,7 @@ MACRO(embree_files TARGET ISA)
   SET(${TARGET}
     geometry/instance_intersector.cpp
     geometry/curve_intersector_virtual.cpp
+    geometry/curve_intersector_virtual2.cpp
     bvh/bvh_intersector1_bvh4.cpp)
 
   IF (${ISA} EQUAL ${ISA_LOWEST_AVX})
