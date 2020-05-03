@@ -1,7 +1,10 @@
 SET(CMAKE_SYSTEM_NAME Windows)
 
-# TODO(LTE): Read root from cmake arg or environment variable.
-SET(LLVM_MINGW_ROOT "D:/local/llvm-mingw")
+IF (DEFINED ENV{LLVM_MINGW_DIR})
+  SET(LLVM_MINGW_ROOT "$ENV{LLVM_MINGW_DIR}")
+ELSE ()
+  SET(LLVM_MINGW_ROOT "C:/ProgramData/llvm-mingw")
+ENDIF()
 
 SET(CMAKE_C_COMPILER ${LLVM_MINGW_ROOT}/bin/x86_64-w64-mingw32-clang.exe)
 SET(CMAKE_CXX_COMPILER ${LLVM_MINGW_ROOT}/bin/x86_64-w64-mingw32-clang++.exe)

@@ -89,9 +89,19 @@ For cross compilation(i.e. build on Linux), edit llvm-mingw pass in `common/cmak
 $ ./scripts/bootstrap-llvm-mingw-cross.sh
 ```
 
+For native compilation(i.e. build on x86-64 Windows), set `LLVM_MINGW_DIR` environments or edit llvm-mingw pass in `bootstrap-llvm-mingw-win64.bat`, then
+
+```
+> bootstrap-llvm-mingw-win64.bat
+```
+
+**Note that you need to specify `Release`, `Debug` or `RelWithDebInfo` for `CMAKE_BUILD_TYPE`**. Internally corresponding cmake setting specifies `-O3` compiler option. Without it, `verify` will segfault at `SSE2.buffer_stride`.
+
 You can use Address sanitizer: `EMBREE_ADDRESS_SANITIZER=On`
 
-MinGW gcc compiles ok, but will seg fault at runtime. Probably due to memory alignment.
+To run app, you need to copy libc++.dll and libunwind.dll(and libclang_rt.asan_dynamic-x86_64.dll when ASAN enabled) from llvm-mingw package(`x86_64-w64-mingw32\bin` folder)
+
+MinGW gcc also compiles ok, but will seg fault at runtime. Probably due to memory alignment.
 (`__aligned` related macros is nog working well for MinGW build)
 
 
