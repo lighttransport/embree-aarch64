@@ -1,4 +1,4 @@
- // ======================================================================== //
+// ======================================================================== //
 // Copyright 2009-2020 Intel Corporation                                    //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and      //
 // limitations under the License.                                           //
 // ======================================================================== //
+
+// For MinGW. utf-8, no BOM
 
 #include "../include/embree3/rtcore_config.h"
 

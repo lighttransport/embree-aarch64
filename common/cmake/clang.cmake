@@ -21,6 +21,14 @@ ENDIF ()
 
 IF (WIN32)
 
+  IF (MINGW) # Assume llvm-mingw
+    OPTION(EMBREE_ADDRESS_SANITIZER "Enabled CLANG address sanitizer." OFF)
+
+    IF (EMBREE_ADDRESS_SANITIZER)
+      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize-address-use-after-scope -fno-omit-frame-pointer -fno-optimize-sibling-calls")
+    ENDIF()
+  ENDIF()
+
   SET(COMMON_CXX_FLAGS "")
   SET(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} /EHsc")        # catch C++ exceptions only and extern "C" functions never throw a C++ exception
 #  SET(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} /MP")          # compile source files in parallel
