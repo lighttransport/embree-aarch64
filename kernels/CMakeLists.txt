@@ -79,7 +79,6 @@ IF (WIN32)
     )
     set_source_files_properties(embree.mrc PROPERTIES LANGUAGE RC)
   ELSE ()
-    MESSAGE(FATAL_ERROR "???")
     # Assume MSVC
     # UTF-16 LE(with BOM)
     SOURCE_GROUP("" FILES embree.rc)
