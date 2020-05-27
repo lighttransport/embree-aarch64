@@ -101,6 +101,9 @@ ELSE()
   SET(EMBREE_LIB_TYPE SHARED)
 ENDIF()
 
+# embree-aarch64 specific.
+OPTION(EMBREE_USE_PARENT_PROJECT_COMPILER_FLAGS "Use parent project's cxx compiler flags(Useful when you want to embed embree to your project)" OFF)
+
 OPTION(EMBREE_ISPC_SUPPORT "Build Embree with support for ISPC applications." ON)
 OPTION(EMBREE_TUTORIALS    "Enable to build Embree tutorials" ON)
 OPTION(EMBREE_BUILD_VERIFY "Build verify program for testing" ON)

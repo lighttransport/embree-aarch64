@@ -1,7 +1,11 @@
 ## Copyright 2009-2020 Intel Corporation
 ## SPDX-License-Identifier: Apache-2.0
 
-ADD_EXECUTABLE(bvh_access ../../kernels/embree.rc bvh_access.cpp)
+IF (MINGW)
+  ADD_EXECUTABLE(bvh_access ../../kernels/embree.mrc bvh_access.cpp)
+ELSE()
+  ADD_EXECUTABLE(bvh_access ../../kernels/embree.rc bvh_access.cpp)
+ENDIF()
 TARGET_LINK_LIBRARIES(bvh_access embree math sys tasking ${GLFW_LIBRARY})
 SET_PROPERTY(TARGET bvh_access PROPERTY FOLDER tutorials/single)
 SET_PROPERTY(TARGET bvh_access APPEND PROPERTY COMPILE_FLAGS " ${FLAGS_LOWEST}")

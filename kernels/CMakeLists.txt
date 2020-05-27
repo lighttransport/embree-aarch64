@@ -69,12 +69,25 @@ SET(EMBREE_LIBRARY_FILES
   bvh/bvh_intersector1_bvh4.cpp
   )
 
-IF (MSVC)
-  SOURCE_GROUP("" FILES embree.rc)
+IF (WIN32)
+  IF(MINGW)
+    # MinGW(windres) does not support UTF-16 LE(with BOM), so we use resource file with UTF-8
+    SOURCE_GROUP("" FILES embree.mrc)
 
-  LIST(APPEND EMBREE_LIBRARY_FILES 
-    embree.rc
-  )
+    LIST(APPEND EMBREE_LIBRARY_FILES 
+      embree.mrc
+    )
+    set_source_files_properties(embree.mrc PROPERTIES LANGUAGE RC)
+  ELSE ()
+    # Assume MSVC
+    # UTF-16 LE(with BOM)
+    SOURCE_GROUP("" FILES embree.rc)
+
+    LIST(APPEND EMBREE_LIBRARY_FILES 
+      embree.rc
+    )
+    set_source_files_properties(embree.rc PROPERTIES LANGUAGE RC)
+  ENDIF()
 ENDIF()
 
 

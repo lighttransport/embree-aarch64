@@ -78,6 +78,28 @@ This will enable building monolithic embree library with single cmake build proc
   -DEMBREE_USE_EMBEDDED_TBB=On \
 ```
 
+Experimental support with llvm-mingw(MinGW/clang)
+-------------------------------------------------
+
+embree-aarch64 started to support compiling embree3 with llvm-mingw.
+
+For cross compilation(i.e. build on Linux), edit llvm-mingw pass in `common/cmake/llvm-mingw-cross.cmake`, then
+
+```
+$ ./scripts/bootstrap-llvm-mingw-cross.sh
+```
+
+You can use Address sanitizer: `EMBREE_ADDRESS_SANITIZER=On`
+
+MinGW gcc compiles ok, but will seg fault at runtime. Probably due to memory alignment.
+(`__aligned` related macros is nog working well for MinGW build)
+
+
+embree-aarch64 specific cmake flags
+-----------------------------------
+
+* EMBREE_USE_PARENT_PROJECT_COMPILER_FLAGS: Use parent project's cxx compiler flags. This flags is useful when you embed embree-aarch64 library to your project(Default Off)
+  * Currently only available for clang compiler.
 
 Status
 ------
@@ -111,6 +133,7 @@ TODO
 * [ ] Support the build with Android version of TBB.
 * [ ] MinGW build
   * [x] LLVM/MinGW https://github.com/mstorsjo/llvm-mingw
+    * [ ] Sometimes `verify` seg faults
   * [ ] MinGW gcc
     * Memory alignment seems not working well when compiling with MinGW-gcc
 
