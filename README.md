@@ -95,6 +95,12 @@ MinGW gcc compiles ok, but will seg fault at runtime. Probably due to memory ali
 (`__aligned` related macros is nog working well for MinGW build)
 
 
+embree-aarch64 specific cmake flags
+-----------------------------------
+
+* EMBREE_USE_PARENT_PROJECT_COMPILER_FLAGS: Use parent project's cxx compiler flags. This flags is useful when you embed embree-aarch64 library to your project(Default Off)
+  * Currently only available for clang compiler.
+
 Status
 ------
 
