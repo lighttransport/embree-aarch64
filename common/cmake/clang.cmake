@@ -21,17 +21,14 @@ ENDIF ()
 
 IF (WIN32)
 
-  if (NOT EMBREE_USE_PARENT_PROJECT_COMPILER_FLAGS)
-    IF (MINGW) # Assume llvm-mingw
-      OPTION(EMBREE_ADDRESS_SANITIZER "Enabled CLANG address sanitizer." OFF)
-
-      IF (EMBREE_ADDRESS_SANITIZER)
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize-address-use-after-scope -fno-omit-frame-pointer -fno-optimize-sibling-calls")
-      ENDIF()
-    ENDIF()
-  endif ()
+  OPTION(EMBREE_ADDRESS_SANITIZER "Enabled CLANG address sanitizer." OFF)
 
   IF (MINGW) # Assume llvm-mingw
+
+    IF (EMBREE_ADDRESS_SANITIZER)
+      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize-address-use-after-scope -fno-omit-frame-pointer -fno-optimize-sibling-calls")
+    ENDIF()
+
 
     if (EMBREE_USE_PARENT_PROJECT_COMPILER_FLAGS)
       # use system provided compiler options and optimization flag
@@ -52,10 +49,6 @@ IF (WIN32)
 
       IF (EMBREE_STACK_PROTECTOR)
         SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstack-protector")           # protects against return address overrides
-      ENDIF()
-
-      IF (EMBREE_ADDRESS_SANITIZER)
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize-address-use-after-scope -fno-omit-frame-pointer -fno-optimize-sibling-calls")
       ENDIF()
 
       SET(CMAKE_CXX_FLAGS_DEBUG "")
@@ -159,6 +152,10 @@ ELSE()
   OPTION(EMBREE_IGNORE_CMAKE_CXX_FLAGS "When enabled Embree ignores default CMAKE_CXX_FLAGS." OFF)
   OPTION(EMBREE_ADDRESS_SANITIZER "Enabled CLANG address sanitizer." OFF)
 
+  IF (EMBREE_ADDRESS_SANITIZER)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize-address-use-after-scope -fno-omit-frame-pointer -fno-optimize-sibling-calls")
+  ENDIF()
+
   if (NOT EMBREE_USE_PARENT_PROJECT_COMPILER_FLAGS)
 
     IF (EMBREE_IGNORE_CMAKE_CXX_FLAGS)
@@ -187,9 +184,6 @@ ELSE()
       SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstack-protector")           # protects against return address overrides
     ENDIF()
 
-    IF (EMBREE_ADDRESS_SANITIZER)
-      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize-address-use-after-scope -fno-omit-frame-pointer -fno-optimize-sibling-calls")
-    ENDIF()
 
     SET(CMAKE_CXX_FLAGS_DEBUG "")
     SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")              # generate debug information
