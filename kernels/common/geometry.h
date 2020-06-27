@@ -351,6 +351,11 @@ namespace embree
       throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
     }
 
+    /*! Sets the maximal curve radius scale allowed by min-width feature. */
+    virtual void setMaxRadiusScale(float s) {
+      throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
+    }
+
     /*! Set user data pointer. */
     virtual void setUserData(void* ptr);
       
@@ -454,7 +459,7 @@ namespace embree
     }
 
     /*! Sets transformation of the instance */
-    virtual void setQuaternionDecomposition(const AffineSpace3fa& qd, unsigned int timeStep) {
+    virtual void setQuaternionDecomposition(const AffineSpace3ff& qd, unsigned int timeStep) {
       throw_RTCError(RTC_ERROR_INVALID_OPERATION,"operation not supported for this geometry"); 
     }
 

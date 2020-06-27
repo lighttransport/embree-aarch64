@@ -1,3 +1,3 @@
-[submodule "third_party/tbb"]
-	path = third_party/tbb
-	url = https://github.com/intel/tbb
+[submodule "doc/intelstyle"]
+	path = doc/intelstyle
+	url = ../intelstyle.git

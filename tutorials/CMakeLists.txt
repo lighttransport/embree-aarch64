@@ -1,49 +1,56 @@
 ## Copyright 2009-2020 Intel Corporation
 ## SPDX-License-Identifier: Apache-2.0
 
-IF (NOT WIN32 OR EMBREE_EXTERNAL_GLFW)
+include(CMakeDependentOption)
 
-  FIND_PACKAGE(glfw3 REQUIRED)
-  SET(GLFW_LIBRARY glfw)
-  SET(GLFW_INCLUDE_DIRS)
+OPTION(EMBREE_TUTORIALS    "Enable to build Embree tutorials" ON)
+
+ADD_SUBDIRECTORY(common/image)
+CMAKE_DEPENDENT_OPTION(EMBREE_TUTORIALS_GLFW  "Enables GLFW usage in tutorials. When disabled tutorial can only render to disk." ON "EMBREE_TUTORIALS" OFF)
+
+IF (EMBREE_TUTORIALS)
+
+IF (EMBREE_TUTORIALS_GLFW)
+
+  IF (NOT WIN32 OR EMBREE_EXTERNAL_GLFW)
   
-ELSE()
-
-  # detect and select Win32 or x64
-  IF (CMAKE_SIZEOF_VOID_P EQUAL 8)
-    SET(ARCH x64)
+    FIND_PACKAGE(glfw3 REQUIRED)
+    SET(GLFW_LIBRARY glfw)
+    SET(GLFW_INCLUDE_DIRS)
+    
   ELSE()
-    SET(ARCH Win32)
+  
+    # detect and select Win32 or x64
+    IF (CMAKE_SIZEOF_VOID_P EQUAL 8)
+      SET(ARCH x64)
+    ELSE()
+      SET(ARCH Win32)
+    ENDIF()
+  
+    # detect Visual Studio version
+    IF (MSVC12)
+      SET(VCVER vc12)
+    ELSE()
+      SET(VCVER vc14)
+    ENDIF()
+  
+    FIND_PATH(GLFW_INCLUDE_DIRS NAMES GLFW/glfw3.h PATHS common/glfw/include)
+    FIND_LIBRARY(GLFW_LIBRARY glfw3 common/glfw/${ARCH}/${VCVER})
+    MARK_AS_ADVANCED(
+      GLFW_INCLUDE_DIR
+      GLFW_LIBRARY
+    )
   ENDIF()
 
-  # detect Visual Studio version
-  IF (MSVC12)
-    SET(VCVER vc12)
-  ELSE()
-    SET(VCVER vc14)
-  ENDIF()
-
-  FIND_PATH(GLFW_INCLUDE_DIRS NAMES GLFW/glfw3.h PATHS common/glfw/include)
-  FIND_LIBRARY(GLFW_LIBRARY glfw3 common/glfw/${ARCH}/${VCVER})
-  IF (GLFW_INCLUDE_DIRS AND GLFW_LIBRARY)
-    SET(GLFW_FOUND 1)
-  ENDIF()
-  SET(GLFW_STATIC_LIBRARIES ${GLFW_LIBRARY})
-  MARK_AS_ADVANCED(
-    GLFW_INCLUDE_DIR
-    GLFW_LIBRARY
-  )
-ENDIF()
-
-IF (GLFW_FOUND)
   FIND_PACKAGE(OpenGL)
   IF (NOT OPENGL_FOUND)
     MESSAGE(FATAL_ERROR "OpenGL not found! Please either install OpenGL or disable EMBREE_TUTORIALS.")
   ENDIF()
 
+  ADD_DEFINITIONS(-DUSE_GLFW)
   INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR} ${GLFW_INCLUDE_DIRS})
-ENDIF (GLFW_FOUND)
 
+ENDIF()
 
 ADD_SUBDIRECTORY(common)
 
@@ -86,5 +93,7 @@ IF (GLFW_FOUND)
   ENDIF()
 ENDIF()
 
-ADD_SUBDIRECTORY(bvh_builder)
-ADD_SUBDIRECTORY(buildbench)
+ADD_SUBDIRECTORY(embree_tests)
+
+ENDIF()
+

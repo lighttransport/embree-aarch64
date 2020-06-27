@@ -19,10 +19,16 @@
     {
       enum RTCIntersectContextFlags flags;
       RTCFilterFunctionN filter;
+      
       #if RTC_MAX_INSTANCE_LEVEL_COUNT > 1
-      unsigned int instStackSize;
+        unsigned int instStackSize;
       #endif
+      
       unsigned int instID[RTC_MAX_INSTANCE_LEVEL_COUNT];
+
+      #if RTC_MIN_WIDTH
+        float minWidthDistanceFactor;
+      #endif
     };
 
     void rtcInitIntersectContext(
@@ -63,8 +69,15 @@ passed the first filter stage are valid in this second filter
 stage. Having such a per ray-query filter function can be useful to
 implement modifications of the behavior of the query, such as
 collecting all hits or accumulating transparencies. The support for
-the context filter function must be enabled for a scene by using
-the `RTC_SCENE_FLAG_CONTEXT_FILTER_FUNCTION` scene flag.
+the context filter function must be enabled for a scene by using the
+`RTC_SCENE_FLAG_CONTEXT_FILTER_FUNCTION` scene flag. In case of
+instancing this feature has to get enabled also for each instantiated
+scene.
+
+The minWidthDistanceFactor value controls the target size of the curve
+radii when the min-width feature is enabled. Please see the
+[rtcSetGeometryMaxRadiusScale] function for more details on the
+min-width feature.
 
 It is guaranteed that the pointer to the intersection context passed
 to a ray query is directly passed to the registered callback

@@ -115,11 +115,14 @@ start and the second control point the end of the line segment. When
 constructing hair strands in this basis, the end-point can be shared
 with the start of the next line segment.
 
-For the linear basis the user has to additionally provide a flags
-buffer of type `RTC_BUFFER_TYPE_FLAGS` which contains bytes that
-encode if the left neighbor segment (`RTC_CURVE_FLAG_NEIGHBOR_LEFT`
-flag) and/or right neighbor segment (`RTC_CURVE_FLAG_NEIGHBOR_RIGHT`
-flags) exist (see [RTCCurveFlags]).
+For the linear basis the user optionally can provide a flags buffer of
+type `RTC_BUFFER_TYPE_FLAGS` which contains bytes that encode if the
+left neighbor segment (`RTC_CURVE_FLAG_NEIGHBOR_LEFT` flag) and/or
+right neighbor segment (`RTC_CURVE_FLAG_NEIGHBOR_RIGHT` flags) exist
+(see [RTCCurveFlags]). If this buffer is not set, than the left/right
+neighbor bits are automatically calculated base on the index buffer
+(left segment exists if segment(id-1)+1 == segment(id) and right
+segment exists if segment(id+1)-1 == segment(id)).
 
 A left neighbor segment is assumed to end at the start vertex of the
 current segement, and to start at the previous vertex in the vertex
@@ -217,14 +220,15 @@ In the `RTC_GEOMETRY_TYPE_ROUND_*` round mode, a real geometric
 surface is rendered for the curve, which is more expensive but allows
 closeup views.
 
-For the linear basis the round mode renders an end sphere for a
-segment and a cone that tangentially touches that ending sphere (and
-an imaginary start sphere). The geometry clips away parts of the
-end spheres that lies inside the neighboring segments, thus the curve
-interiour will also render properly as long as only neighboring
-segments penetrate into a segment. For this to work properly it is
-important that the flags buffer is properly populated with neighbor
-information.
+For the linear basis the round mode renders a cone that tangentially
+touches a start-sphere and end-sphere. The start sphere is rendered
+when no previous segments is indicated by the neighbor bits. The end
+sphere is always rendered but parts that lie inside the next segment
+are clipped away (if that next segment exists). This way a curve is
+closed on both ends and the interiour will render properly as long as
+only neighboring segments penetrate into a segment. For this to work
+properly it is important that the flags buffer is properly populated
+with neighbor information.
 
 For the cubic polynomial bases, the round mode renders a sweep surface
 by sweeping a varying radius circle tangential along the curve. As a
@@ -262,4 +266,4 @@ queried using `rtcGetDeviceError`.
 
 #### SEE ALSO
 
-[rtcNewGeometry, RTCCurveFlags]
+[rtcNewGeometry], [RTCCurveFlags]

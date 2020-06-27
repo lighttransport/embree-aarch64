@@ -4,6 +4,19 @@
 IF (TASKING_INTERNAL)
   ADD_LIBRARY(tasking STATIC taskschedulerinternal.cpp)
 ELSEIF (TASKING_TBB)
+  ##############################################################
+  # Find TBB
+  ##############################################################
+  if (NOT ${EMBREE_TBB_ROOT} STREQUAL "")
+    set(TBB_ROOT ${EMBREE_TBB_ROOT})
+  endif()
+  FIND_PACKAGE(TBB REQUIRED tbb)
+
+  ##############################################################
+  # Create tasking target and link against TBB. Also set include directory
+  # information on tasking target to provide the "algorithms" object library
+  # with the TBB header files
+  ##############################################################
   ADD_LIBRARY(tasking STATIC taskschedulertbb.cpp)
   #TARGET_LINK_LIBRARIES(tasking PRIVATE sys math)
   if (EMBREE_USE_EMBEDDED_TBB)
