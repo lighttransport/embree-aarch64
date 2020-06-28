@@ -369,7 +369,7 @@ unsigned int addCurve (RTCScene scene, const Vec3fa& pos, RTCGeometryType type, 
   Vec3fa* bspline = (Vec3fa*) malloc(16*sizeof(Vec3fa));
   for (int i=0; i<16; i++) {
     float f = (float)(i)/16.0f;
-    bspline[i] = Vec3fa(2.0f*f-1.0f,sin(12.0f*f),cos(12.0f*f));
+    bspline[i] = Vec3fa(2.0f*f-1.0f,std::sin(12.0f*f),std::cos(12.0f*f));
   }
 
   for (unsigned int t=0; t<num_time_steps; t++)
@@ -381,7 +381,7 @@ unsigned int addCurve (RTCScene scene, const Vec3fa& pos, RTCGeometryType type, 
     AffineSpace3fa scale = AffineSpace3fa::scale(Vec3fa(2.0f,1.0f,1.0f));
 
     for (int i=0; i<16; i++)
-      vertices[i] = Vec3fa(xfmPoint(rotation*scale,bspline[i])+pos,0.2f);
+      vertices[i] = Vec3ff(xfmPoint(rotation*scale,bspline[i])+pos,0.2f);
   }
 
   int* indices = (int*) rtcSetNewGeometryBuffer(geom,RTC_BUFFER_TYPE_INDEX,0,RTC_FORMAT_UINT,sizeof(int),13);
@@ -404,7 +404,7 @@ unsigned int addLines (RTCScene scene, const Vec3fa& pos, unsigned int num_time_
   Vec3fa* bspline = (Vec3fa*) malloc(16*sizeof(Vec3fa));
   for (int i=0; i<16; i++) {
     float f = (float)(i)/16.0f;
-    bspline[i] = Vec3fa(2.0f*f-1.0f,sin(12.0f*f),cos(12.0f*f));
+    bspline[i] = Vec3fa(2.0f*f-1.0f,std::sin(12.0f*f),std::cos(12.0f*f));
   }
 
   for (unsigned int t=0; t<num_time_steps; t++)
@@ -416,7 +416,7 @@ unsigned int addLines (RTCScene scene, const Vec3fa& pos, unsigned int num_time_
     AffineSpace3fa scale = AffineSpace3fa::scale(Vec3fa(2.0f,1.0f,1.0f));
 
     for (int i=0; i<16; i++)
-      vertices[i] = Vec3fa(xfmPoint(rotation*scale,bspline[i])+pos,0.2f);
+      vertices[i] = Vec3ff(xfmPoint(rotation*scale,bspline[i])+pos,0.2f);
   }
 
   int* indices = (int*) rtcSetNewGeometryBuffer(geom,RTC_BUFFER_TYPE_INDEX,0,RTC_FORMAT_UINT,sizeof(int),15);
@@ -526,7 +526,7 @@ void sphereBoundsFunc(const struct RTCBoundsFunctionArguments* args)
   const unsigned int time = args->timeStep;
   const Sphere& sphere = spheres[args->primID];
   float ft = 2.0f*float(pi) * (float) time / (float) (sphere.num_time_steps-1);
-  Vec3fa p = sphere.p + Vec3fa(cos(ft),0.0f,sin(ft));
+  Vec3fa p = sphere.p + Vec3fa(std::cos(ft),0.0f,std::sin(ft));
   bounds_o->lower_x = p.x-sphere.r;
   bounds_o->lower_y = p.y-sphere.r;
   bounds_o->lower_z = p.z-sphere.r;
@@ -552,12 +552,12 @@ void sphereIntersectFuncN(const RTCIntersectFunctionNArguments* args)
   
   const int time_segments = sphere.num_time_steps-1;
   const float time = ray->time()*(float)(time_segments);
-  const int itime = clamp((int)(floor(time)),(int)0,time_segments-1);
+  const int itime = clamp((int)(std::floor(time)),(int)0,time_segments-1);
   const float ftime = time - (float)(itime);
   const float ft0 = 2.0f*float(pi) * (float) (itime+0) / (float) (sphere.num_time_steps-1);
   const float ft1 = 2.0f*float(pi) * (float) (itime+1) / (float) (sphere.num_time_steps-1);
-  const Vec3fa p0 = sphere.p + Vec3fa(cos(ft0),0.0f,sin(ft0));
-  const Vec3fa p1 = sphere.p + Vec3fa(cos(ft1),0.0f,sin(ft1));
+  const Vec3fa p0 = sphere.p + Vec3fa(std::cos(ft0),0.0f,std::sin(ft0));
+  const Vec3fa p1 = sphere.p + Vec3fa(std::cos(ft1),0.0f,std::sin(ft1));
   const Vec3fa sphere_p = (1.0f-ftime)*p0 + ftime*p1;
   
   const Vec3fa v = ray->org-sphere_p;
@@ -566,7 +566,7 @@ void sphereIntersectFuncN(const RTCIntersectFunctionNArguments* args)
   const float C = dot(v,v) - sqr(sphere.r);
   const float D = B*B - 4.0f*A*C;
   if (D < 0.0f) return;
-  const float Q = sqrt(D);
+  const float Q = std::sqrt(D);
   const float rcpA = rcp(A);
   const float t0 = 0.5f*rcpA*(-B-Q);
   const float t1 = 0.5f*rcpA*(-B+Q);
@@ -604,12 +604,12 @@ void sphereOccludedFuncN(const RTCOccludedFunctionNArguments* args)
   Ray *ray = (Ray *)rays;
   const int time_segments = sphere.num_time_steps-1;
   const float time = ray->time()*(float)(time_segments);
-  const int itime = clamp((int)(floor(time)),(int)0,time_segments-1);
+  const int itime = clamp((int)(std::floor(time)),(int)0,time_segments-1);
   const float ftime = time - (float)(itime);
   const float ft0 = 2.0f*float(pi) * (float) (itime+0) / (float) (sphere.num_time_steps-1);
   const float ft1 = 2.0f*float(pi) * (float) (itime+1) / (float) (sphere.num_time_steps-1);
-  const Vec3fa p0 = sphere.p + Vec3fa(cos(ft0),0.0f,sin(ft0));
-  const Vec3fa p1 = sphere.p + Vec3fa(cos(ft1),0.0f,sin(ft1));
+  const Vec3fa p0 = sphere.p + Vec3fa(std::cos(ft0),0.0f,std::sin(ft0));
+  const Vec3fa p1 = sphere.p + Vec3fa(std::cos(ft1),0.0f,std::sin(ft1));
   const Vec3fa sphere_p = (1.0f-ftime)*p0 + ftime*p1;
   
   const Vec3fa v = ray->org-sphere_p;
@@ -618,7 +618,7 @@ void sphereOccludedFuncN(const RTCOccludedFunctionNArguments* args)
   const float C = dot(v,v) - sqr(sphere.r);
   const float D = B*B - 4.0f*A*C;
   if (D < 0.0f) return;
-  const float Q = sqrt(D);
+  const float Q = std::sqrt(D);
   const float rcpA = rcp(A);
   const float t0 = 0.5f*rcpA*(-B-Q);
   const float t1 = 0.5f*rcpA*(-B+Q);
@@ -737,7 +737,7 @@ Vec3fa renderPixelStandard(float x, float y, const Vec3fa &camorg, const Vec3fa 
   RTCIntersectContext context;
   rtcInitIntersectContext(&context);
   
-  float time = abs((int)(0.01f*frameID) - 0.01f*frameID);
+  float time = std::abs((int)(0.01f*frameID) - 0.01f*frameID);
   if (g_time != -1) time = g_time;
 
   /* initialize ray */

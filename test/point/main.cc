@@ -190,7 +190,7 @@ static void addPoints (RTCDevice device, RTCScene scene, RTCGeometryType gtype, 
     color[0] = COLOR;
     color[1] = COLOR;
     color[2] = COLOR;
-    point_vertices[i] = Vec4f(pos) + Vec4f(vtx[0], vtx[1], vtx[2], vtx[3]);
+    point_vertices[i] = Vec4f(pos.x, pos.y, pos.z, 0.0f) + Vec4f(vtx[0], vtx[1], vtx[2], vtx[3]);
     point_colors[i] = Vec3fa(color[0], color[1], color[2]);
   }
 
@@ -316,6 +316,7 @@ static void my_error_handler(void* userPtr, const RTCError code, const char* str
   exit(1);
 }
 
+#if 0
 static void print_bvh4(embree::BVH4::NodeRef node, size_t depth)
 {
   if (node.isAlignedNode())
@@ -355,6 +356,7 @@ void DumpScene(RTCScene scene)
     print_bvh4(bvh4->root, 0);
   }
 } 
+#endif
 
 static void bora() {
   std::cout << "bora" << std::endl;
@@ -378,7 +380,7 @@ int main(int argc, char **argv) {
 
   rtcCommitScene(scene);
 
-  DumpScene(scene);
+  //DumpScene(scene);
 
   int width = 512;
   int height = 512;

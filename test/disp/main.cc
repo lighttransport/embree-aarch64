@@ -328,6 +328,7 @@ static void error_handler(void* userPtr, const RTCError code, const char* str = 
   exit(1);
 }
 
+#if 0
 static void print_bvh4(embree::BVH4::NodeRef node, size_t depth)
 {
   if (node.isAlignedNode())
@@ -367,6 +368,7 @@ void DumpScene(RTCScene scene)
     print_bvh4(bvh4->root, 0);
   }
 } 
+#endif
 
 static void bora() {
   std::cout << "bora" << std::endl;
@@ -390,7 +392,7 @@ int main(int argc, char **argv) {
 
   rtcCommitScene(scene);
 
-  DumpScene(scene);
+  //DumpScene(scene);
 
   int width = 512;
   int height = 512;
