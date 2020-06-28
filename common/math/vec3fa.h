@@ -117,7 +117,8 @@ namespace embree
     return r;
 #else
     //return blendv_ps(Vec3fa(one).m128, (-Vec3fa(one)).m128, _mm_cmplt_ps (a.m128,Vec3fa(zero).m128));
-    return blendv_ps(Vec3fa(one).m128, -Vec3fa(one).m128, _mm_cmplt_ps (a.m128,Vec3fa(zero).m128));
+    auto neg_one = -Vec3fa(one);
+    return blendv_ps(Vec3fa(one).m128, neg_one.m128, _mm_cmplt_ps (a.m128,Vec3fa(zero).m128));
 #endif
   }
 
