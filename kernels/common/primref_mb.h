@@ -32,7 +32,7 @@ namespace embree
       : lbounds((LBBox3fx)lbounds_i), time_range(time_range)
     {
       assert(activeTimeSegments > 0);
-#if defined(__X86_64__)
+#if defined(__X86_64__) || defined(__aarch64__)
       lbounds.bounds0.lower.a = id & 0xFFFFFFFF;
       lbounds.bounds0.upper.a = (id >> 32) & 0xFFFFFFFF;
 #else

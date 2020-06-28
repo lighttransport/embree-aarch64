@@ -79,7 +79,7 @@ namespace embree
 
     /*! returns an size_t sized ID */
     __forceinline size_t ID() const { 
-#if defined(__X86_64__)
+#if defined(__X86_64__) || defined(__aarch64__)
       return size_t(lower.u) + (size_t(upper.u) << 32);
 #else
       return size_t(lower.u);
