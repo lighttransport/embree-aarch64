@@ -5,7 +5,7 @@ IF (MINGW)
   ADD_EXECUTABLE(minimal ../../kernels/embree.mrc minimal.cpp)
 ELSE()
   ADD_EXECUTABLE(minimal ../../kernels/embree.rc minimal.cpp)
-ENDIF
+ENDIF()
 TARGET_LINK_LIBRARIES(minimal embree)
 TARGET_INCLUDE_DIRECTORIES(minimal PRIVATE ${PROJECT_SOURCE_DIR}/include)
 SET_PROPERTY(TARGET minimal PROPERTY FOLDER tutorials/single)
