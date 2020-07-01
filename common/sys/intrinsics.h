@@ -459,7 +459,7 @@ namespace embree
 #endif
 #endif
 
-#if defined(__SSE4_2__)
+#if defined(__SSE4_2__) || defined(__ARM_NEON)
 
   __forceinline int popcnt(int in) {
     return _mm_popcnt_u32(in);
@@ -469,7 +469,7 @@ namespace embree
     return _mm_popcnt_u32(in);
   }
 
-#if defined(__X86_64__)
+#if defined(__X86_64__) || defined(__ARM_NEON)
   __forceinline size_t popcnt(size_t in) {
     return _mm_popcnt_u64(in);
   }
