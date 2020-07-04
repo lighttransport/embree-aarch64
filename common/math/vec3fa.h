@@ -194,7 +194,7 @@ namespace embree
 
 #if defined(__aarch64__)
     __forceinline Vec3fa mini(const Vec3fa& a, const Vec3fa& b) {
-      return _mm_min_ps(a, b);
+      return _mm_min_ps(a.m128, b.m128);
     }
 #elif defined(__SSE4_1__)
     __forceinline Vec3fa mini(const Vec3fa& a, const Vec3fa& b) {
@@ -207,7 +207,7 @@ namespace embree
 
 #if defined(__aarch64__)
     __forceinline Vec3fa maxi(const Vec3fa& a, const Vec3fa& b) {
-      return _mm_max_ps(a, b);
+      return _mm_max_ps(a.m128, b.m128);
     }
 #elif defined(__SSE4_1__)
     __forceinline Vec3fa maxi(const Vec3fa& a, const Vec3fa& b) {
@@ -241,7 +241,7 @@ namespace embree
         return _mm_msub_ps(a.m128, b.m128, c.m128);  //-a*b+c;
     }
   __forceinline Vec3fa nmsub( const Vec3fa& a, const Vec3fa& b, const Vec3fa& c) {
-        Vec3fa t = _mm_madd_ps(a, b, c);
+        Vec3fa t = _mm_madd_ps(a.m128, b.m128, c.m128);
         return -t;
     }
 #else
@@ -405,9 +405,9 @@ namespace embree
   ////////////////////////////////////////////////////////////////////////////////
 
 #if defined(__aarch64__)
-  __forceinline Vec3fa floor(const Vec3fa& a) { return vrndmq_f32(a); }
-  __forceinline Vec3fa ceil (const Vec3fa& a) { return vrndpq_f32(a); }
-  __forceinline Vec3fa trunc(const Vec3fa& a) { return vrndq_f32(a); }
+  __forceinline Vec3fa floor(const Vec3fa& a) { return vrndmq_f32(a.m128); }
+  __forceinline Vec3fa ceil (const Vec3fa& a) { return vrndpq_f32(a.m128); }
+  __forceinline Vec3fa trunc(const Vec3fa& a) { return vrndq_f32(a.m128); }
 #elif defined (__SSE4_1__)
   __forceinline Vec3fa trunc( const Vec3fa& a ) { return _mm_round_ps(a.m128, _MM_FROUND_TO_NEAREST_INT); }
   __forceinline Vec3fa floor( const Vec3fa& a ) { return _mm_round_ps(a.m128, _MM_FROUND_TO_NEG_INF    ); }
