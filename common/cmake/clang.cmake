@@ -156,7 +156,21 @@ ELSE()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize-address-use-after-scope -fno-omit-frame-pointer -fno-optimize-sibling-calls")
   ENDIF()
 
-  if (NOT EMBREE_USE_PARENT_PROJECT_COMPILER_FLAGS)
+  if (EMBREE_USE_PARENT_PROJECT_COMPILER_FLAGS)
+
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsigned-char")
+
+    SET(CMAKE_CXX_FLAGS_DEBUG "")
+    SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsigned-char")
+
+    SET(CMAKE_CXX_FLAGS_RELEASE "")
+    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fsigned-char")
+
+    SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "")
+    SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -fsigned-char")
+
+  ELSE (EMBREE_USE_PARENT_PROJECT_COMPILER_FLAGS)
 
     IF (EMBREE_IGNORE_CMAKE_CXX_FLAGS)
       SET(CMAKE_CXX_FLAGS "")
@@ -184,7 +198,6 @@ ELSE()
       SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstack-protector")           # protects against return address overrides
     ENDIF()
 
-
     SET(CMAKE_CXX_FLAGS_DEBUG "")
     SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")              # generate debug information
     SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")         # enable assertions
@@ -200,7 +213,7 @@ ELSE()
     SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DNDEBUG")        # disable assertions
     SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -O3")             # enable full optimizations
 
-  endif ()
+  endif (EMBREE_USE_PARENT_PROJECT_COMPILER_FLAGS)
 
   MACRO(DISABLE_STACK_PROTECTOR_FOR_FILE file)
     IF (EMBREE_STACK_PROTECTOR)
