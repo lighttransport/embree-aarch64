@@ -29,7 +29,7 @@ namespace embree
 
     __forceinline PrimRef (const BBox3fa& bounds, size_t id) 
     {
-#if defined(__X86_64__) || defined(__arch64__)
+#if defined(__X86_64__) || defined(__aarch64__)
       lower = Vec3fx(bounds.lower, (unsigned)(id & 0xFFFFFFFF));
       upper = Vec3fx(bounds.upper, (unsigned)((id >> 32) & 0xFFFFFFFF));
 #else
