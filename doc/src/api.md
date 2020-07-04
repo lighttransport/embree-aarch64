@@ -731,6 +731,16 @@ Embree API Reference
 ```
 \pagebreak
 
+## RTCFormat
+``` {include=src/api/RTCFormat.md}
+```
+\pagebreak
+
+## RTCBufferType
+``` {include=src/api/RTCBufferType.md}
+```
+\pagebreak
+
 ## rtcGetGeometryBufferData
 ``` {include=src/api/rtcGetGeometryBufferData.md}
 ```

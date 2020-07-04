@@ -2,9 +2,9 @@
 ## SPDX-License-Identifier: Apache-2.0
 
 SET(EMBREE_VERSION_MAJOR 3)
-SET(EMBREE_VERSION_MINOR 10)
+SET(EMBREE_VERSION_MINOR 11)
 SET(EMBREE_VERSION_PATCH 0)
-SET(EMBREE_VERSION_NOTE "")
+SET(EMBREE_VERSION_NOTE "-alpha.0")
 
 SET(EMBREE_VERSION ${EMBREE_VERSION_MAJOR}.${EMBREE_VERSION_MINOR}.${EMBREE_VERSION_PATCH})
 MATH(EXPR EMBREE_VERSION_NUMBER "10000*${EMBREE_VERSION_MAJOR} + 100*${EMBREE_VERSION_MINOR} + ${EMBREE_VERSION_PATCH}")
@@ -65,6 +65,9 @@ IF(COMMAND cmake_policy)
   endif()
   if(POLICY CMP0022)
     cmake_policy(SET CMP0022 NEW)
+  endif()
+  if(POLICY CMP0074)
+    cmake_policy(SET CMP0074 NEW)
   endif()
 ENDIF(COMMAND cmake_policy)
 
@@ -144,6 +147,7 @@ OPTION(EMBREE_RAY_PACKETS "Enabled support for ray packets." ON)
 
 SET(EMBREE_MAX_INSTANCE_LEVEL_COUNT 1 CACHE STRING "Maximum number of instance levels.")
 SET(EMBREE_CURVE_SELF_INTERSECTION_AVOIDANCE_FACTOR 2.0 CACHE STRING "Self intersection avoidance factor for flat curves. Specify floating point value in range 0 to inf.")
+OPTION(EMBREE_MIN_WIDTH "Enables min-width feature to enlarge curve and point thickness to pixel width." OFF)
 
 ##############################################################
 # Mobile Support (support arm64 / aarch64 on Android and iOS)
@@ -533,6 +537,7 @@ IF (EMBREE_TUTORIALS)
   ADD_SUBDIRECTORY(tutorials)
 ENDIF()
 IF (EMBREE_BUILD_VERIFY)
+  ADD_SUBDIRECTORY(tutorials)
   IF (NOT EMBREE_TUTORIALS)
     ADD_SUBDIRECTORY(tutorials/common)
     ADD_SUBDIRECTORY(tutorials/verify)
