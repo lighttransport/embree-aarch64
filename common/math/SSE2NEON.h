@@ -106,6 +106,11 @@
 #define GCC 1
 #define ENABLE_CPP_VERSION 0
 
+// enable precise emulation of _mm_min_ps and _mm_max_ps?
+// This would slow down the computation a bit, but gives consistent result with x86 SSE2.
+// (e.g. would solve a hole or NaN pixel in the rendering result) 
+#define USE_PRECISE_MINMAX_IMPLEMENTATION (1)
+
 #if GCC
 #define FORCE_INLINE					inline __attribute__((always_inline))
 #define ALIGN_STRUCT(x)					__attribute__((aligned(x)))
@@ -1106,16 +1111,142 @@ FORCE_INLINE __m128 _mm_sqrt_ss(__m128 in)
   return vsetq_lane_f32(vgetq_lane_f32(value, 0), result, 0);
 }
 
+#if defined(__aarch64__) || defined(BUILD_IOS)
+#if USE_PRECISE_MINMAX_IMPLEMENTATION
+
+// Check if input is sNaN
+FORCE_INLINE uint32x4_t is_snan(float32x4_t a)
+{
+  // all exp bits are 1 and MSB bit of mantissa is 1 
+  const uint32x4_t vexp_mask = {0x7f800000, 0x7f800000, 0x7f800000, 0x7f800000};
+  const uint32x4_t vqnan_bit_mask = {0x00400000, 0x00400000, 0x00400000, 0x00400000};
+  const uint32x4_t vsnan_bit_mask = {0x003fffff, 0x003fffff, 0x003fffff, 0x003fffff};
+  const uint32x4_t vzero = vdupq_n_u32(0);
+
+  uint32x4_t v_exp_all_ones = vceqq_u32(vandq_u32(vreinterpretq_u32_f32(a), vexp_mask), vexp_mask);
+
+  // Check if qnan mantissa bits is off
+  uint32x4_t v_qnan_bit_off = vceqq_u32(vandq_u32(vreinterpretq_u32_f32(a), vqnan_bit_mask), vzero);
+  uint32x4_t v_snan_bit_any = vcgtq_u32(vandq_u32(vreinterpretq_u32_f32(a), vsnan_bit_mask), vzero);
+
+  uint32x4_t v_is_snan = vandq_u32(vandq_u32(v_exp_all_ones, v_qnan_bit_off), v_snan_bit_any);
+
+  return v_is_snan;
+}
+
+// Check if input is NaN(sNaN or qNan)
+FORCE_INLINE uint32x4_t is_nan(float32x4_t a)
+{
+  const uint32x4_t vexp_mask = {0x7f800000, 0x7f800000, 0x7f800000, 0x7f800000};
+  const uint32x4_t vmantissa_mask = {0x007fffff, 0x007fffff, 0x007fffff, 0x007fffff}; 
+  const uint32x4_t vzero = vdupq_n_u32(0);
+
+  // Check if all exp bits are 1.
+  uint32x4_t v_exp_all_ones = vceqq_u32(vandq_u32(vreinterpretq_u32_f32(a), vexp_mask), vexp_mask);
+
+  // Check if any mantissa bits are on(qNaN or sNaN)
+  uint32x4_t v_mantissa_any = vcgtq_u32(vandq_u32(vreinterpretq_u32_f32(a), vmantissa_mask), vzero);
+
+  uint32x4_t v_is_nan = vandq_u32(v_exp_all_ones, v_mantissa_any);
+
+  return v_is_nan;
+}
+
+FORCE_INLINE float32x4_t v_mm_min(float32x4_t a, float32x4_t b)
+{
+  //
+  // Accurate simulation of _mm_min_ps using ARM NEON
+  //
+  // https://www.felixcloutier.com/x86/minps
+  //
+  // when both input are (+/-)0.0, return the second
+  // when the first input is NaN(sNaN or qNaN), return the second.
+  // when the second input is sNaN, return sNaN(return the second).
+  // otherwise return min(a, b) 
+  //
+  const uint32x4_t vzero = vdupq_n_f32(0.0f);
+  const uint32x4_t v_src1_is_snan = is_snan(b);
+
+  // fortunately, ceqq_f32 ignores the sign.
+  const uint32x4_t v_both_are_zeros = vandq_u32(vreinterpretq_u32_f32(vceqq_f32(a, vzero)),
+    vreinterpretq_u32_f32(vceqq_f32(b, vzero)));
+
+  const uint32x4_t v_src0_is_nan = is_nan(a);
+
+  const float32x4_t v_min = vminq_f32(a, b);
+
+  float32x4_t v_special_case = vbslq_f32(v_both_are_zeros, b, v_min);
+  v_special_case = vbslq_f32(v_src0_is_nan, b, v_special_case);
+  v_special_case = vbslq_f32(v_src1_is_snan, b, v_special_case);
+
+  // Requie NaN or both zero case handling?
+  const uint32x4_t v_require_special_handling = vorrq_u32(v_src1_is_snan, vorrq_u32(v_both_are_zeros, v_src0_is_nan));
+
+  // use min(a, b) when !(require special handling)
+  float32x4_t ret = vbslq_f32(v_require_special_handling, v_special_case, v_min);
+  
+  return ret;
+}
+
+FORCE_INLINE float32x4_t v_mm_max(float32x4_t a, float32x4_t b)
+{
+  //
+  // Accurate simulation of _mm_max_ps using ARM NEON
+  //
+  // https://www.felixcloutier.com/x86/maxps
+  //
+  // when both input are (+/-)0.0, return the second
+  // when the first input is NaN(sNaN or qNaN), return the second.
+  // when the second input is sNaN, return sNaN(return the second).
+  // otherwise return max(a, b) 
+  //
+  const uint32x4_t vzero = vdupq_n_f32(0.0f);
+  const uint32x4_t v_src1_is_snan = is_snan(b);
+
+  // fortunately, ceqq_f32 ignores the sign.
+  const uint32x4_t v_both_are_zeros = vandq_u32(vreinterpretq_u32_f32(vceqq_f32(a, vzero)),
+    vreinterpretq_u32_f32(vceqq_f32(b, vzero)));
+
+  const uint32x4_t v_src0_is_nan = is_nan(a);
+
+  const float32x4_t v_max = vmaxq_f32(a, b);
+
+  float32x4_t v_special_case = vbslq_f32(v_both_are_zeros, b, v_max);
+  v_special_case = vbslq_f32(v_src0_is_nan, b, v_special_case);
+  v_special_case = vbslq_f32(v_src1_is_snan, b, v_special_case);
+
+  // Requie NaN or both zero case handling?
+  const uint32x4_t v_require_special_handling = vorrq_u32(v_src1_is_snan, vorrq_u32(v_both_are_zeros, v_src0_is_nan));
+
+  // use max(a, b) when !(require special handling)
+  float32x4_t ret = vbslq_f32(v_require_special_handling, v_special_case, v_max);
+  
+  return ret;
+}
+
+#endif // USE_PRECISE_MINMAX_IMPLEMENTATION
+#endif // defined(__aarch64__) || defiend(BUILD_IOS)
+
 // Computes the maximums of the four single-precision, floating-point values of a and b. https://msdn.microsoft.com/en-us/library/vstudio/ff5d607a(v=vs.100).aspx
 FORCE_INLINE __m128 _mm_max_ps(__m128 a, __m128 b)
 {
+#if USE_PRECISE_MINMAX_IMPLEMENTATION
+  return v_mm_max(a, b);
+#else
+  // Faster, but would give inconsitent rendering(e.g. holes, NaN pixels)
   return vmaxq_f32(a, b);
+#endif
 }
 
 // Computes the minima of the four single-precision, floating-point values of a and b. https://msdn.microsoft.com/en-us/library/vstudio/wh13kadz(v=vs.100).aspx
 FORCE_INLINE __m128 _mm_min_ps(__m128 a, __m128 b)
 {
+#if USE_PRECISE_MINMAX_IMPLEMENTATION
+  return v_mm_min(a, b);
+#else
+  // Faster, but would give inconsitent rendering(e.g. holes, NaN pixels)
   return vminq_f32(a, b);
+#endif
 }
 
 // Computes the maximum of the two lower scalar single-precision floating point values of a and b.  https://msdn.microsoft.com/en-us/library/s6db5esz(v=vs.100).aspx
@@ -1124,7 +1255,11 @@ FORCE_INLINE __m128 _mm_max_ss(__m128 a, __m128 b)
   float32x4_t value;
   float32x4_t result = a;
 
+#if USE_PRECISE_MINMAX_IMPLEMENTATION
+  value = v_mm_max(a, b);
+#else
   value = vmaxq_f32(a, b);
+#endif
   return vsetq_lane_f32(vgetq_lane_f32(value, 0), result, 0);
 }
 
@@ -1134,7 +1269,11 @@ FORCE_INLINE __m128 _mm_min_ss(__m128 a, __m128 b)
   float32x4_t value;
   float32x4_t result = a;
 
+#if USE_PRECISE_MINMAX_IMPLEMENTATION
+  value = v_mm_min(a, b);
+#else
   value = vminq_f32(a, b);
+#endif
   return vsetq_lane_f32(vgetq_lane_f32(value, 0), result, 0);
 }
 
