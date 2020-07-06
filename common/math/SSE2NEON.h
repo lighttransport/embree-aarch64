@@ -1164,12 +1164,11 @@ FORCE_INLINE float32x4_t v_mm_min(float32x4_t a, float32x4_t b)
   // when the second input is sNaN, return sNaN(return the second).
   // otherwise return min(a, b) 
   //
-  const uint32x4_t vzero = vdupq_n_f32(0.0f);
+  const float32x4_t vzero = vdupq_n_f32(0.0f);
   const uint32x4_t v_src1_is_snan = is_snan(b);
 
   // fortunately, ceqq_f32 ignores the sign.
-  const uint32x4_t v_both_are_zeros = vandq_u32(vreinterpretq_u32_f32(vceqq_f32(a, vzero)),
-    vreinterpretq_u32_f32(vceqq_f32(b, vzero)));
+  const uint32x4_t v_both_are_zeros = vandq_u32(vceqq_f32(a, vzero), vceqq_f32(b, vzero));
 
   const uint32x4_t v_src0_is_nan = is_nan(a);
 
@@ -1200,12 +1199,11 @@ FORCE_INLINE float32x4_t v_mm_max(float32x4_t a, float32x4_t b)
   // when the second input is sNaN, return sNaN(return the second).
   // otherwise return max(a, b) 
   //
-  const uint32x4_t vzero = vdupq_n_f32(0.0f);
+  const float32x4_t vzero = vdupq_n_f32(0.0f);
   const uint32x4_t v_src1_is_snan = is_snan(b);
 
   // fortunately, ceqq_f32 ignores the sign.
-  const uint32x4_t v_both_are_zeros = vandq_u32(vreinterpretq_u32_f32(vceqq_f32(a, vzero)),
-    vreinterpretq_u32_f32(vceqq_f32(b, vzero)));
+  const uint32x4_t v_both_are_zeros = vandq_u32(vceqq_f32(a, vzero), vceqq_f32(b, vzero));
 
   const uint32x4_t v_src0_is_nan = is_nan(a);
 
