@@ -1773,4 +1773,20 @@ FORCE_INLINE __m128 _mm_abs_epi32(__m128 a)
 }
 #endif  //defined(__aarch64__)
 
+// Count the number of bits set to 1 in unsigned 32-bit integer a, and
+// return that count in dst.
+// https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm_popcnt_u32
+FORCE_INLINE int _mm_popcnt_u32(unsigned int a)
+{
+  return (int)vaddlv_u8(vcnt_u8(vcreate_u8((uint64_t)a)));
+}
+
+// Count the number of bits set to 1 in unsigned 64-bit integer a, and
+// return that count in dst.
+// https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm_popcnt_u64
+FORCE_INLINE int64_t _mm_popcnt_u64(uint64_t a)
+{
+  return (int64_t)vaddlv_u8(vcnt_u8(vcreate_u8(a)));
+}
+
 #endif
