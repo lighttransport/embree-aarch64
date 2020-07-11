@@ -23,7 +23,7 @@ $ cd build-aarch64-cross
 $ make
 ```
 
-At least you'll need folliwing cmake options to enable AARCH64 build.
+At least you'll need following cmake options to enable AARCH64 build.
 
 ```
   -DEMBREE_ARM=On \
