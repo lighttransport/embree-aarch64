@@ -1031,8 +1031,11 @@ FORCE_INLINE __m128 _mm_rcp_ps(__m128 in)
 {
   // Get an initial estimate of 1/in.
   float32x4_t reciprocal = vrecpeq_f32(in);
-  
-    // Refinements are done outside for rcp in aarch64 embree
+
+  // We only return estimated 1/in.
+  // Newton-Raphon iteration shold be done in the outside of _mm_rcp_ps().
+
+  // TODO(LTE): We could delete these ifdef?
 #if !defined(__aarch64__) && defined(BUILD_IOS)
   reciprocal = vmulq_f32(vrecpsq_f32(in, reciprocal), reciprocal);
   reciprocal = vmulq_f32(vrecpsq_f32(in, reciprocal), reciprocal);
@@ -1057,6 +1060,13 @@ FORCE_INLINE __m128 _mm_div_ps(__m128 a, __m128 b)
     
   reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
   reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
+
+  // Add one more round of newton-raphson since NEON's reciprocal estimation has less accuracy compared to SSE2's rcp.
+  reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
+
+  // Another round for safety
+  reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
+
     
   return vmulq_f32(a, reciprocal);
 }
@@ -1078,6 +1088,12 @@ FORCE_INLINE __m128 _mm_rsqrt_ps(__m128 in)
   value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
   value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
 
+  // one more round to get better precision
+  value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
+
+  // another round for safety
+  value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
+
   return value;
 }
 
@@ -1086,8 +1102,7 @@ FORCE_INLINE __m128 _mm_rsqrt_ss(__m128 in)
   float32x4_t result = in;
   
   __m128 value = _mm_rsqrt_ps(in);
-  value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
-  value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
+
   return vsetq_lane_f32(vgetq_lane_f32(value, 0), result, 0);
 }
 
@@ -1096,8 +1111,8 @@ FORCE_INLINE __m128 _mm_rsqrt_ss(__m128 in)
 FORCE_INLINE __m128 _mm_sqrt_ps(__m128 in)
 {
   __m128 reciprocal = _mm_rsqrt_ps(in);
-  reciprocal = vmulq_f32(reciprocal, vrsqrtsq_f32(vmulq_f32(in, reciprocal), reciprocal));
-  reciprocal = vmulq_f32(reciprocal, vrsqrtsq_f32(vmulq_f32(in, reciprocal), reciprocal));
+
+  // sqrt(x) = x * (1 / sqrt(x))
   return vmulq_f32(in, reciprocal);
 }
 
