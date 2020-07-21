@@ -29,11 +29,15 @@ ENDIF()
 # Install MSVC runtime
 ##############################################################
 
-IF (WIN32)
-  SET(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
-  INCLUDE(InstallRequiredSystemLibraries)
-  LIST(FILTER CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS INCLUDE REGEX ".*msvcp[0-9]+\.dll|.*vcruntime[0-9]+\.dll|.*vcruntime[0-9]+_[0-9]+\.dll")
-  INSTALL(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT lib)
+IF (EMBREE_USE_PARENT_PROJECT_COMPILER_FLAGS)
+  # Embree is being compiled as a submodule
+ELSE()
+  IF (WIN32)
+    SET(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+    INCLUDE(InstallRequiredSystemLibraries)
+    LIST(FILTER CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS INCLUDE REGEX ".*msvcp[0-9]+\.dll|.*vcruntime[0-9]+\.dll|.*vcruntime[0-9]+_[0-9]+\.dll")
+    INSTALL(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT lib)
+  ENDIF()
 ENDIF()
 
 ##############################################################
