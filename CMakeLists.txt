@@ -154,9 +154,39 @@ OPTION(EMBREE_GEOMETRY_GRID "Enables support for grid geometries." ON)
 OPTION(EMBREE_GEOMETRY_POINT "Enables support for point geometries." ON)
 OPTION(EMBREE_RAY_PACKETS "Enabled support for ray packets." ON)
 
+OPTION(EMBREE_USE_CCACHE "Use ccache(for developer)." OFF)
+
 SET(EMBREE_MAX_INSTANCE_LEVEL_COUNT 1 CACHE STRING "Maximum number of instance levels.")
 SET(EMBREE_CURVE_SELF_INTERSECTION_AVOIDANCE_FACTOR 2.0 CACHE STRING "Self intersection avoidance factor for flat curves. Specify floating point value in range 0 to inf.")
 OPTION(EMBREE_MIN_WIDTH "Enables min-width feature to enlarge curve and point thickness to pixel width." OFF)
+
+# CCache
+if(EMBREE_USE_CCACHE)
+  if(MSVC)
+    # No ccache support
+  else()
+    find_program(CCACHE_EXE ccache)
+    if(CCACHE_EXE)
+
+      message(STATUS "Use ccache : " ${CCACHE_EXE})
+      # CMAKE_C_COMPILER_LAUNCHER = available from cmake 3.4+)
+      if(CMAKE_C_COMPILER_LAUNCHER)
+        set(CMAKE_C_COMPILER_LAUNCHER "${CMAKE_C_COMPILER_LAUNCHER}"
+                                      "${CCACHE_EXE}")
+      else()
+        set(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_EXE}")
+      endif()
+
+      if(CMAKE_CXX_COMPILER_LAUNCHER)
+        set(CMAKE_CXX_COMPILER_LAUNCHER "${CMAKE_CXX_COMPILER_LAUNCHER}"
+                                        "${CCACHE_EXE}")
+      else()
+        set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_EXE}")
+      endif()
+
+    endif(CCACHE_EXE)
+  endif()
+endif(EMBREE_USE_CCACHE)
 
 ##############################################################
 # Mobile Support (support arm64 / aarch64 on Android and iOS)
