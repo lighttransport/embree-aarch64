@@ -11,7 +11,7 @@ Porting was done using similar approach by existing embree-arm effort. https://m
 
 Embree-aarch64 can also be used for x86-64 target. x86-64 code path should be mostly identical to original Intel Embree.
 
-How to cross-compile for AARCH64 Linux
+How to cross-compile for AARCH64 Linux(gcc)
 ----------------------------------
 
 Edit compiler and cmake path in `./scripts/bootstrap-aarch64-gcc-cross-linux.sh`, then
@@ -33,6 +33,35 @@ At least you'll need folliwing cmake options to enable AARCH64 build.
   -DEMBREE_MAX_ISA=SSE2 \
   -DEMBREE_RAY_PACKETS=Off
 ```
+
+How to cross-compile for AARCH64 Linux(clang)
+----------------------------------
+
+You'll need clang-10 or later and lld(Linker)
+
+Edit compiler and cmake path in `./scripts/bootstrap-aarch64-clang-cross-linux.sh`, then
+
+```
+$ cd $EMBREE_AARCH64_REPO
+$ ./scripts/bootstrap-aarch64-clang-cross-linux.sh
+$ cd build-aarch64-cross
+$ make
+```
+
+At least you'll need folliwing cmake options to enable AARCH64 build.
+
+```
+  -DCMAKE_TOOLCHAIN_FILE=common/cmake/clang-aarch64-cross-toolchain.cmake \
+  -DEMBREE_ARM=On \
+  -DEMBREE_ISPC_SUPPORT=Off \
+  -DEMBREE_TASKING_SYSTEM=Internal \
+  -DEMBREE_TUTORIALS=Off \
+  -DEMBREE_MAX_ISA=SSE2 \
+  -DEMBREE_RAY_PACKETS=Off \
+  -DEMBREE_USE_LLD=On 
+```
+
+TODO: libc++ support.
 
 How to build for Android arm64-v8a
 ----------------------------------

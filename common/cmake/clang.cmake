@@ -213,6 +213,12 @@ ELSE()
     SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DNDEBUG")        # disable assertions
     SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -O3")             # enable full optimizations
 
+    # pthread related code cannot be linked without lld when cross-compiling.
+    if (EMBREE_USE_LLD)
+      MESSAGE(STATUS "Use LLD")
+      SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld")
+    endif (EMBREE_USE_LLD)
+      
   endif (EMBREE_USE_PARENT_PROJECT_COMPILER_FLAGS)
 
   MACRO(DISABLE_STACK_PROTECTOR_FOR_FILE file)
@@ -236,5 +242,11 @@ ELSE()
       SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pie")                     # enables position independent execution for executable
     ENDIF()
   ENDIF(APPLE)
+
+  IF (CMAKE_CROSSCOMPILING)
+    # Assume cross-compiling for aarch64 linux
+    # Need to add `-pthread`(It looks find_package(Threads) seems not to set `-pthread` when cross-compiling)
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread")
+  ENDIF ()
 
 ENDIF()
