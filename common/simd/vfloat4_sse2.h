@@ -292,6 +292,8 @@ namespace embree
     __m128 reciprocal = _mm_rcp_ps(a);
     reciprocal = vmulq_f32(vrecpsq_f32(a, reciprocal), reciprocal);
     reciprocal = vmulq_f32(vrecpsq_f32(a, reciprocal), reciprocal);
+    // +1 round since NEON's reciprocal estimate instruction has less accuracy than SSE2's rcp.
+    reciprocal = vmulq_f32(vrecpsq_f32(a, reciprocal), reciprocal);
     return (const vfloat4)reciprocal;
 #else
 
@@ -316,6 +318,7 @@ namespace embree
   {
 #if defined(__aarch64__)
     vfloat4 r = _mm_rsqrt_ps(a);
+    r = vmulq_f32(r, vrsqrtsq_f32(vmulq_f32(a, r), r));
     r = vmulq_f32(r, vrsqrtsq_f32(vmulq_f32(a, r), r));
     r = vmulq_f32(r, vrsqrtsq_f32(vmulq_f32(a, r), r));
     return r;
