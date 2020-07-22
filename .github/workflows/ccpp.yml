@@ -36,7 +36,7 @@ jobs:
   build-cross-aarch64:
 
     runs-on: ubuntu-18.04
-    name: Build on cross aarch64
+    name: Build on cross aarch64(gcc)
 
     steps:
       - name: Checkout
@@ -48,6 +48,28 @@ jobs:
             sudo apt-get install -y gcc-8-aarch64-linux-gnu g++-8-aarch64-linux-gnu
             ./scripts/bootstrap-aarch64-gcc-cross-linux.sh
             cd build-aarch64-cross
+            make VERBOSE=1
+
+  # Cross-compile Embree using clang for aarch64 target
+  build-cross-aarch64:
+
+    runs-on: ubuntu-18.04
+    name: Build on cross aarch64(clang)
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: CmakeAndBuild
+        run: |
+            sudo apt-get update
+            sudo apt-get install -y build-essential
+            sudo apt-get install -y g++-multilib
+            sudo apt-get install -y libstdc++-8-dev-arm64-cross
+            sudo apt-get install -y clang
+            sudo apt-get install -y lld
+
+            ./scripts/bootstrap-aarch64-clang-cross-linux.sh
+            cd build-aarch64-cross-clang
             make VERBOSE=1
 
   # Native x86-64 build
