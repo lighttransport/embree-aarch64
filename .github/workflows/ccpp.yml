@@ -64,11 +64,12 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y build-essential
             sudo apt-get install -y gcc-8-aarch64-linux-gnu g++-8-aarch64-linux-gnu
-            sudo apt-get install -y g++-multilib
+            sudo apt-get install -y gcc-multilib g++-multilib
             sudo apt-get install -y libstdc++-8-dev-arm64-cross
             sudo apt-get install -y clang
             sudo apt-get install -y lld
 
+            ls -la /usr/aarch64-linux-gnu/include/c++/8/aarch64-linux-gnu/bits
             ./scripts/bootstrap-aarch64-clang-cross-linux.sh
             cd build-aarch64-cross-clang
             make VERBOSE=1
