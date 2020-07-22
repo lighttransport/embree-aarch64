@@ -63,17 +63,18 @@ jobs:
         run: |
             sudo apt-get update
             sudo apt-get install -y build-essential
-            sudo apt-get install -y gcc-8-aarch64-linux-gnu g++-8-aarch64-linux-gnu
             sudo apt-get install -y gcc-multilib g++-multilib
-            sudo apt-get install -y libstdc++-8-dev-arm64-cross
-            sudo apt-get install -y clang
-            sudo apt-get install -y lld
+            #sudo apt-get install -y libstdc++-8-dev-arm64-cross
+            #sudo apt-get install -y clang
+            #sudo apt-get install -y lld
 
-            # Default clang(6.0) cannot find gcc headers, so
+            # It looks default clang(6.0) cannot find gcc headers, so
             # Use clang 10(FYI clang 9 would work)
-            sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
-            sudo apt-get install -y clang-10
-            sudo apt-get install -y lld-10
+            #sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
+            sudo apt-get install -y clang-10 lld-10
+
+            sudo apt-get install -y gcc-8-aarch64-linux-gnu g++-8-aarch64-linux-gnu
+
             sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-10 10
             sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-10 10
             sudo update-alternatives --install /usr/bin/ld.lld lld /usr/bin/ld.lld-10 10
