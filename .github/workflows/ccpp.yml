@@ -69,7 +69,15 @@ jobs:
             sudo apt-get install -y clang
             sudo apt-get install -y lld
 
-            ls -la /usr/aarch64-linux-gnu/include/c++/8/aarch64-linux-gnu/bits
+            # Default clang(6.0) cannot find gcc headers, so
+            # Use clang 10(FYI clang 9 would work)
+            sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
+            sudo apt-get install -y clang-10
+            sudo apt-get install -y lld-10
+            sudo update-alternatives --install /usr/bin/clang clang /user/bin/clang-10 10
+            sudo update-alternatives --install /usr/bin/clang++ clang++ /user/bin/clang++-10 10
+            sudo update-alternatives --install /usr/bin/ld.lld lld /user/bin/ld.lld-10 10
+
             ./scripts/bootstrap-aarch64-clang-cross-linux.sh
             cd build-aarch64-cross-clang
             make VERBOSE=1
