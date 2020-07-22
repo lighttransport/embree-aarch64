@@ -11,17 +11,24 @@ else()
     set(GCC_ARM_TOOLCHAIN "/usr")
 endif()
 
+# Base directory to `/bin/clang` and `/bin/clang++`
+if(DEFINED ENV{CLANG_TOOLCHAIN})
+    set(CLANG_TOOLCHAIN $ENV{CLANG_TOOLCHAIN})
+else()
+    set(CLANG_TOOLCHAIN "/usr")
+endif()
+
 # Clang target triple
 SET(TARGET_TRIPLE aarch64-linux-gnu)
 
 # specify the cross compiler
 # TODO(LTE): Read clang path from environment variable
 SET(CMAKE_C_COMPILER_TARGET ${TARGET_TRIPLE})
-SET(CMAKE_C_COMPILER /mnt/data/local/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04/bin/clang)
+SET(CMAKE_C_COMPILER ${CLANG_TOOLCHAIN}/bin/clang)
 SET(CMAKE_CXX_COMPILER_TARGET ${TARGET_TRIPLE})
-SET(CMAKE_CXX_COMPILER /mnt/data/local/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04/bin/clang++)
+SET(CMAKE_CXX_COMPILER ${CLANG_TOOLCHAIN}/bin/clang++)
 SET(CMAKE_ASM_COMPILER_TARGET ${TARGET_TRIPLE})
-SET(CMAKE_ASM_COMPILER /mnt/data/local/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04/bin/clang++)
+SET(CMAKE_ASM_COMPILER ${CLANG_TOOLCHAIN}/bin/clang++)
 
 # Don't run the linker on compiler check
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)

@@ -39,11 +39,11 @@ How to cross-compile for AARCH64 Linux(clang)
 
 You'll need clang-10 or later and lld(Linker)
 
-Edit compiler and cmake path in `./scripts/bootstrap-aarch64-clang-cross-linux.sh`, then
+Set path to clang base directory(`/bin/clang` will be prepended) to `CLANG_TOOLCHAIN` environment variable(default is `/usr`), then
 
 ```
 $ cd $EMBREE_AARCH64_REPO
-$ ./scripts/bootstrap-aarch64-clang-cross-linux.sh
+$ CLANG_TOOLCHAIN=<path/to/clang> ./scripts/bootstrap-aarch64-clang-cross-linux.sh
 $ cd build-aarch64-cross
 $ make
 ```
