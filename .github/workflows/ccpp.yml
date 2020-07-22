@@ -32,8 +32,8 @@ jobs:
           make EXTRA_CXXFLAGS="-fsanitize=address" EXTRA_LDFLAGS="-fsanitize=address" EMBREE_LIB_PATH=../../build-aarch64
           ./run.sh ../../build-aarch64 > /dev/null
 
-  # Cross-compile Embree for aarch64 target
-  build-cross-aarch64:
+  # Cross-compile Embree using gcc for aarch64 target
+  build-cross-aarch64-gcc:
 
     runs-on: ubuntu-18.04
     name: Build on cross aarch64(gcc)
@@ -51,7 +51,7 @@ jobs:
             make VERBOSE=1
 
   # Cross-compile Embree using clang for aarch64 target
-  build-cross-aarch64:
+  build-cross-aarch64-clang:
 
     runs-on: ubuntu-18.04
     name: Build on cross aarch64(clang)
