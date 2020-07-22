@@ -79,6 +79,8 @@ jobs:
             sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-10 10
             sudo update-alternatives --install /usr/bin/ld.lld lld /usr/bin/ld.lld-10 10
 
+            clang++ -v -xc++ - < /dev/null
+
             ./scripts/bootstrap-aarch64-clang-cross-linux.sh
             cd build-aarch64-cross-clang
             make VERBOSE=1

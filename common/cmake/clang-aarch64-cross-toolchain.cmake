@@ -34,10 +34,10 @@ SET(CMAKE_ASM_COMPILER ${CLANG_TOOLCHAIN}/bin/clang++)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 
-# or we can use `--gcc-toolchain` for clang
+# or we could use `-B` for clang
 # this flag is required to find libc(glibc) headers, crtbegin.o, etc
-set(CMAKE_C_FLAGS_INIT " -B${GCC_ARM_TOOLCHAIN}")
-set(CMAKE_CXX_FLAGS_INIT " -B${GCC_ARM_TOOLCHAIN} ")
+set(CMAKE_C_FLAGS_INIT " --gcc-toolchain=${GCC_ARM_TOOLCHAIN}")
+set(CMAKE_CXX_FLAGS_INIT " --gcc-toolchain=${GCC_ARM_TOOLCHAIN} ")
 
 # C/C++ toolchain
 set(GCC_ARM_SYSROOT "${GCC_ARM_TOOLCHAIN}/${TARGET_TRIPLE}")
