@@ -74,9 +74,9 @@ jobs:
             sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
             sudo apt-get install -y clang-10
             sudo apt-get install -y lld-10
-            sudo update-alternatives --install /usr/bin/clang clang /user/bin/clang-10 10
-            sudo update-alternatives --install /usr/bin/clang++ clang++ /user/bin/clang++-10 10
-            sudo update-alternatives --install /usr/bin/ld.lld lld /user/bin/ld.lld-10 10
+            sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-10 10
+            sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-10 10
+            sudo update-alternatives --install /usr/bin/ld.lld lld /usr/bin/ld.lld-10 10
 
             ./scripts/bootstrap-aarch64-clang-cross-linux.sh
             cd build-aarch64-cross-clang
