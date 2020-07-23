@@ -50,40 +50,40 @@ jobs:
             cd build-aarch64-cross
             make VERBOSE=1
 
-  # Cross-compile Embree using clang for aarch64 target
-  build-cross-aarch64-clang:
+  ## Cross-compile Embree using clang for aarch64 target
+  #build-cross-aarch64-clang:
 
-    runs-on: ubuntu-18.04
-    name: Build on cross aarch64(clang)
+  #  runs-on: ubuntu-18.04
+  #  name: Build on cross aarch64(clang)
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-      - name: CmakeAndBuild
-        run: |
-            sudo apt-get update
-            sudo apt-get install -y build-essential
-            sudo apt-get install -y gcc-multilib g++-multilib
-            #sudo apt-get install -y libstdc++-8-dev-arm64-cross
-            #sudo apt-get install -y clang
-            #sudo apt-get install -y lld
+  #  steps:
+  #    - name: Checkout
+  #      uses: actions/checkout@v1
+  #    - name: CmakeAndBuild
+  #      run: |
+  #          sudo apt-get update
+  #          sudo apt-get install -y build-essential
+  #          sudo apt-get install -y gcc-multilib g++-multilib
+  #          #sudo apt-get install -y libstdc++-8-dev-arm64-cross
+  #          #sudo apt-get install -y clang
+  #          #sudo apt-get install -y lld
 
-            # It looks default clang(6.0) cannot find gcc headers, so
-            # Use clang 10(FYI clang 9 would work)
-            #sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
-            sudo apt-get install -y clang-10 lld-10
+  #          # It looks default clang(6.0) cannot find gcc headers, so
+  #          # Use clang 10(FYI clang 9 would work)
+  #          #sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
+  #          sudo apt-get install -y clang-10 lld-10
 
-            sudo apt-get install -y gcc-8-aarch64-linux-gnu g++-8-aarch64-linux-gnu
+  #          sudo apt-get install -y gcc-8-aarch64-linux-gnu g++-8-aarch64-linux-gnu
 
-            sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-10 10
-            sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-10 10
-            sudo update-alternatives --install /usr/bin/ld.lld lld /usr/bin/ld.lld-10 10
+  #          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-10 10
+  #          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-10 10
+  #          sudo update-alternatives --install /usr/bin/ld.lld lld /usr/bin/ld.lld-10 10
 
-            clang++ -v -xc++ - < /dev/null
+  #          clang++ -v -xc++ - < /dev/null
 
-            ./scripts/bootstrap-aarch64-clang-cross-linux.sh
-            cd build-aarch64-cross-clang
-            make VERBOSE=1
+  #          ./scripts/bootstrap-aarch64-clang-cross-linux.sh
+  #          cd build-aarch64-cross-clang
+  #          make VERBOSE=1
 
   # Native x86-64 build
   build-x86-64:
