@@ -222,7 +222,15 @@ ELSE()
     # pthread related code cannot be linked without lld when cross-compiling.
     if (EMBREE_USE_LLD)
       MESSAGE(STATUS "Use LLD")
-      SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld")
+
+      if (DEFINED ENV{LLD_PATH})
+        set(LLD_PATH $ENV{LLD_PATH})
+      else ()
+        set(LLD_PATH "lld")
+      endif ()
+      
+      SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=${LLD_PATH}")
+
     endif (EMBREE_USE_LLD)
       
   endif (EMBREE_USE_PARENT_PROJECT_COMPILER_FLAGS)

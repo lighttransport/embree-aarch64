@@ -155,7 +155,7 @@ OPTION(EMBREE_GEOMETRY_POINT "Enables support for point geometries." ON)
 OPTION(EMBREE_RAY_PACKETS "Enabled support for ray packets." ON)
 
 OPTION(EMBREE_USE_CCACHE "Use ccache(for developer)." OFF)
-OPTION(EMBREE_USE_LLD "Use lld(for clang only. required when cross-compiling embree for aarch64 target)." OFF)
+OPTION(EMBREE_USE_LLD "Use lld(for clang only. required when cross-compiling embree for aarch64 target) You can set path to lld through LLD_PATH environment variable." OFF)
 
 SET(EMBREE_MAX_INSTANCE_LEVEL_COUNT 1 CACHE STRING "Maximum number of instance levels.")
 SET(EMBREE_CURVE_SELF_INTERSECTION_AVOIDANCE_FACTOR 2.0 CACHE STRING "Self intersection avoidance factor for flat curves. Specify floating point value in range 0 to inf.")
