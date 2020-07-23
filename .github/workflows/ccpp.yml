@@ -77,7 +77,7 @@ jobs:
             g++ -v
             clang -v
 
-            echo '#include <cstddef>' | clang++-9 -c --target=aarch64-linux-gnu --sysroot=/usr/aarch64-linux-gnu -B/usr -v -H -xc++ -std=c++11 -
+            echo '#include <cstddef>' | clang++-9 -c --target=aarch64-linux-gnu --sysroot=/usr/aarch64-linux-gnu -nostdinc++ --sysroot=/usr/aarch64-linux-gnu -I/usr/aarch64-linux-gnu/include/c++/8 -I/usr/aarch64-linux-gnu/include/c++/8/aarch64-linux-gnu/ -v -H -xc++ -std=c++11 -
 
             CLANG_PATH=clang-9 CLANGXX_PATH=clang++-9 LLD_PATH=lld-9 ./scripts/bootstrap-aarch64-clang-cross-linux.sh
             cd build-aarch64-cross-clang
