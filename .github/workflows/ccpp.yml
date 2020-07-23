@@ -63,15 +63,19 @@ jobs:
         run: |
             sudo apt-get update
             sudo apt-get install -y build-essential
-            sudo apt-get install -y gcc-multilib g++-multilib
             sudo apt-get install -y gcc-8-aarch64-linux-gnu g++-8-aarch64-linux-gnu
+            sudo apt-get install -y gcc-8-multilib g++-8-multilib
             sudo apt-get install -y lld-9
 
-            # clang-9 is installed on GitHub Actions' ubuntu 18.04 image
+            # clang-9 is installed by default on GitHub Actions' ubuntu 18.04 image
 
             #sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-10 10
             #sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-10 10
             #sudo update-alternatives --install /usr/bin/ld.lld lld /usr/bin/ld.lld-9 1
+
+            gcc -v
+            g++ -v
+            clang -v
 
             echo '#include <cstddef>' | clang++-9 -c --target=aarch64-linux-gnu --sysroot=/usr/aarch64-linux-gnu -B/usr -v -H -xc++ -std=c++11 -
 
