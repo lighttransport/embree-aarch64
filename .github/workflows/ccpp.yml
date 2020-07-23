@@ -73,7 +73,7 @@ jobs:
             #sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-10 10
             #sudo update-alternatives --install /usr/bin/ld.lld lld /usr/bin/ld.lld-9 1
 
-            echo "int main() {}" | clang++-9 --target=aarch64-linux-gnu -v -xc++ -
+            echo '#include <cstddef>' | clang++-9 -c --target=aarch64-linux-gnu --sysroot=/usr/aarch64-linux-gnu -B/usr -v -H -xc++ -std=c++11 -
 
             CLANG_PATH=clang-9 CLANGXX_PATH=clang++-9 LLD_PATH=lld-9 ./scripts/bootstrap-aarch64-clang-cross-linux.sh
             cd build-aarch64-cross-clang
