@@ -1083,7 +1083,12 @@ FORCE_INLINE __m128 _mm_div_ss(__m128 a, __m128 b)
 // Computes the approximations of the reciprocal square roots of the four single-precision floating point values of in.  https://msdn.microsoft.com/en-us/library/22hfsh53(v=vs.100).aspx
 FORCE_INLINE __m128 _mm_rsqrt_ps(__m128 in)
 {
+	
   float32x4_t value = vrsqrteq_f32(in);
+  
+  // TODO: We must debug and ensure that rsqrt(0) and rsqrt(-0) yield proper values.
+  // Related code snippets can be found here: https://cpp.hotexamples.com/examples/-/-/vrsqrteq_f32/cpp-vrsqrteq_f32-function-examples.html
+  // If we adapt this function, we might be able to avoid special zero treatment in _mm_sqrt_ps
   
   value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
   value = vmulq_f32(value, vrsqrtsq_f32(vmulq_f32(in, value), value));
@@ -1111,7 +1116,13 @@ FORCE_INLINE __m128 _mm_rsqrt_ss(__m128 in)
 FORCE_INLINE __m128 _mm_sqrt_ps(__m128 in)
 {
   __m128 reciprocal = _mm_rsqrt_ps(in);
-
+  
+  // We must treat sqrt(in == 0) in a special way. At this point reciprocal contains gargabe due to vrsqrteq_f32(0) returning +inf.
+  // We assign 0 to reciprocal wherever required.
+  const float32x4_t vzero = vdupq_n_f32(0.0f);
+  const uint32x4_t mask = vceqq_f32(in, vzero);
+  reciprocal = vbslq_f32(mask, vzero, reciprocal);
+  
   // sqrt(x) = x * (1 / sqrt(x))
   return vmulq_f32(in, reciprocal);
 }
