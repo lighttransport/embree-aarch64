@@ -25,6 +25,17 @@ else()
     set(CLANGXX_PATH "clang++")
 endif()
 
+# extra C_FLAGS, CXX_FLAGS for cross compling
+set(EXTRA_CROSS_C_FLAGS "")
+if(DEFINED ENV{EXTRA_CROSS_C_FLAGS})
+    set(EXTRA_CROSS_C_FLAGS $ENV{EXTRA_CROSS_C_FLAGS})
+endif()
+
+set(EXTRA_CROSS_CXX_FLAGS "")
+if(DEFINED ENV{EXTRA_CROSS_CXX_FLAGS})
+    set(EXTRA_CROSS_CXX_FLAGS $ENV{EXTRA_CROSS_CXX_FLAGS})
+endif()
+
 # Clang target triple
 SET(TARGET_TRIPLE aarch64-linux-gnu)
 
@@ -43,13 +54,13 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 # or we could use `-B` for clang
 # this flag is required to find libc(glibc) headers, crtbegin.o, etc
-set(CMAKE_C_FLAGS_INIT " --gcc-toolchain=${GCC_ARM_TOOLCHAIN}")
-set(CMAKE_CXX_FLAGS_INIT " --gcc-toolchain=${GCC_ARM_TOOLCHAIN} ")
+set(CMAKE_C_FLAGS_INIT " --gcc-toolchain=${GCC_ARM_TOOLCHAIN} ${EXTRA_CROSS_C_FLAGS} ")
+set(CMAKE_CXX_FLAGS_INIT " --gcc-toolchain=${GCC_ARM_TOOLCHAIN} ${EXTRA_CROSS_CXX_FLAGS} ")
 
 # C/C++ toolchain
 set(GCC_ARM_SYSROOT "${GCC_ARM_TOOLCHAIN}/${TARGET_TRIPLE}")
 set(CMAKE_SYSROOT ${GCC_ARM_SYSROOT})
-#set(CMAKE_FIND_ROOT_PATH ${GCC_ARM_SYSROOT})
+set(CMAKE_FIND_ROOT_PATH ${GCC_ARM_SYSROOT})
 
 # Search for programs in the build host directories
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
