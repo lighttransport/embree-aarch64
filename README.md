@@ -37,18 +37,18 @@ At least you'll need following cmake options to enable AARCH64 build.
 How to cross-compile for AARCH64 Linux(clang)
 ----------------------------------
 
-You'll need clang-10 or later and lld(Linker)
-
-Set path to clang base directory(`/bin/clang` will be prepended) to `CLANG_TOOLCHAIN` environment variable(default is `/usr`), then
+Set path to clang, clang++, lld to environment variables(See `.github/workflows/ccpp.yml` for example), then
 
 ```
 $ cd $EMBREE_AARCH64_REPO
-$ CLANG_TOOLCHAIN=<path/to/clang> ./scripts/bootstrap-aarch64-clang-cross-linux.sh
+$ CLANG_PATH=<path/to/clang> CLANGXX_PATH=<path/to/clang++> LLD_PATH=<lldname> ./scripts/bootstrap-aarch64-clang-cross-linux.sh
 $ cd build-aarch64-cross
 $ make
 ```
 
-At least you'll need folliwing cmake options to enable AARCH64 build.
+You can pass custom `C_FLAGS` and `CXX_FLAGS` through `EXTRA_CROSS_C_FLAGS` and `EXTRA_CROSS_CXX_FLAGS` environment variables.
+
+At least you'll need folliwing cmake options to enable AARCH64 cross compile with clang.
 
 ```
   -DCMAKE_TOOLCHAIN_FILE=common/cmake/clang-aarch64-cross-toolchain.cmake \
