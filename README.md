@@ -3,6 +3,13 @@
 
 [![Actions Status](https://github.com/lighttransport/embree-aarch64/workflows/BuildCI/badge.svg)](https://github.com/lighttransport/embree-aarch64/actions)
 
+Embree on AARCH64(ARM64) status
+===============================
+
+Production grade. embree-aarch64 gives mostly identical result compared to x86-64 version.
+Minior issue exists in watertight test https://github.com/lighttransport/embree-aarch64/issues/28 , but it would be neglible in most production environment.
+
+
 Embree-aarch64 Overview
 =======================
 
