@@ -108,7 +108,7 @@
 
 // enable precise emulation of _mm_min_ps and _mm_max_ps?
 // This would slow down the computation a bit, but gives consistent result with x86 SSE2.
-// (e.g. would solve a hole or NaN pixel in the rendering result)
+// (e.g. would solve a hole or NaN pixel in the rendering result) 
 #define USE_PRECISE_MINMAX_IMPLEMENTATION (1)
 
 #if GCC
@@ -196,11 +196,12 @@ typedef SIMDVec __m128d;
 
 FORCE_INLINE void _mm_pause()
 {
+        asm volatile ("nop");
 }
 
 FORCE_INLINE void _mm_mfence()
 {
-    __sync_synchronize();
+  asm volatile("":::"memory");
 }
 
 #define _MM_HINT_T0 3
@@ -210,8 +211,7 @@ FORCE_INLINE void _mm_mfence()
 
 FORCE_INLINE void _mm_prefetch(const void* ptr, unsigned int level)
 {
-   __builtin_prefetch(ptr);
- 
+        __builtin_prefetch(ptr);
 }
 
 FORCE_INLINE void* _mm_malloc(int size, int align)
@@ -326,10 +326,11 @@ FORCE_INLINE __m128i _mm_set1_epi32(int _i)
 }
 
 //Set the first lane to of 4 signed single-position, floating-point number to w
-#if defined(__aarch64__)
+#if defined(__aarch64__) && defined(BUILD_IOS)
 FORCE_INLINE __m128 _mm_set_ss(float _w)
 {
-    float32x4_t res = {_w, 0, 0, 0};
+    float32x4_t res;
+    res[0] = _w;
     return res;
 }
 
@@ -631,7 +632,7 @@ FORCE_INLINE __m128 _mm_shuffle_ps_0101(__m128 a, __m128 b)
 // The same is true on SSE as well.
 // Selects four specific single-precision, floating-point values from a and b, based on the mask i. https://msdn.microsoft.com/en-us/library/vstudio/5f0858x0(v=vs.100).aspx
 template <int i>
-FORCE_INLINE __m128 _mm_shuffle_ps_default(const __m128& a, const __m128& b)
+FORCE_INLINE __m128 _mm_shuffle_ps_default(__m128 a, __m128 b)
 {
 #if ENABLE_CPP_VERSION // I am not convinced that the NEON version is faster than the C version yet.
   __m128 ret;
@@ -641,50 +642,16 @@ FORCE_INLINE __m128 _mm_shuffle_ps_default(const __m128& a, const __m128& b)
   ret[3] = b[(i >> 6) & 0x03];
   return ret;
 #else
-# if __has_builtin(__builtin_shufflevector)
-    return __builtin_shufflevector(             \
-        a, b, (i) & (0x3), ((i) >> 2) & 0x3,
-        (((i) >> 4) & 0x3) + 4, (((i) >> 6) & 0x3) + 4);
-# else
-    const int i0 = (i >> 0)&0x3;
-    const int i1 = (i >> 2)&0x3;
-    const int i2 = (i >> 4)&0x3;
-    const int i3 = (i >> 6)&0x3;
-
-    if (&a == &b)
-     {
-         if (i0 == i1 && i0 == i2 && i0 == i3)
-         {
-             return vdupq_laneq_f32(a,i0);
-         }
-         static const uint8_t tbl[16] = {
-             (i0*4) + 0,(i0*4) + 1,(i0*4) + 2,(i0*4) + 3,
-             (i1*4) + 0,(i1*4) + 1,(i1*4) + 2,(i1*4) + 3,
-             (i2*4) + 0,(i2*4) + 1,(i2*4) + 2,(i2*4) + 3,
-             (i3*4) + 0,(i3*4) + 1,(i3*4) + 2,(i3*4) + 3
-         };
-         
-         return vqtbl1q_s8(int8x16_t(b),*(int8x16_t *)tbl);
-         
-     }
-     else
-     {
-         
-         static const uint8_t tbl[16] = {
-             (i0*4) + 0,(i0*4) + 1,(i0*4) + 2,(i0*4) + 3,
-             (i1*4) + 0,(i1*4) + 1,(i1*4) + 2,(i1*4) + 3,
-             (i2*4) + 0 + 16,(i2*4) + 1 + 16,(i2*4) + 2 + 16,(i2*4) + 3 + 16,
-             (i3*4) + 0 + 16,(i3*4) + 1 + 16,(i3*4) + 2 + 16,(i3*4) + 3 + 16
-         };
-         
-         return vqtbl2q_s8((int8x16x2_t){a,b},*(int8x16_t *)tbl);
-     }
-# endif //builtin(shufflevector)
+  __m128 ret = vmovq_n_f32(vgetq_lane_f32(a, i & 0x3));
+  ret = vsetq_lane_f32(vgetq_lane_f32(a, (i >> 2) & 0x3), ret, 1);
+  ret = vsetq_lane_f32(vgetq_lane_f32(b, (i >> 4) & 0x3), ret, 2);
+  ret = vsetq_lane_f32(vgetq_lane_f32(b, (i >> 6) & 0x3), ret, 3);
+  return ret;
 #endif
 }
 
 template <int i >
-FORCE_INLINE __m128 _mm_shuffle_ps_function(const __m128& a, const __m128& b)
+FORCE_INLINE __m128 _mm_shuffle_ps_function(__m128 a, __m128 b)
 {
   switch (i)
   {
@@ -740,11 +707,7 @@ FORCE_INLINE __m128 _mm_shuffle_ps_function(const __m128& a, const __m128& b)
   return _mm_shuffle_ps_default<i>(a, b);
 }
 
-# if __has_builtin(__builtin_shufflevector)
-#define _mm_shuffle_ps(a,b,i) _mm_shuffle_ps_default<i>(a,b)
-# else
 #define _mm_shuffle_ps(a,b,i) _mm_shuffle_ps_function<i>(a,b)
-#endif
 
 // Takes the upper 64 bits of a and places it in the low end of the result
 // Takes the lower 64 bits of b and places it into the high end of the result.
@@ -940,7 +903,7 @@ FORCE_INLINE __m128i _mm_srli_epi32(__m128i a, const int imm8)
 // Based on SIMDe
 FORCE_INLINE __m128i _mm_srai_epi32(__m128i a, const int imm8)
 {
-#if defined(__aarch64__)
+#if defined(__aarch64__) 
     const int32x4_t s = vdupq_n_s32(-imm8);
     return vshlq_s32(a, s);
 #else
@@ -1098,9 +1061,6 @@ FORCE_INLINE __m128 _mm_rcp_ss(__m128 in)
 // Divides the four single-precision, floating-point values of a and b. https://msdn.microsoft.com/en-us/library/edaw8147(v=vs.100).aspx
 FORCE_INLINE __m128 _mm_div_ps(__m128 a, __m128 b)
 {
-#if defined(BUILD_IOS) 
-  return vdivq_f32(a,b);
-#else
   float32x4_t reciprocal = _mm_rcp_ps(b);
     
   reciprocal = vmulq_f32(vrecpsq_f32(b, reciprocal), reciprocal);
@@ -1114,7 +1074,6 @@ FORCE_INLINE __m128 _mm_div_ps(__m128 a, __m128 b)
 
     
   return vmulq_f32(a, reciprocal);
-#endif
 }
 
 // Divides the scalar single-precision floating point value of a by b.  https://msdn.microsoft.com/en-us/library/4y73xa49(v=vs.100).aspx
@@ -1161,9 +1120,6 @@ FORCE_INLINE __m128 _mm_rsqrt_ss(__m128 in)
 // Computes the approximations of square roots of the four single-precision, floating-point values of a. First computes reciprocal square roots and then reciprocals of the four values. https://msdn.microsoft.com/en-us/library/vstudio/8z67bwwk(v=vs.100).aspx
 FORCE_INLINE __m128 _mm_sqrt_ps(__m128 in)
 {
-#if defined(BUILD_IOS)
-  return vsqrtq_f32(in);
-#else
   __m128 reciprocal = _mm_rsqrt_ps(in);
   
   // We must treat sqrt(in == 0) in a special way. At this point reciprocal contains gargabe due to vrsqrteq_f32(0) returning +inf.
@@ -1174,7 +1130,6 @@ FORCE_INLINE __m128 _mm_sqrt_ps(__m128 in)
   
   // sqrt(x) = x * (1 / sqrt(x))
   return vmulq_f32(in, reciprocal);
-#endif
 }
 
 // Computes the approximation of the square root of the scalar single-precision floating point value of in.  https://msdn.microsoft.com/en-us/library/ahfsc22d(v=vs.100).aspx
@@ -1187,12 +1142,125 @@ FORCE_INLINE __m128 _mm_sqrt_ss(__m128 in)
   return vsetq_lane_f32(vgetq_lane_f32(value, 0), result, 0);
 }
 
+#if defined(__aarch64__) || defined(BUILD_IOS)
+#if USE_PRECISE_MINMAX_IMPLEMENTATION
+
+// Check if input is sNaN
+FORCE_INLINE uint32x4_t is_snan(float32x4_t a)
+{
+  // all exp bits are 1 and MSB bit of mantissa is 1 
+  const uint32x4_t vexp_mask = {0x7f800000, 0x7f800000, 0x7f800000, 0x7f800000};
+  const uint32x4_t vqnan_bit_mask = {0x00400000, 0x00400000, 0x00400000, 0x00400000};
+  const uint32x4_t vsnan_bit_mask = {0x003fffff, 0x003fffff, 0x003fffff, 0x003fffff};
+  const uint32x4_t vzero = vdupq_n_u32(0);
+
+  uint32x4_t v_exp_all_ones = vceqq_u32(vandq_u32(vreinterpretq_u32_f32(a), vexp_mask), vexp_mask);
+
+  // Check if qnan mantissa bits is off
+  uint32x4_t v_qnan_bit_off = vceqq_u32(vandq_u32(vreinterpretq_u32_f32(a), vqnan_bit_mask), vzero);
+  uint32x4_t v_snan_bit_any = vcgtq_u32(vandq_u32(vreinterpretq_u32_f32(a), vsnan_bit_mask), vzero);
+
+  uint32x4_t v_is_snan = vandq_u32(vandq_u32(v_exp_all_ones, v_qnan_bit_off), v_snan_bit_any);
+
+  return v_is_snan;
+}
+
+// Check if input is NaN(sNaN or qNan)
+FORCE_INLINE uint32x4_t is_nan(float32x4_t a)
+{
+  const uint32x4_t vexp_mask = {0x7f800000, 0x7f800000, 0x7f800000, 0x7f800000};
+  const uint32x4_t vmantissa_mask = {0x007fffff, 0x007fffff, 0x007fffff, 0x007fffff}; 
+  const uint32x4_t vzero = vdupq_n_u32(0);
+
+  // Check if all exp bits are 1.
+  uint32x4_t v_exp_all_ones = vceqq_u32(vandq_u32(vreinterpretq_u32_f32(a), vexp_mask), vexp_mask);
+
+  // Check if any mantissa bits are on(qNaN or sNaN)
+  uint32x4_t v_mantissa_any = vcgtq_u32(vandq_u32(vreinterpretq_u32_f32(a), vmantissa_mask), vzero);
+
+  uint32x4_t v_is_nan = vandq_u32(v_exp_all_ones, v_mantissa_any);
+
+  return v_is_nan;
+}
+
+FORCE_INLINE float32x4_t v_mm_min(float32x4_t a, float32x4_t b)
+{
+  //
+  // Accurate simulation of _mm_min_ps using ARM NEON
+  //
+  // https://www.felixcloutier.com/x86/minps
+  //
+  // when both input are (+/-)0.0, return the second
+  // when the first input is NaN(sNaN or qNaN), return the second.
+  // when the second input is sNaN, return sNaN(return the second).
+  // otherwise return min(a, b) 
+  //
+  const float32x4_t vzero = vdupq_n_f32(0.0f);
+  const uint32x4_t v_src1_is_snan = is_snan(b);
+
+  // fortunately, ceqq_f32 ignores the sign.
+  const uint32x4_t v_both_are_zeros = vandq_u32(vceqq_f32(a, vzero), vceqq_f32(b, vzero));
+
+  const uint32x4_t v_src0_is_nan = is_nan(a);
+
+  const float32x4_t v_min = vminq_f32(a, b);
+
+  float32x4_t v_special_case = vbslq_f32(v_both_are_zeros, b, v_min);
+  v_special_case = vbslq_f32(v_src0_is_nan, b, v_special_case);
+  v_special_case = vbslq_f32(v_src1_is_snan, b, v_special_case);
+
+  // Requie NaN or both zero case handling?
+  const uint32x4_t v_require_special_handling = vorrq_u32(v_src1_is_snan, vorrq_u32(v_both_are_zeros, v_src0_is_nan));
+
+  // use min(a, b) when !(require special handling)
+  float32x4_t ret = vbslq_f32(v_require_special_handling, v_special_case, v_min);
+  
+  return ret;
+}
+
+FORCE_INLINE float32x4_t v_mm_max(float32x4_t a, float32x4_t b)
+{
+  //
+  // Accurate simulation of _mm_max_ps using ARM NEON
+  //
+  // https://www.felixcloutier.com/x86/maxps
+  //
+  // when both input are (+/-)0.0, return the second
+  // when the first input is NaN(sNaN or qNaN), return the second.
+  // when the second input is sNaN, return sNaN(return the second).
+  // otherwise return max(a, b) 
+  //
+  const float32x4_t vzero = vdupq_n_f32(0.0f);
+  const uint32x4_t v_src1_is_snan = is_snan(b);
+
+  // fortunately, ceqq_f32 ignores the sign.
+  const uint32x4_t v_both_are_zeros = vandq_u32(vceqq_f32(a, vzero), vceqq_f32(b, vzero));
+
+  const uint32x4_t v_src0_is_nan = is_nan(a);
+
+  const float32x4_t v_max = vmaxq_f32(a, b);
+
+  float32x4_t v_special_case = vbslq_f32(v_both_are_zeros, b, v_max);
+  v_special_case = vbslq_f32(v_src0_is_nan, b, v_special_case);
+  v_special_case = vbslq_f32(v_src1_is_snan, b, v_special_case);
+
+  // Requie NaN or both zero case handling?
+  const uint32x4_t v_require_special_handling = vorrq_u32(v_src1_is_snan, vorrq_u32(v_both_are_zeros, v_src0_is_nan));
+
+  // use max(a, b) when !(require special handling)
+  float32x4_t ret = vbslq_f32(v_require_special_handling, v_special_case, v_max);
+  
+  return ret;
+}
+
+#endif // USE_PRECISE_MINMAX_IMPLEMENTATION
+#endif // defined(__aarch64__) || defiend(BUILD_IOS)
 
 // Computes the maximums of the four single-precision, floating-point values of a and b. https://msdn.microsoft.com/en-us/library/vstudio/ff5d607a(v=vs.100).aspx
 FORCE_INLINE __m128 _mm_max_ps(__m128 a, __m128 b)
 {
 #if USE_PRECISE_MINMAX_IMPLEMENTATION
-  return vbslq_f32(vcltq_f32(b,a),a,b);
+  return v_mm_max(a, b);
 #else
   // Faster, but would give inconsitent rendering(e.g. holes, NaN pixels)
   return vmaxq_f32(a, b);
@@ -1203,7 +1271,7 @@ FORCE_INLINE __m128 _mm_max_ps(__m128 a, __m128 b)
 FORCE_INLINE __m128 _mm_min_ps(__m128 a, __m128 b)
 {
 #if USE_PRECISE_MINMAX_IMPLEMENTATION
-  return vbslq_f32(vcltq_f32(a,b),a,b);
+  return v_mm_min(a, b);
 #else
   // Faster, but would give inconsitent rendering(e.g. holes, NaN pixels)
   return vminq_f32(a, b);
@@ -1215,8 +1283,12 @@ FORCE_INLINE __m128 _mm_max_ss(__m128 a, __m128 b)
 {
   float32x4_t value;
   float32x4_t result = a;
- 
-  value = _mm_max_ps(a, b);
+
+#if USE_PRECISE_MINMAX_IMPLEMENTATION
+  value = v_mm_max(a, b);
+#else
+  value = vmaxq_f32(a, b);
+#endif
   return vsetq_lane_f32(vgetq_lane_f32(value, 0), result, 0);
 }
 
@@ -1226,8 +1298,11 @@ FORCE_INLINE __m128 _mm_min_ss(__m128 a, __m128 b)
   float32x4_t value;
   float32x4_t result = a;
 
-    
-  value = _mm_min_ps(a, b);
+#if USE_PRECISE_MINMAX_IMPLEMENTATION
+  value = v_mm_min(a, b);
+#else
+  value = vminq_f32(a, b);
+#endif
   return vsetq_lane_f32(vgetq_lane_f32(value, 0), result, 0);
 }
 
@@ -1262,9 +1337,6 @@ FORCE_INLINE __m128i _mm_mulhi_epi16(__m128i a, __m128i b)
 //https://msdn.microsoft.com/en-us/library/yd9wecaa.aspx
 FORCE_INLINE __m128 _mm_hadd_ps(__m128 a, __m128 b )
 {
-#if defined(__aarch64__)
-    return vpaddq_f32(a,b);
-#else
 // This does not work, no vpaddq...
 //	return (__m128) vpaddq_f32(a,b);
         //
@@ -1278,7 +1350,6 @@ FORCE_INLINE __m128 _mm_hadd_ps(__m128 a, __m128 b )
         //
         // combine
         return vcombine_f32( vpadd_f32( vget_low_f32(a), vget_high_f32(a) ), vpadd_f32( vget_low_f32(b), vget_high_f32(b) ) );
-#endif
 }
 
 // ******************************************
