@@ -239,7 +239,7 @@ namespace embree
     friend __forceinline vfloat4 select(const vboolf4& m, const vfloat4& t, const vfloat4& f) {
 #if defined(__AVX512VL__)
       return _mm_mask_blend_ps(m, f, t);
-#elif defined(__SSE4_1__)
+#elif defined(__SSE4_1__) || (defined(__aarch64__) && defined(BUILD_IOS))
       return _mm_blendv_ps(f, t, m);
 #else
       return _mm_or_ps(_mm_and_ps(m, t), _mm_andnot_ps(m, f));
@@ -262,7 +262,7 @@ namespace embree
   __forceinline vfloat4 operator +(const vfloat4& a) { return a; }
 #if defined(__aarch64__)
   __forceinline vfloat4 operator -(const vfloat4& a) {
-    return _mm_xor_ps(a, vreinterpretq_f32_u32(v0x80000000));
+    return vnegq_f32(a);
   }
 #else
   __forceinline vfloat4 operator -(const vfloat4& a) { return _mm_xor_ps(a, _mm_castsi128_ps(_mm_set1_epi32(0x80000000))); }
@@ -289,12 +289,16 @@ namespace embree
   __forceinline vfloat4 rcp(const vfloat4& a)
   {
 #if defined(__aarch64__)
+#if defined(BUILD_IOS)
+    return vfloat4(1.0f)/a;
+#else //BUILD_IOS
     __m128 reciprocal = _mm_rcp_ps(a);
     reciprocal = vmulq_f32(vrecpsq_f32(a, reciprocal), reciprocal);
     reciprocal = vmulq_f32(vrecpsq_f32(a, reciprocal), reciprocal);
     // +1 round since NEON's reciprocal estimate instruction has less accuracy than SSE2's rcp.
     reciprocal = vmulq_f32(vrecpsq_f32(a, reciprocal), reciprocal);
     return (const vfloat4)reciprocal;
+#endif // BUILD_IOS
 #else
 
 #if defined(__AVX512VL__)
@@ -387,17 +391,8 @@ namespace embree
   __forceinline vfloat4 max(const vfloat4& a, float          b) { return _mm_max_ps(a,vfloat4(b)); }
   __forceinline vfloat4 max(float          a, const vfloat4& b) { return _mm_max_ps(vfloat4(a),b); }
 
-#if defined(__aarch64__) && defined(BUILD_IOS)
-__forceinline vfloat4 mini(const vfloat4& a, const vfloat4& b)
-    {
-        return _mm_min_ps(a, b);
-    }
+#if defined(__SSE4_1__) || defined(__aarch64__)
 
-__forceinline vfloat4 maxi(const vfloat4& a, const vfloat4& b)
-    {
-        return _mm_max_ps(a, b);
-    }
-#elif defined(__SSE4_1__)
     __forceinline vfloat4 mini(const vfloat4& a, const vfloat4& b) {
       const vint4 ai = _mm_castps_si128(a);
       const vint4 bi = _mm_castps_si128(b);
@@ -454,16 +449,19 @@ __forceinline vfloat4 maxi(const vfloat4& a, const vfloat4& b)
     return _mm_msub_ps(a, b, c);  //-a*b+c;
   }
   __forceinline vfloat4 nmsub(const vfloat4& a, const vfloat4& b, const vfloat4& c) {
-    vfloat4 t = _mm_madd_ps(a, b, c);
-    return -t;
+    return vnegq_f32(vfmaq_f32(c,a, b));
+  }
+  __forceinline vfloat4 msub (const vfloat4& a, const vfloat4& b, const vfloat4& c) {
+      return vfloat4(vfmaq_f32(vnegq_f32(c),a,b));
+  
   }
 #else
   __forceinline vfloat4 madd (const vfloat4& a, const vfloat4& b, const vfloat4& c) { return a*b+c; }
   __forceinline vfloat4 nmadd(const vfloat4& a, const vfloat4& b, const vfloat4& c) { return -a*b+c;}
   __forceinline vfloat4 nmsub(const vfloat4& a, const vfloat4& b, const vfloat4& c) { return -a*b-c; }
+  __forceinline vfloat4 msub (const vfloat4& a, const vfloat4& b, const vfloat4& c) { return a*b-c; }
 #endif
 
-  __forceinline vfloat4 msub (const vfloat4& a, const vfloat4& b, const vfloat4& c) { return a*b-c; }
 #endif
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -497,8 +495,8 @@ __forceinline vfloat4 maxi(const vfloat4& a, const vfloat4& b)
   __forceinline vboolf4 operator ==(const vfloat4& a, const vfloat4& b) { return _mm_cmpeq_ps (a, b); }
   __forceinline vboolf4 operator !=(const vfloat4& a, const vfloat4& b) { return _mm_cmpneq_ps(a, b); }
   __forceinline vboolf4 operator < (const vfloat4& a, const vfloat4& b) { return _mm_cmplt_ps (a, b); }
-  __forceinline vboolf4 operator >=(const vfloat4& a, const vfloat4& b) { return _mm_cmpnlt_ps(a, b); }
-  __forceinline vboolf4 operator > (const vfloat4& a, const vfloat4& b) { return _mm_cmpnle_ps(a, b); }
+  __forceinline vboolf4 operator >=(const vfloat4& a, const vfloat4& b) { return _mm_cmpge_ps (a, b); }
+  __forceinline vboolf4 operator > (const vfloat4& a, const vfloat4& b) { return _mm_cmpgt_ps (a, b); }
   __forceinline vboolf4 operator <=(const vfloat4& a, const vfloat4& b) { return _mm_cmple_ps (a, b); }
 #endif
 
@@ -908,7 +906,7 @@ __forceinline vfloat4 maxi(const vfloat4& a, const vfloat4& b)
     const vfloat4 b0 = shuffle<1,2,0,3>(b);
     const vfloat4 a1 = shuffle<1,2,0,3>(a);
     const vfloat4 b1 = b;
-    return shuffle<1,2,0,3>(msub(a0,b0,a1*b1));
+    return shuffle<1,2,0,3>(prod_diff(a0,b0,a1,b1));
   }
 
   ////////////////////////////////////////////////////////////////////////////////
