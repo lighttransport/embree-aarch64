@@ -125,6 +125,11 @@
 #include "constants.h"
 #endif
 
+
+#if !defined(__has_builtin)
+#define __has_builtin(x) (0)
+#endif
+
 /*******************************************************/
 /* MACRO for shuffle parameter for _mm_shuffle_ps().   */
 /* Argument fp3 is a digit[0123] that represents the fp*/
