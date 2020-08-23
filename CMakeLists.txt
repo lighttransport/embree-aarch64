@@ -10,6 +10,16 @@ SET(EMBREE_VERSION ${EMBREE_VERSION_MAJOR}.${EMBREE_VERSION_MINOR}.${EMBREE_VERS
 MATH(EXPR EMBREE_VERSION_NUMBER "10000*${EMBREE_VERSION_MAJOR} + 100*${EMBREE_VERSION_MINOR} + ${EMBREE_VERSION_PATCH}")
 SET(CPACK_RPM_PACKAGE_RELEASE 1)
 
+# https://stackoverflow.com/questions/42716466/how-can-i-tell-within-a-cmakelists-txt-whether-its-used-with-add-subdirectory
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+  # I am top-level project.
+  SET(EMBREE_AS_SUBMODULE Off)
+else()
+  # I am called from other project with add_subdirectory().
+  MESSAGE(STATUS "Build Embree as submodule") 
+  SET(EMBREE_AS_SUBMODULE On)
+endif()
+
 PROJECT(embree${EMBREE_VERSION_MAJOR})
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.1.0)
@@ -588,18 +598,26 @@ ENDIF()
 # Uninstall
 ##############################################################
 
-configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/common/cmake/uninstall.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake"
-    IMMEDIATE @ONLY)
+IF (NOT EMBREE_AS_SUBMODULE)
 
-add_custom_target(uninstall
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake)
+  configure_file(
+      "${CMAKE_CURRENT_SOURCE_DIR}/common/cmake/uninstall.cmake.in"
+      "${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake"
+      IMMEDIATE @ONLY)
+  
+  add_custom_target(uninstall
+      COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/uninstall.cmake)
+  
+  SET_PROPERTY(TARGET uninstall PROPERTY FOLDER CMakePredefinedTargets)
 
-SET_PROPERTY(TARGET uninstall PROPERTY FOLDER CMakePredefinedTargets)
+ENDIF ()
 
 ##############################################################
 # Has to be last
 ##############################################################
 
-INCLUDE(CPack)
+IF (NOT EMBREE_AS_SUBMODULE)
+
+  INCLUDE(CPack)
+
+ENDIF ()
