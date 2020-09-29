@@ -203,7 +203,7 @@ endif(EMBREE_USE_CCACHE)
 # Mobile Support (support arm64 / aarch64 on Android and iOS)
 ##############################################################
 
-OPTION(EMBREE_USE_EMBEDDED_TBB "Build TBB from source(using third_party/tbb submodule." OFF)
+OPTION(EMBREE_USE_EMBEDDED_TBB "Build TBB from source(please download and extract it to third_party/tbb." OFF)
 
 # We forward-assign these variables for sanity and ease of debugging the build system.
 # They are not directly being used.

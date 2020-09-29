@@ -105,7 +105,9 @@ $ make
 Build monolithc embree with TBB(experimental)
 ---------------------------------------------
 
-`EMBREE_USE_EMBEDDED_TBB=On` builds the embree with embedded(submoduled) tbb.
+`EMBREE_USE_EMBEDDED_TBB=On` builds the embree with local tbb.
+(Dowload TBB and extract it to `thrid_party/tbb`. Adding TBB as a submodule was removed as original Intel Embree did)
+
 This will enable building monolithic embree library with single cmake build procedure.
 (Would make embree build with TBB support for emerging architecures and cross compiling easier)
 
