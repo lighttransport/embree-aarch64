@@ -10,6 +10,9 @@
 
 #if defined(__ARM_NEON)
 #include "SSE2NEON.h"
+#if defined(NEON_AVX2_EMULATION)
+#include "AVX2NEON.h"
+#endif
 #else
 #include <emmintrin.h>
 #include <xmmintrin.h>
@@ -429,7 +432,7 @@ __forceinline float nmsub ( const float a, const float b, const float c) { retur
     return x | (y << 1) | (z << 2);
   }
 
-#if defined(__AVX2__)
+#if defined(__AVX2__) && !defined(__aarch64__)
 
   template<>
     __forceinline unsigned int bitInterleave(const unsigned int &xi, const unsigned int& yi, const unsigned int& zi)
