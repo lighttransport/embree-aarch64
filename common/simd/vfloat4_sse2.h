@@ -495,8 +495,13 @@ namespace embree
   __forceinline vboolf4 operator ==(const vfloat4& a, const vfloat4& b) { return _mm_cmpeq_ps (a, b); }
   __forceinline vboolf4 operator !=(const vfloat4& a, const vfloat4& b) { return _mm_cmpneq_ps(a, b); }
   __forceinline vboolf4 operator < (const vfloat4& a, const vfloat4& b) { return _mm_cmplt_ps (a, b); }
+#if defined(__aarch64__)
   __forceinline vboolf4 operator >=(const vfloat4& a, const vfloat4& b) { return _mm_cmpge_ps (a, b); }
   __forceinline vboolf4 operator > (const vfloat4& a, const vfloat4& b) { return _mm_cmpgt_ps (a, b); }
+#else
+  __forceinline vboolf4 operator >=(const vfloat4& a, const vfloat4& b) { return _mm_cmpnlt_ps(a, b); }
+  __forceinline vboolf4 operator > (const vfloat4& a, const vfloat4& b) { return _mm_cmpnle_ps(a, b); }
+#endif
   __forceinline vboolf4 operator <=(const vfloat4& a, const vfloat4& b) { return _mm_cmple_ps (a, b); }
 #endif
 

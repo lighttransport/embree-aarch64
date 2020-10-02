@@ -470,12 +470,17 @@ namespace embree
       const vfloat4 tFarY  = (vfloat4::load((float*)((const char*)&node->lower_x+ray.farY )) - ray.org.y) * ray.rdir.y;
       const vfloat4 tFarZ  = (vfloat4::load((float*)((const char*)&node->lower_x+ray.farZ )) - ray.org.z) * ray.rdir.z;
 #endif
-      
-#if defined(__aarch64__) || (defined(__SSE4_1__) && !defined(__AVX512F__)) // up to HSW
-      const vfloat4 tNear = maxi(tNearX,tNearY,tNearZ,ray.tnear);
-      const vfloat4 tFar  = mini(tFarX ,tFarY ,tFarZ ,ray.tfar);
+
+#if defined(__aarch64__)
+      const vfloat4 tNear = maxi(tNearX, tNearY, tNearZ, ray.tnear);
+      const vfloat4 tFar = mini(tFarX, tFarY, tFarZ, ray.tfar);
       const vbool4 vmask = asInt(tNear) <= asInt(tFar);
       const size_t mask = movemask(vmask);
+#elif defined(__SSE4_1__) && !defined(__AVX512F__) // up to HSW
+      const vfloat4 tNear = maxi(tNearX,tNearY,tNearZ,ray.tnear);
+      const vfloat4 tFar  = mini(tFarX ,tFarY ,tFarZ ,ray.tfar);
+      const vbool4 vmask = asInt(tNear) > asInt(tFar);
+      const size_t mask = movemask(vmask) ^ ((1<<4)-1);
 #elif defined(__AVX512F__) && !defined(__AVX512ER__) // SKX
       const vfloat4 tNear = maxi(tNearX,tNearY,tNearZ,ray.tnear);
       const vfloat4 tFar  = mini(tFarX ,tFarY ,tFarZ ,ray.tfar);
