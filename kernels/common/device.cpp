@@ -38,9 +38,10 @@ namespace embree
 
   Device::Device (const char* cfg)
   {
-    /* check CPU */
-    if (!hasISA(ISA)) 
+    /* check that CPU supports lowest ISA */
+    if (!hasISA(ISA)) {
       throw_RTCError(RTC_ERROR_UNSUPPORTED_CPU,"CPU does not support " ISA_STR);
+    }
 
     /* initialize global state */
     State::parseString(cfg);
@@ -50,6 +51,11 @@ namespace embree
       State::parseFile(FileName::homeFolder()+FileName(".embree" TOSTRING(RTC_VERSION_MAJOR)));
     State::verify();
 
+    /* check whether selected ISA is supported by the HW, as the user could have forced an unsupported ISA */    
+    if (!checkISASupport()) {
+      throw_RTCError(RTC_ERROR_UNSUPPORTED_CPU,"CPU does not support selected ISA");
+    }    
+    
     /*! do some internal tests */
     assert(isa::Cylinder::verify());
 
@@ -139,6 +145,9 @@ namespace embree
 #if defined (EMBREE_BACKFACE_CULLING)
     v += "backfaceculling ";
 #endif
+#if defined (EMBREE_BACKFACE_CULLING_CURVES)
+    v += "backfacecullingcurves ";
+#endif
 #if defined(EMBREE_FILTER_FUNCTION)
     v += "intersection_filter ";
 #endif
@@ -177,7 +186,11 @@ namespace embree
     std::cout << "    Tasking : ";
 #if defined(TASKING_TBB)
     std::cout << "TBB" << TBB_VERSION_MAJOR << "." << TBB_VERSION_MINOR << " ";
+  #if TBB_INTERFACE_VERSION >= 12002
+    std::cout << "TBB_header_interface_" << TBB_INTERFACE_VERSION << " TBB_lib_interface_" << TBB_runtime_interface_version() << " ";
+  #else
     std::cout << "TBB_header_interface_" << TBB_INTERFACE_VERSION << " TBB_lib_interface_" << tbb::TBB_runtime_interface_version() << " ";
+  #endif
 #endif
 #if defined(TASKING_INTERNAL)
     std::cout << "internal_tasking_system ";
@@ -430,6 +443,12 @@ namespace embree
     case RTC_DEVICE_PROPERTY_BACKFACE_CULLING_ENABLED: return 1;
 #else
     case RTC_DEVICE_PROPERTY_BACKFACE_CULLING_ENABLED: return 0;
+#endif
+
+#if defined(EMBREE_BACKFACE_CULLING_CURVES)
+    case RTC_DEVICE_PROPERTY_BACKFACE_CULLING_CURVES_ENABLED: return 1;
+#else
+    case RTC_DEVICE_PROPERTY_BACKFACE_CULLING_CURVES_ENABLED: return 0;
 #endif
 
 #if defined(EMBREE_COMPACT_POLYS)
