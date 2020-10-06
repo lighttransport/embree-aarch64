@@ -51,6 +51,8 @@ namespace embree
     return "Mac OS X (32bit)";
 #elif defined(__MACOSX__) && defined(__X86_64__)
     return "Mac OS X (64bit)";
+#elif defined(__UNIX__) && defined(__aarch64__)
+    return "Unix (aarch64)";
 #elif defined(__UNIX__) && !defined(__X86_64__)
     return "Unix (32bit)";
 #elif defined(__UNIX__) && defined(__X86_64__)
@@ -355,7 +357,7 @@ namespace embree
     if (hasISA(features,AVX2)) v += "AVX2 ";
     if (hasISA(features,AVX512KNL)) v += "AVX512KNL ";
     if (hasISA(features,AVX512SKX)) v += "AVX512SKX ";
-    if (hasISA(features,AVX512SKX)) v += "NEON ";
+    if (hasISA(features,NEON)) v += "NEON ";
     return v;
   }
 }

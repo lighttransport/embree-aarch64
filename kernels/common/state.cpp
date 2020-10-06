@@ -147,7 +147,20 @@ namespace embree
   }
 
   bool State::checkISASupport() {
+#if defined(__ARM_NEON)
+    /*
+     * NEON CPU type is a mixture of NEON and SSE2
+     */
+
+    bool hasSSE2 = (getCPUFeatures() & enabled_cpu_features) & CPU_FEATURE_SSE2;
+
+    /* this will be true when explicitly initialize Device with `isa=neon` config */
+    bool hasNEON = (getCPUFeatures() & enabled_cpu_features) & CPU_FEATURE_NEON;
+
+    return hasSSE2 || hasNEON;
+#else
     return (getCPUFeatures() & enabled_cpu_features) == enabled_cpu_features;
+#endif
   }
   
   void State::verify()
