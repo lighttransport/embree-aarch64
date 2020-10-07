@@ -1640,8 +1640,7 @@ FORCE_INLINE __m128i _mm_set1_epi64x(int64_t _i)
 #if defined(__aarch64__)
 FORCE_INLINE __m128 _mm_blendv_ps(__m128 a, __m128 b, __m128 c)
 {
-    int32x4_t mask = vshrq_n_s32(__m128i(c),31);
-    return vbslq_f32( uint32x4_t(mask), b, a);
+    return vbslq_f32( vreinterpretq_u32_f32(c), b, a);
 }
 
 FORCE_INLINE __m128i _mm_load4epu8_epi32(__m128i *ptr)

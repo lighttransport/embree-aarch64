@@ -152,7 +152,7 @@ namespace embree
   template<> __forceinline vboolf4 shuffle<0, 1, 0, 1>(const vboolf4& v) { return _mm_castpd_ps(_mm_movedup_pd(v)); }
 #endif
 
-#if defined(__SSE4_1__) && !defined(__aarch64__)
+#if defined(__SSE4_1__)
   template<int dst, int src, int clr> __forceinline vboolf4 insert(const vboolf4& a, const vboolf4& b) { return _mm_insert_ps(a, b, (dst << 4) | (src << 6) | clr); }
   template<int dst, int src> __forceinline vboolf4 insert(const vboolf4& a, const vboolf4& b) { return insert<dst, src, 0>(a, b); }
   template<int dst> __forceinline vboolf4 insert(const vboolf4& a, const bool b) { return insert<dst, 0>(a, vboolf4(b)); }
