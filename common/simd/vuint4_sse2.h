@@ -106,7 +106,7 @@ namespace embree
 #endif
 
     static __forceinline vuint4 load(const unsigned short* ptr) {
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
       return _mm_load4epu16_epi32(((__m128i*)ptr));
 #elif defined (__SSE4_1__)
       return _mm_cvtepu16_epi32(_mm_loadu_si128((__m128i*)ptr));
@@ -116,11 +116,11 @@ namespace embree
     } 
 
     static __forceinline void store_uint8(uint8_t* ptr, const vuint4& v) {
-#if defined(__aarch64__) && defined(BUILD_IOS)
-        uint32x4_t x = v;
+#if defined(__aarch64__) 
+        uint32x4_t x = uint32x4_t(v.v);
         uint16x4_t y = vqmovn_u32(x);
         uint8x8_t z = vqmovn_u16(vcombine_u16(y, y));
-        vst1_lane_u32(ptr, z, 0);
+        vst1_lane_u32((uint32_t *)ptr, uint32x2_t(z), 0);
 #elif defined(__SSE4_1__)
       __m128i x = v;
       x = _mm_packus_epi32(x, x);
@@ -133,9 +133,9 @@ namespace embree
     }
 
     static __forceinline void store_uint8(unsigned short* ptr, const vuint4& v) {
-#if defined(__aarch64__) && defined(BUILD_IOS)
-        int32x4_t x = v;
-        int16x4_t y = vqmovn_u32(x);
+#if defined(__aarch64__)
+        uint32x4_t x = (uint32x4_t)v.v;
+        uint16x4_t y = vqmovn_u32(x);
         vst1_u16(ptr, y);
 #else
       for (size_t i=0;i<4;i++)
@@ -144,7 +144,7 @@ namespace embree
     }
 
     static __forceinline vuint4 load_nt(void* ptr) {
-#if (defined(__aarch64__) && defined(BUILD_IOS)) || defined(__SSE4_1__)
+#if (defined(__aarch64__)) || defined(__SSE4_1__)
       return _mm_stream_load_si128((__m128i*)ptr); 
 #else
       return _mm_load_si128((__m128i*)ptr); 
@@ -152,8 +152,8 @@ namespace embree
     }
     
     static __forceinline void store_nt(void* ptr, const vuint4& v) {
-#if (defined(__aarch64__) && defined(BUILD_IOS)) || defined(__SSE4_1__)
-      _mm_stream_ps((float*)ptr,_mm_castsi128_ps(v)); 
+#if !defined(__aarch64__) && defined(__SSE4_1__)
+      _mm_stream_ps((float*)ptr, _mm_castsi128_ps(v)); 
 #else
       _mm_store_si128((__m128i*)ptr,v);
 #endif
@@ -161,7 +161,7 @@ namespace embree
 
     template<int scale = 4>
     static __forceinline vuint4 gather(const unsigned int* ptr, const vint4& index) {
-#if defined(__AVX2__)
+#if defined(__AVX2__) && !defined(__aarch64__)
       return _mm_i32gather_epi32((const int*)ptr, index, scale);
 #else
       return vuint4(
@@ -177,7 +177,7 @@ namespace embree
       vuint4 r = zero;
 #if defined(__AVX512VL__)
       return _mm_mmask_i32gather_epi32(r, mask, index, ptr, scale);
-#elif defined(__AVX2__)
+#elif defined(__AVX2__) && !defined(__aarch64__)
       return _mm_mask_i32gather_epi32(r, (const int*)ptr, index, mask, scale);
 #else
       if (likely(mask[0])) r[0] = *(unsigned int*)(((int8_t*)ptr)+scale*index[0]);
@@ -351,57 +351,6 @@ namespace embree
     return select(vboolf4(mask), t, f);
 #endif    
   }
-                                                                               
-#if defined(__aarch64__) && defined(BUILD_IOS)
-  template<> __forceinline vuint4 select<0>(const vuint4& t, const vuint4& f) {
-    return _mm_blendv_ps(f, t, vzero);
-  }
-  template<> __forceinline vuint4 select<1>(const vuint4& t, const vuint4& f) {
-    return _mm_blendv_ps(f, t, v000F);
-  }
-  template<> __forceinline vuint4 select<2>(const vuint4& t, const vuint4& f) {
-    return _mm_blendv_ps(f, t, v00F0);
-  }
-  template<> __forceinline vuint4 select<3>(const vuint4& t, const vuint4& f) {
-    return _mm_blendv_ps(f, t, v00FF);
-  }
-  template<> __forceinline vuint4 select<4>(const vuint4& t, const vuint4& f) {
-    return _mm_blendv_ps(f, t, v0F00);
-  }
-  template<> __forceinline vuint4 select<5>(const vuint4& t, const vuint4& f) {
-    return _mm_blendv_ps(f, t, v0F0F);
-  }
-  template<> __forceinline vuint4 select<6>(const vuint4& t, const vuint4& f) {
-    return _mm_blendv_ps(f, t, v0FF0);
-  }
-  template<> __forceinline vuint4 select<7>(const vuint4& t, const vuint4& f) {
-    return _mm_blendv_ps(f, t, v0FFF);
-  }
-  template<> __forceinline vuint4 select<8>(const vuint4& t, const vuint4& f) {
-    return _mm_blendv_ps(f, t, vF000);
-  }
-  template<> __forceinline vuint4 select<9>(const vuint4& t, const vuint4& f) {
-    return _mm_blendv_ps(f, t, vF00F);
-  }
-  template<> __forceinline vuint4 select<10>(const vuint4& t, const vuint4& f) {
-    return _mm_blendv_ps(f, t, vF0F0);
-  }
-  template<> __forceinline vuint4 select<11>(const vuint4& t, const vuint4& f) {
-    return _mm_blendv_ps(f, t, vF0FF);
-  }
-  template<> __forceinline vuint4 select<12>(const vuint4& t, const vuint4& f) {
-    return _mm_blendv_ps(f, t, vFF00);
-  }
-  template<> __forceinline vuint4 select<13>(const vuint4& t, const vuint4& f) {
-    return _mm_blendv_ps(f, t, vFF0F);
-  }
-  template<> __forceinline vuint4 select<14>(const vuint4& t, const vuint4& f) {
-    return _mm_blendv_ps(f, t, vFFF0);
-  }
-  template<> __forceinline vuint4 select<15>(const vuint4& t, const vuint4& f) {
-    return _mm_blendv_ps(f, t, vFFFF);
-  }
-#endif
 
 /*#if defined(__SSE4_1__)
   __forceinline vuint4 min(const vuint4& a, const vuint4& b) { return _mm_min_epu32(a, b); }
@@ -424,14 +373,14 @@ namespace embree
   __forceinline vuint4 unpacklo(const vuint4& a, const vuint4& b) { return _mm_castps_si128(_mm_unpacklo_ps(_mm_castsi128_ps(a), _mm_castsi128_ps(b))); }
   __forceinline vuint4 unpackhi(const vuint4& a, const vuint4& b) { return _mm_castps_si128(_mm_unpackhi_ps(_mm_castsi128_ps(a), _mm_castsi128_ps(b))); }
 
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
   template<int i0, int i1, int i2, int i3>
   __forceinline vuint4 shuffle(const vuint4& v) {
-    return vqtbl1q_u8( v, _MN_SHUFFLE(i0, i1, i2, i3));
+    return vreinterpretq_s32_u8(vqtbl1q_u8( (uint8x16_t)v.v, _MN_SHUFFLE(i0, i1, i2, i3)));
   }
   template<int i0, int i1, int i2, int i3>
   __forceinline vuint4 shuffle(const vuint4& a, const vuint4& b) {
-    return vqtbl2q_u8( (uint8x16x2_t){a, b}, _MF_SHUFFLE(i0, i1, i2, i3) );
+    return vreinterpretq_s32_u8(vqtbl2q_u8( (uint8x16x2_t){(uint8x16_t)a.v, (uint8x16_t)b.v}, _MF_SHUFFLE(i0, i1, i2, i3)));
   }
 #else
   template<int i0, int i1, int i2, int i3>
@@ -443,12 +392,7 @@ namespace embree
     return _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(a), _mm_castsi128_ps(b), _MM_SHUFFLE(i3, i2, i1, i0)));
   }
 #endif
-                                                                               
-#if defined(__aarch64__) && defined(BUILD_IOS)
-  template<> __forceinline vuint4 shuffle<0, 0, 2, 2>(const vuint4& v) { return vqtbl1q_u8( v, (uint8x16_t){0,1,2,3, 0,1,2,3, 8,9,10,11, 8,9,10,11} ); }
-  template<> __forceinline vuint4 shuffle<1, 1, 3, 3>(const vuint4& v) { return vqtbl1q_u8( v, (uint8x16_t){4,5,6,7, 4,5,6,7, 12,13,14,15, 12,13,14,15} ); }
-  template<> __forceinline vuint4 shuffle<0, 1, 0, 1>(const vuint4& v) { return vqtbl1q_u8( v, (uint8x16_t){0,1,2,3, 4,5,6,7, 0,1,2,3, 4,5,6,7} ); }
-#elif defined(__SSE3__)
+#if defined(__SSE3__)
   template<> __forceinline vuint4 shuffle<0, 0, 2, 2>(const vuint4& v) { return _mm_castps_si128(_mm_moveldup_ps(_mm_castsi128_ps(v))); }
   template<> __forceinline vuint4 shuffle<1, 1, 3, 3>(const vuint4& v) { return _mm_castps_si128(_mm_movehdup_ps(_mm_castsi128_ps(v))); }
   template<> __forceinline vuint4 shuffle<0, 1, 0, 1>(const vuint4& v) { return _mm_castpd_si128(_mm_movedup_pd (_mm_castsi128_pd(v))); }
@@ -459,7 +403,7 @@ namespace embree
     return shuffle<i,i,i,i>(v);
   }
 
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
   template<int src> __forceinline unsigned int extract(const vuint4& b);
   template<int dst> __forceinline vuint4 insert(const vuint4& a, const unsigned b);
 #elif defined(__SSE4_1__)
@@ -470,7 +414,7 @@ namespace embree
   template<int dst> __forceinline vuint4 insert(const vuint4& a, const unsigned b) { vuint4 c = a; c[dst&3] = b; return c; }
 #endif
 
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
   template<> __forceinline unsigned int extract<0>(const vuint4& b) {
     return b[0];
   }

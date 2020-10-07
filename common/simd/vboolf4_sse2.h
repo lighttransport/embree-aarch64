@@ -115,15 +115,15 @@ namespace embree
   __forceinline vboolf4 unpacklo(const vboolf4& a, const vboolf4& b) { return _mm_unpacklo_ps(a, b); }
   __forceinline vboolf4 unpackhi(const vboolf4& a, const vboolf4& b) { return _mm_unpackhi_ps(a, b); }
 
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
   template<int i0, int i1, int i2, int i3>
   __forceinline vboolf4 shuffle(const vboolf4& v) {
-    return vqtbl1q_u8( (__m128i)v, _MN_SHUFFLE(i0, i1, i2, i3));
+    return vreinterpretq_f32_u8(vqtbl1q_u8( vreinterpretq_u8_s32(v), _MN_SHUFFLE(i0, i1, i2, i3)));
   }
-                                                                
+
   template<int i0, int i1, int i2, int i3>
   __forceinline vboolf4 shuffle(const vboolf4& a, const vboolf4& b) {
-    return vqtbl2q_u8( (uint8x16x2_t){(__m128i)a, (__m128i)b}, _MF_SHUFFLE(i0, i1, i2, i3) );
+    return vreinterpretq_f32_u8(vqtbl2q_u8( (uint8x16x2_t){(uint8x16_t)a.v, (uint8x16_t)b.v}, _MF_SHUFFLE(i0, i1, i2, i3)));
   }
 #else
   template<int i0, int i1, int i2, int i3>
@@ -142,17 +142,13 @@ namespace embree
     return shuffle<i0,i0,i0,i0>(v);
   }
 
-#if defined(__aarch64__) && defined(BUILD_IOS)
-  template<> __forceinline vboolf4 shuffle<0, 0, 2, 2>(const vboolf4& v) { return vqtbl1q_u8( (int32x4_t)v, v0022 ); }
-  template<> __forceinline vboolf4 shuffle<1, 1, 3, 3>(const vboolf4& v) { return vqtbl1q_u8( (int32x4_t)v, v1133 ); }
-  template<> __forceinline vboolf4 shuffle<0, 1, 0, 1>(const vboolf4& v) { return vqtbl1q_u8( (int32x4_t)v, v0101 ); }
-#elif defined(__SSE3__)
+#if defined(__SSE3__)
   template<> __forceinline vboolf4 shuffle<0, 0, 2, 2>(const vboolf4& v) { return _mm_moveldup_ps(v); }
   template<> __forceinline vboolf4 shuffle<1, 1, 3, 3>(const vboolf4& v) { return _mm_movehdup_ps(v); }
   template<> __forceinline vboolf4 shuffle<0, 1, 0, 1>(const vboolf4& v) { return _mm_castpd_ps(_mm_movedup_pd(v)); }
 #endif
 
-#if defined(__SSE4_1__)
+#if defined(__SSE4_1__) && !defined(__aarch64__)
   template<int dst, int src, int clr> __forceinline vboolf4 insert(const vboolf4& a, const vboolf4& b) { return _mm_insert_ps(a, b, (dst << 4) | (src << 6) | clr); }
   template<int dst, int src> __forceinline vboolf4 insert(const vboolf4& a, const vboolf4& b) { return insert<dst, src, 0>(a, b); }
   template<int dst> __forceinline vboolf4 insert(const vboolf4& a, const bool b) { return insert<dst, 0>(a, vboolf4(b)); }
