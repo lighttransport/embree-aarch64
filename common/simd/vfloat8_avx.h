@@ -119,6 +119,12 @@ namespace embree
 
     static __forceinline void store (const vboolf8& mask, void* ptr, const vfloat8& v) { _mm256_mask_store_ps ((float*)ptr,mask,v); }
     static __forceinline void storeu(const vboolf8& mask, void* ptr, const vfloat8& v) { _mm256_mask_storeu_ps((float*)ptr,mask,v); }
+#elif defined(__aarch64__)
+    static __forceinline vfloat8 load (const vboolf8& mask, const void* ptr) { return _mm256_maskload_ps((float*)ptr,(__m256i)mask.v); }
+    static __forceinline vfloat8 loadu(const vboolf8& mask, const void* ptr) { return _mm256_maskload_ps((float*)ptr,(__m256i)mask.v); }
+
+    static __forceinline void store (const vboolf8& mask, void* ptr, const vfloat8& v) { _mm256_maskstore_ps((float*)ptr,(__m256i)mask.v,v); }
+    static __forceinline void storeu(const vboolf8& mask, void* ptr, const vfloat8& v) { _mm256_maskstore_ps((float*)ptr,(__m256i)mask.v,v); }
 #else
     static __forceinline vfloat8 load (const vboolf8& mask, const void* ptr) { return _mm256_maskload_ps((float*)ptr,(__m256i)mask); }
     static __forceinline vfloat8 loadu(const vboolf8& mask, const void* ptr) { return _mm256_maskload_ps((float*)ptr,(__m256i)mask); }
@@ -273,13 +279,22 @@ __forceinline vfloat8 abs(const vfloat8& a) {
 
   __forceinline vfloat8 rcp(const vfloat8& a)
   {
+#if defined(BUILD_IOS) && defined(__aarch64__)
+    // ios devices are faster doing full divide, no need for NR fixup
+    vfloat8 ret;
+    const float32x4_t one = vdupq_n_f32(1.0f);
+    ret.v.lo = vdivq_f32(one, a.v.lo);
+    ret.v.hi = vdivq_f32(one, a.v.hi);
+    return ret;
+#endif
+
 #if defined(__AVX512VL__)
     const vfloat8 r = _mm256_rcp14_ps(a);
 #else
     const vfloat8 r = _mm256_rcp_ps(a);
 #endif
-
-#if defined(__AVX2__) && !defined(aarch64)
+      
+#if defined(__AVX2__) //&& !defined(aarch64)
     return _mm256_mul_ps(r, _mm256_fnmadd_ps(r, a, vfloat8(2.0f)));
 #else
     return _mm256_mul_ps(r, _mm256_sub_ps(vfloat8(2.0f), _mm256_mul_ps(r, a)));
@@ -702,20 +717,22 @@ __forceinline vfloat8 abs(const vfloat8& a) {
 #else
   __forceinline float reduce_min(const vfloat8& v) { return vminvq_f32(_mm_min_ps(v.v.lo,v.v.hi)); }
   __forceinline float reduce_max(const vfloat8& v) { return vmaxvq_f32(_mm_max_ps(v.v.lo,v.v.hi)); }
+  __forceinline vfloat8 vreduce_min(const vfloat8& v) { return vfloat8(reduce_min(v)); }
+  __forceinline vfloat8 vreduce_max(const vfloat8& v) { return vfloat8(reduce_max(v)); }
   __forceinline float reduce_add(const vfloat8& v) { return vaddvq_f32(_mm_add_ps(v.v.lo,v.v.hi)); }
 
 #endif
   __forceinline size_t select_min(const vboolf8& valid, const vfloat8& v) 
   { 
     const vfloat8 a = select(valid,v,vfloat8(pos_inf)); 
-    const vbool8 valid_min = valid & (a == reduce_min(a));
+    const vbool8 valid_min = valid & (a == vreduce_min(a));
     return bsf(movemask(any(valid_min) ? valid_min : valid)); 
   }
 
   __forceinline size_t select_max(const vboolf8& valid, const vfloat8& v) 
   { 
     const vfloat8 a = select(valid,v,vfloat8(neg_inf)); 
-    const vbool8 valid_max = valid & (a == reduce_max(a));
+    const vbool8 valid_max = valid & (a == vreduce_max(a));
     return bsf(movemask(any(valid_max) ? valid_max : valid)); 
   }
 

@@ -84,20 +84,20 @@ namespace embree
   }
 
   __forceinline float signmsk ( const float x ) {
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
       // FP and Neon shares same vector register in arm64
       __m128 a;
       __m128i b;
       a[0] = x;
       b[0] = 0x80000000;
-      a = _mm_and_ps(a, b);
+      a = _mm_and_ps(a, vreinterpretq_f32_s32(b));
       return a[0];
 #else
     return _mm_cvtss_f32(_mm_and_ps(_mm_set_ss(x),_mm_castsi128_ps(_mm_set1_epi32(0x80000000))));
 #endif
   }
   __forceinline float xorf( const float x, const float y ) {
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
       // FP and Neon shares same vector register in arm64
       __m128 a;
       __m128 b;
@@ -110,13 +110,13 @@ namespace embree
 #endif
   }
   __forceinline float andf( const float x, const unsigned y ) {
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__) 
       // FP and Neon shares same vector register in arm64
       __m128 a;
-      __m128 b;
+      __m128i b;
       a[0] = x;
       b[0] = y;
-      a = _mm_and_ps(a, b);
+      a = _mm_and_ps(a, vreinterpretq_f32_s32(b));
       return a[0];
 #else
     return _mm_cvtss_f32(_mm_and_ps(_mm_set_ss(x),_mm_castsi128_ps(_mm_set1_epi32(y))));
@@ -200,7 +200,7 @@ namespace embree
   __forceinline double floor( const double x ) { return ::floor (x); }
   __forceinline double ceil ( const double x ) { return ::ceil (x); }
 
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__) 
     __forceinline float mini(float a, float b) {
         // FP and Neon shares same vector register in arm64
         __m128 x;
@@ -219,7 +219,7 @@ namespace embree
   }
 #endif
 
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__) 
     __forceinline float maxi(float a, float b) {
         // FP and Neon shares same vector register in arm64
         __m128 x;
@@ -244,19 +244,7 @@ namespace embree
   __forceinline      int min(int      a, int      b) { return a<b ? a:b; }
   __forceinline unsigned min(unsigned a, unsigned b) { return a<b ? a:b; }
   __forceinline  int64_t min(int64_t  a, int64_t  b) { return a<b ? a:b; }
-#if defined(__aarch64__) && defined(BUILD_IOS)
-    __forceinline float min(float a, float b) {
-        // FP and Neon shares same vector register in arm64
-        __m128 x;
-        __m128 y;
-        x[0] = a;
-        y[0] = b;
-        x = _mm_min_ps(x, y);
-        return x[0];
-    }
-#else
-    __forceinline    float min(float    a, float    b) { return a<b ? a:b; }
-#endif
+  __forceinline    float min(float    a, float    b) { return a<b ? a:b; }
   __forceinline   double min(double   a, double   b) { return a<b ? a:b; }
 #if defined(__X86_64__) || defined(__aarch64__)
   __forceinline   size_t min(size_t   a, size_t   b) { return a<b ? a:b; }
@@ -273,19 +261,7 @@ namespace embree
   __forceinline      int max(int      a, int      b) { return a<b ? b:a; }
   __forceinline unsigned max(unsigned a, unsigned b) { return a<b ? b:a; }
   __forceinline  int64_t max(int64_t  a, int64_t  b) { return a<b ? b:a; }
-#if defined(__aarch64__) && defined(BUILD_IOS)
-    __forceinline float max(float a, float b) {
-        // FP and Neon shares same vector register in arm64
-        __m128 x;
-        __m128 y;
-        x[0] = a;
-        y[0] = b;
-        x = _mm_max_ps(x, y);
-        return x[0];
-    }
-#else
-    __forceinline    float max(float    a, float    b) { return a<b ? b:a; }
-#endif
+  __forceinline    float max(float    a, float    b) { return a<b ? b:a; }
   __forceinline   double max(double   a, double   b) { return a<b ? b:a; }
 #if defined(__X86_64__) || defined(__aarch64__)
   __forceinline   size_t max(size_t   a, size_t   b) { return a<b ? b:a; }
@@ -389,7 +365,7 @@ __forceinline float nmsub ( const float a, const float b, const float c) { retur
 
 
   template<typename T> __forceinline T prod_diff(const T& a,const T& b,const T& c,const T& d) {
-#if !defined(__aarch64__)
+#if 1//!defined(__aarch64__)
       return msub(a,b,c*d);
 #else
       return nmadd(c,d,a*b);

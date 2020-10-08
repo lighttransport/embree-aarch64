@@ -254,7 +254,7 @@ FORCE_INLINE void _mm_setcsr(int val)
 // ******************************************
 
 // extracts the lower order floating point value from the parameter : https://msdn.microsoft.com/en-us/library/bb514059%28v=vs.120%29.aspx?f=255&MSPPError=-2147217396
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
 FORCE_INLINE float _mm_cvtss_f32(const __m128& x)
 {
     return x[0];
@@ -291,7 +291,7 @@ FORCE_INLINE __m128 _mm_set_ps1(float _w)
 }
 
 // Sets the four single-precision, floating-point values to the four inputs. https://msdn.microsoft.com/en-us/library/vstudio/afh0zf75(v=vs.100).aspx
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__) 
 FORCE_INLINE __m128 _mm_set_ps(const float w, const float z, const float y, const float x)
 {
     float32x4_t t = { x, y, z, w };
@@ -914,10 +914,10 @@ FORCE_INLINE __m128i _mm_slli_epi32(__m128i a, const int imm8)
 // Based on SIMDe
 FORCE_INLINE __m128i _mm_srli_epi32(__m128i a, const int imm8)
 {
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
     const int shift = (imm8 > 31) ? 0 : imm8;  // Unfortunately, we need to check for this case for embree.
     const int32x4_t s = vdupq_n_s32(-shift);
-    return vshlq_u32(a, s);
+    return vreinterpretq_s32_u32(vshlq_u32(vreinterpretq_u32_s32(a), s));
 #else
   int32_t __attribute__((aligned(16))) data[4];
   vst1q_s32(data, a);
@@ -1071,19 +1071,21 @@ FORCE_INLINE __m128 _mm_mul_ss(__m128 a, __m128 b)
 // Computes the approximations of reciprocals of the four single-precision, floating-point values of a. https://msdn.microsoft.com/en-us/library/vstudio/796k1tty(v=vs.100).aspx
 FORCE_INLINE __m128 _mm_rcp_ps(__m128 in)
 {
-  // Get an initial estimate of 1/in.
+#if defined(BUILD_IOS)
+  return vdivq_f32(vdupq_n_f32(1.0f),in);
+    
+#endif
+    // Get an initial estimate of 1/in.
   float32x4_t reciprocal = vrecpeq_f32(in);
 
   // We only return estimated 1/in.
   // Newton-Raphon iteration shold be done in the outside of _mm_rcp_ps().
 
   // TODO(LTE): We could delete these ifdef?
-#if !defined(__aarch64__) && defined(BUILD_IOS)
   reciprocal = vmulq_f32(vrecpsq_f32(in, reciprocal), reciprocal);
   reciprocal = vmulq_f32(vrecpsq_f32(in, reciprocal), reciprocal);
-#endif
-
   return reciprocal;
+
 }
 
 FORCE_INLINE __m128 _mm_rcp_ss(__m128 in)
@@ -1466,7 +1468,7 @@ FORCE_INLINE __m128i _mm_cvtsi32_si128(int a)
 // Applies a type cast to reinterpret four 32-bit floating point values passed in as a 128-bit parameter as packed 32-bit integers. https://msdn.microsoft.com/en-us/library/bb514099.aspx
 FORCE_INLINE __m128i _mm_castps_si128(__m128 a)
 {
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
     return (__m128i)a;
 #else
   return *(const __m128i *)&a;
@@ -1476,7 +1478,7 @@ FORCE_INLINE __m128i _mm_castps_si128(__m128 a)
 // Applies a type cast to reinterpret four 32-bit integers passed in as a 128-bit parameter as packed 32-bit floating point values. https://msdn.microsoft.com/en-us/library/bb514029.aspx
 FORCE_INLINE __m128 _mm_castsi128_ps(__m128i a)
 {
-#if defined(__aarch64__) && defined(BUILD_IOS)
+#if defined(__aarch64__)
     return (__m128)a;
 #else
   return *(const __m128 *)&a;

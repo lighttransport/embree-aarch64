@@ -18,8 +18,8 @@ struct __m256 {
 
 struct __m256i {
     __m128i lo,hi;
-    __m256i(const __m256 a) : lo(a.lo),hi(a.hi) {}
-    operator __m256() const {__m256 res; res.lo = lo;res.hi = hi; return res;}
+    explicit __m256i(const __m256 a) : lo(__m128i(a.lo)),hi(__m128i(a.hi)) {}
+    operator __m256() const {__m256 res; res.lo = __m128(lo);res.hi = __m128(hi); return res;}
     __m256i() {}
 };
  
@@ -29,19 +29,20 @@ struct __m256i {
 struct __m256d {
     float64x2_t lo,hi;
     __m256d() {}
-    __m256d(const __m256& a) : lo(a.lo),hi(a.hi) {}
-    __m256d(const __m256i& a) : lo(a.lo),hi(a.hi) {}
+    __m256d(const __m256& a) : lo(float64x2_t(a.lo)),hi(float64x2_t(a.hi)) {}
+    __m256d(const __m256i& a) : lo(float64x2_t(a.lo)),hi(float64x2_t(a.hi)) {}
 };
 
 #define UNARY_AVX_OP(type,func,basic_func) AVX2NEON_ABI type func(const type& a) {type res;res.lo=basic_func(a.lo);res.hi=basic_func(a.hi);return res;}
 
 
 #define BINARY_AVX_OP(type,func,basic_func) AVX2NEON_ABI type func(const type& a,const type& b) {type res;res.lo=basic_func(a.lo,b.lo);res.hi=basic_func(a.hi,b.hi);return res;}
+#define BINARY_AVX_OP_CAST(type,func,basic_func,bdst,bsrc) AVX2NEON_ABI type func(const type& a,const type& b) {type res;res.lo=bdst(basic_func(bsrc(a.lo),bsrc(b.lo)));res.hi=bdst(basic_func(bsrc(a.hi),bsrc(b.hi)));return res;}
 
 #define TERNARY_AVX_OP(type,func,basic_func) AVX2NEON_ABI type func(const type& a,const type& b,const type& c) {type res;res.lo=basic_func(a.lo,b.lo,c.lo);res.hi=basic_func(a.hi,b.hi,c.hi);return res;}
 
 
-#define CAST_SIMD_TYPE(to,name,from) AVX2NEON_ABI to name(const from& a) { to res; res.lo = a.lo; res.hi=a.hi; return res;}
+#define CAST_SIMD_TYPE(to,name,from,basic_dst) AVX2NEON_ABI to name(const from& a) { to res; res.lo = basic_dst(a.lo); res.hi=basic_dst(a.hi); return res;}
 
 
 
@@ -87,7 +88,7 @@ __m128i _mm_blend_epi32 (__m128i a, __m128i b, const int imm8)
 AVX2NEON_ABI
 __m128 _mm_cmpngt_ps (__m128 a, __m128 b)
 {
-    return vmvnq_s32(_mm_cmpgt_ps(a,b));
+    return __m128(vmvnq_s32(__m128i(_mm_cmpgt_ps(a,b))));
 }
 
 
@@ -97,7 +98,7 @@ __m128i _mm_loadl_epi64 (__m128i const* mem_addr)
     int64x2_t y;
     y[0] = *(int64_t *)mem_addr;
     y[1] = 0;
-    return y;
+    return __m128i(y);
 }
 
 AVX2NEON_ABI
@@ -211,7 +212,7 @@ inline float32x4_t dpps_neon<0xff>(const float32x4_t& a,const float32x4_t& b)
 AVX2NEON_ABI
 __m128 _mm_cmpnge_ps (__m128 a, __m128 b)
 {
-    return vmvnq_s32(_mm_cmpge_ps(a,b));
+    return __m128(vmvnq_s32(__m128i(_mm_cmpge_ps(a,b))));
 }
 
 
@@ -238,7 +239,7 @@ AVX2NEON_ABI
 __m256 _mm256_setzero_ps()
 {
     __m256 res;
-    res.lo = res.hi = vdupq_n_s32(0);
+    res.lo = res.hi = vdupq_n_f32(0.0f);
     return res;
 }
 
@@ -254,12 +255,12 @@ __m256 _mm256_undefined_ps()
     return _mm256_setzero_ps();
 }
 
-CAST_SIMD_TYPE(__m256d,_mm256_castps_pd,__m256)
-CAST_SIMD_TYPE(__m256i,_mm256_castps_si256,__m256)
-CAST_SIMD_TYPE(__m256, _mm256_castsi256_ps, __m256i)
-CAST_SIMD_TYPE(__m256, _mm256_castpd_ps ,__m256d)
-CAST_SIMD_TYPE(__m256d, _mm256_castsi256_pd, __m256i)
-CAST_SIMD_TYPE(__m256i, _mm256_castpd_si256, __m256d)
+CAST_SIMD_TYPE(__m256d,_mm256_castps_pd,__m256,float64x2_t)
+CAST_SIMD_TYPE(__m256i,_mm256_castps_si256,__m256,__m128i)
+CAST_SIMD_TYPE(__m256, _mm256_castsi256_ps, __m256i,__m128)
+CAST_SIMD_TYPE(__m256, _mm256_castpd_ps ,__m256d,__m128)
+CAST_SIMD_TYPE(__m256d, _mm256_castsi256_pd, __m256i,float64x2_t)
+CAST_SIMD_TYPE(__m256i, _mm256_castpd_si256, __m256d,__m128i)
 
 
 
@@ -364,7 +365,7 @@ __m256i _mm256_set1_epi64x (long long a)
 {
     __m256i res;
     int64x2_t t = vdupq_n_s64(a);
-    res.lo = res.hi = t;
+    res.lo = res.hi = __m128i(t);
     return res;
 }
 
@@ -433,7 +434,6 @@ __m256 _mm256_insertf128_ps (__m256 a, __m128 b, int imm8)
     __m256 res = a;
     if (imm8 & 1) res.hi = b;
     else res.lo = b;
-    
     return res;
 }
 
@@ -455,7 +455,15 @@ __m256d _mm256_movedup_pd (__m256d a)
     return res;
 }
 
-UNARY_AVX_OP(__m256i,_mm256_abs_epi32,_mm_abs_epi32)
+AVX2NEON_ABI
+__m256i _mm256_abs_epi32(__m256i a)
+{
+   __m256i res;
+   res.lo = vabsq_s32(a.lo);
+   res.hi = vabsq_s32(a.hi);
+   return res;
+}
+
 UNARY_AVX_OP(__m256,_mm256_sqrt_ps,_mm_sqrt_ps)
 UNARY_AVX_OP(__m256,_mm256_rsqrt_ps,_mm_rsqrt_ps)
 UNARY_AVX_OP(__m256,_mm256_rcp_ps,_mm_rcp_ps)
@@ -469,8 +477,8 @@ BINARY_AVX_OP(__m256i,_mm256_mullo_epi32,_mm_mullo_epi32)
 
 BINARY_AVX_OP(__m256i,_mm256_min_epi32,_mm_min_epi32)
 BINARY_AVX_OP(__m256i,_mm256_max_epi32,_mm_max_epi32)
-BINARY_AVX_OP(__m256i,_mm256_min_epu32,vminq_u32)
-BINARY_AVX_OP(__m256i,_mm256_max_epu32,vmaxq_u32)
+BINARY_AVX_OP_CAST(__m256i,_mm256_min_epu32,vminq_u32,__m128i,uint32x4_t)
+BINARY_AVX_OP_CAST(__m256i,_mm256_max_epu32,vmaxq_u32,__m128i,uint32x4_t)
 
 BINARY_AVX_OP(__m256,_mm256_min_ps,_mm_min_ps)
 BINARY_AVX_OP(__m256,_mm256_max_ps,_mm_max_ps)
@@ -485,15 +493,15 @@ BINARY_AVX_OP(__m256,_mm256_andnot_ps,_mm_andnot_ps)
 BINARY_AVX_OP(__m256,_mm256_or_ps,_mm_or_ps)
 BINARY_AVX_OP(__m256,_mm256_xor_ps,_mm_xor_ps)
 
-BINARY_AVX_OP(__m256d,_mm256_and_pd,vandq_s64)
-BINARY_AVX_OP(__m256d,_mm256_or_pd,vorrq_s64)
-BINARY_AVX_OP(__m256d,_mm256_xor_pd,veorq_s64)
+BINARY_AVX_OP_CAST(__m256d,_mm256_and_pd,vandq_s64,float64x2_t,int64x2_t)
+BINARY_AVX_OP_CAST(__m256d,_mm256_or_pd,vorrq_s64,float64x2_t,int64x2_t)
+BINARY_AVX_OP_CAST(__m256d,_mm256_xor_pd,veorq_s64,float64x2_t,int64x2_t)
 
 
 
-BINARY_AVX_OP(__m256i,_mm256_and_si256,_mm_and_ps)
-BINARY_AVX_OP(__m256i,_mm256_or_si256,_mm_or_ps)
-BINARY_AVX_OP(__m256i,_mm256_xor_si256,_mm_xor_ps)
+BINARY_AVX_OP(__m256i,_mm256_and_si256,_mm_and_si128)
+BINARY_AVX_OP(__m256i,_mm256_or_si256,_mm_or_si128)
+BINARY_AVX_OP(__m256i,_mm256_xor_si256,_mm_xor_si128)
 
 
 BINARY_AVX_OP(__m256,_mm256_unpackhi_ps,_mm_unpackhi_ps)
@@ -563,9 +571,9 @@ int _mm256_testz_ps (const __m256& a, const __m256& b)
     if (&a != &b)
         t = _mm256_and_ps(a,b);
 
-    t.lo = vshrq_n_s32(t.lo,31);
-    t.hi = vshrq_n_s32(t.hi,31);
-    return vaddvq_s32(vaddq_s32(t.lo,t.hi)) == 0;
+    __m128i l  = vshrq_n_s32(__m128i(t.lo),31);
+    __m128i h  = vshrq_n_s32(__m128i(t.hi),31);
+    return vaddvq_s32(vaddq_s32(l,h)) == 0;
 }
 
 
@@ -575,8 +583,8 @@ __m256i _mm256_set_epi64x (int64_t e3, int64_t e2, int64_t e1, int64_t e0)
     __m256i res;
     int64x2_t t0 = {e0,e1};
     int64x2_t t1 = {e2,e3};
-    res.lo = t0;
-    res.hi = t1;
+    res.lo = __m128i(t0);
+    res.hi = __m128i(t1);
     return res;
 }
 
@@ -593,10 +601,10 @@ int _mm256_movemask_pd (__m256d a)
 {
     int res = 0;
     uint64x2_t x;
-    x = a.lo;
+    x = uint64x2_t(a.lo);
     res |= (x[0] >> 63) ? 1 : 0;
     res |= (x[0] >> 63) ? 2 : 0;
-    x = a.hi;
+    x = uint64x2_t(a.hi);
     res |= (x[0] >> 63) ? 4 : 0;
     res |= (x[0] >> 63) ? 8 : 0;
     return res;
@@ -606,8 +614,8 @@ AVX2NEON_ABI
 __m256i _mm256_cmpeq_epi64 (__m256i a, __m256i b)
 {
     __m256i res;
-    res.lo = vceqq_s64(a.lo,b.lo);
-    res.hi = vceqq_s64(a.hi,b.hi);
+    res.lo = __m128i(vceqq_s64(int64x2_t(a.lo),int64x2_t(b.lo)));
+    res.hi = __m128i(vceqq_s64(int64x2_t(a.hi),int64x2_t(b.hi)));
     return res;
 }
 
@@ -615,8 +623,8 @@ AVX2NEON_ABI
 __m256i _mm256_cmpeq_pd (__m256d a, __m256d b)
 {
     __m256i res;
-    res.lo = vceqq_f64(a.lo,b.lo);
-    res.hi = vceqq_f64(a.hi,b.hi);
+    res.lo = __m128i(vceqq_f64(a.lo,b.lo));
+    res.hi = __m128i(vceqq_f64(a.hi,b.hi));
     return res;
 }
 
@@ -635,12 +643,11 @@ int _mm256_testz_pd (const __m256d& a, const __m256d& b)
 AVX2NEON_ABI
 __m256d _mm256_blendv_pd (__m256d a, __m256d b, __m256d mask)
 {
-    
     __m256d res;
-    uint64x2_t t = mask.lo;
+    uint64x2_t t = uint64x2_t(mask.lo);
     res.lo[0] = (t[0] >> 63) ? b.lo[0] : a.lo[0];
     res.lo[1] = (t[1] >> 63) ? b.lo[1] : a.lo[1];
-    t = mask.hi;
+    t = uint64x2_t(mask.hi);
     res.hi[0] = (t[0] >> 63) ? b.hi[0] : a.hi[0];
     res.hi[1] = (t[1] >> 63) ? b.hi[1] : a.hi[1];
     return res;
@@ -743,7 +750,7 @@ AVX2NEON_ABI
 __m256i _mm256_cvtepu8_epi32 (__m128i a)
 {
     __m256i res;
-    uint8x16_t x = a;
+    uint8x16_t x = uint8x16_t(a);
     for (int i=0;i<4;i++)
     {
         res.lo[i] = x[i];
@@ -751,11 +758,13 @@ __m256i _mm256_cvtepu8_epi32 (__m128i a)
     }
     return res;
 }
+
+
 AVX2NEON_ABI
 __m256i _mm256_cvtepi8_epi32 (__m128i a)
 {
     __m256i res;
-    int8x16_t x = a;
+    int8x16_t x = int8x16_t(a);
     for (int i=0;i<4;i++)
     {
         res.lo[i] = x[i];
@@ -769,7 +778,7 @@ AVX2NEON_ABI
 __m256i _mm256_cvtepu16_epi32 (__m128i a)
 {
     __m256i res;
-    uint16x8_t x = a;
+    uint16x8_t x = uint16x8_t(a);
     for (int i=0;i<4;i++)
     {
         res.lo[i] = x[i];
@@ -782,7 +791,7 @@ AVX2NEON_ABI
 __m256i _mm256_cvtepi16_epi32 (__m128i a)
 {
     __m256i res;
-    int16x8_t x = a;
+    int16x8_t x = int16x8_t(a);
     for (int i=0;i<4;i++)
     {
         res.lo[i] = x[i];
@@ -854,8 +863,8 @@ AVX2NEON_ABI
 __m256i _mm256_srlv_epi32 (__m256i a, __m256i count)
 {
     __m256i res;
-    res.lo = vshlq_u32(a.lo,vnegq_s32(count.lo));
-    res.hi = vshlq_u32(a.hi,vnegq_s32(count.hi));
+    res.lo = __m128i(vshlq_u32(uint32x4_t(a.lo),vnegq_s32(count.lo)));
+    res.hi = __m128i(vshlq_u32(uint32x4_t(a.hi),vnegq_s32(count.hi)));
     return res;
 
 }
@@ -921,8 +930,8 @@ AVX2NEON_ABI
 __m256d _mm256_andnot_pd (__m256d a, __m256d b)
 {
     __m256d res;
-    res.lo = _mm_andnot_ps(a.lo,b.lo);
-    res.hi = _mm_andnot_ps(a.hi,b.hi);
+    res.lo = float64x2_t(_mm_andnot_ps(__m128(a.lo),__m128(b.lo)));
+    res.hi = float64x2_t(_mm_andnot_ps(__m128(a.hi),__m128(b.hi)));
     return res;
 }
 
