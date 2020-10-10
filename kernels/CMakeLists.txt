@@ -48,11 +48,17 @@ SET(EMBREE_LIBRARY_FILES
   geometry/curve_intersector_virtual.cpp
   geometry/curve_intersector_virtual2.cpp
   geometry/curve_intersector_virtual_point.cpp
+  geometry/curve_intersector_virtual_point2.cpp
   geometry/curve_intersector_virtual_bezier_curve.cpp
+  geometry/curve_intersector_virtual_bezier_curve2.cpp
   geometry/curve_intersector_virtual_bspline_curve.cpp
+  geometry/curve_intersector_virtual_bspline_curve2.cpp
   geometry/curve_intersector_virtual_linear_curve.cpp
+  geometry/curve_intersector_virtual_linear_curve2.cpp
   geometry/curve_intersector_virtual_catmullrom_curve.cpp
+  geometry/curve_intersector_virtual_catmullrom_curve2.cpp
   geometry/curve_intersector_virtual_hermite_curve.cpp
+  geometry/curve_intersector_virtual_catmullrom_curve2.cpp
   builders/primrefgen.cpp
 
   bvh/bvh.cpp
@@ -128,11 +134,17 @@ MACRO(embree_files TARGET ISA)
     geometry/curve_intersector_virtual.cpp
     geometry/curve_intersector_virtual2.cpp
     geometry/curve_intersector_virtual_point.cpp
+    geometry/curve_intersector_virtual_point2.cpp
     geometry/curve_intersector_virtual_bezier_curve.cpp
+    geometry/curve_intersector_virtual_bezier_curve2.cpp
     geometry/curve_intersector_virtual_bspline_curve.cpp
+    geometry/curve_intersector_virtual_bspline_curve2.cpp
     geometry/curve_intersector_virtual_linear_curve.cpp
+    geometry/curve_intersector_virtual_linear_curve2.cpp
     geometry/curve_intersector_virtual_catmullrom_curve.cpp
+    geometry/curve_intersector_virtual_catmullrom_curve2.cpp
     geometry/curve_intersector_virtual_hermite_curve.cpp
+    geometry/curve_intersector_virtual_hermite_curve2.cpp
     bvh/bvh_intersector1_bvh4.cpp)
 
   IF (${ISA} EQUAL ${ISA_LOWEST_AVX})

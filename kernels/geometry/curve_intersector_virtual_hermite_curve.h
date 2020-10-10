@@ -12,5 +12,10 @@ namespace embree
     void AddVirtualCurveHermiteCurveInterector4i(VirtualCurveIntersector &prim);
     void AddVirtualCurveHermiteCurveInterector4v(VirtualCurveIntersector &prim);
     void AddVirtualCurveHermiteCurveInterector4iMB(VirtualCurveIntersector &prim);
+#if defined(__AVX__)
+    void AddVirtualCurveHermiteCurveInterector8i(VirtualCurveIntersector &prim);
+    void AddVirtualCurveHermiteCurveInterector8v(VirtualCurveIntersector &prim);
+    void AddVirtualCurveHermiteCurveInterector8iMB(VirtualCurveIntersector &prim);
+#endif
   }
 }
