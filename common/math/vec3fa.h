@@ -116,9 +116,7 @@ namespace embree
     Vec3fa r = blendv_ps(vOne, vmOne, _mm_cmplt_ps (a.m128,vdupq_n_f32(0.0f)));
     return r;
 #else
-    //return blendv_ps(Vec3fa(one).m128, (-Vec3fa(one)).m128, _mm_cmplt_ps (a.m128,Vec3fa(zero).m128));
-    auto neg_one = -Vec3fa(one);
-    return blendv_ps(Vec3fa(one).m128, neg_one.m128, _mm_cmplt_ps (a.m128,Vec3fa(zero).m128));
+    return blendv_ps(Vec3fa(one).m128, (-Vec3fa(one)).m128, _mm_cmplt_ps (a.m128,Vec3fa(zero).m128));
 #endif
   }
 
@@ -319,8 +317,13 @@ namespace embree
   __forceinline Vec3ba neq_mask(const Vec3fa& a, const Vec3fa& b ) { return _mm_cmpneq_ps(a.m128, b.m128); }
   __forceinline Vec3ba lt_mask( const Vec3fa& a, const Vec3fa& b ) { return _mm_cmplt_ps (a.m128, b.m128); }
   __forceinline Vec3ba le_mask( const Vec3fa& a, const Vec3fa& b ) { return _mm_cmple_ps (a.m128, b.m128); }
+ #if defined(__aarch64__)
   __forceinline Vec3ba gt_mask( const Vec3fa& a, const Vec3fa& b ) { return _mm_cmpgt_ps (a.m128, b.m128); }
   __forceinline Vec3ba ge_mask( const Vec3fa& a, const Vec3fa& b ) { return _mm_cmpge_ps (a.m128, b.m128); }
+#else
+  __forceinline Vec3ba gt_mask(const Vec3fa& a, const Vec3fa& b) { return _mm_cmpnle_ps(a.m128, b.m128); }
+  __forceinline Vec3ba ge_mask(const Vec3fa& a, const Vec3fa& b) { return _mm_cmpnlt_ps(a.m128, b.m128); }
+#endif
 
   __forceinline bool isvalid ( const Vec3fa& v ) {
     return all(gt_mask(v,Vec3fa(-FLT_LARGE)) & lt_mask(v,Vec3fa(+FLT_LARGE)));
@@ -584,8 +587,7 @@ namespace embree
     return blendv_ps(a.m128, _mm_set1_ps(min_rcp_input), _mm_cmplt_ps (abs(a).m128, _mm_set1_ps(min_rcp_input)));
   }
   __forceinline Vec3fx rcp_safe(const Vec3fx& a) {
-    return blendv_ps(rcp(a).m128, _mm_set1_ps(1.0f/min_rcp_input), _mm_cmplt_ps (abs(a).m128, _mm_set1_ps(min_rcp_input)));
-
+    return rcp(zero_fix(a));
   }
   __forceinline Vec3fx log ( const Vec3fx& a ) {
     return Vec3fx(logf(a.x),logf(a.y),logf(a.z));

@@ -14,9 +14,9 @@ Embree-aarch64 Overview
 =======================
 
 Embree-aarch64 is a port of Embree library(version 3.x) to AARCH64 platform(includes Android arm64-v8a).
-Porting was done using similar approach by existing embree-arm effort. https://mightynotes.wordpress.com/2017/01/24/porting-intel-embree-to-arm/
+Porting was done using similar approach by Martin Chang's https://mightynotes.wordpress.com/ awesome embree-arm effort. https://mightynotes.wordpress.com/2017/01/24/porting-intel-embree-to-arm/ 
 
-Embree-aarch64 can also be used for x86-64 target. x86-64 code path should be mostly identical to original Intel Embree.
+Embree-aarch64 can also be used for x86-64 target. x86-64 code path should be mostly identical to original Intel Embree, and has a more easy-to-embed feature to your Application.
 
 How to cross-compile for AARCH64 Linux(gcc)
 ----------------------------------
