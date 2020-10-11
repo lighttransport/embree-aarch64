@@ -23,6 +23,7 @@ namespace embree
       AddVirtualCurvePointInterector4i(function_local_static_prim);
       AddVirtualCurveLinearCurveInterector4i(function_local_static_prim);
       AddVirtualCurveBezierCurveInterector4i(function_local_static_prim);
+      AddVirtualCurveBSplineCurveInterector4i(function_local_static_prim);
       AddVirtualCurveHermiteCurveInterector4i(function_local_static_prim);
       AddVirtualCurveCatmullRomCurveInterector4i(function_local_static_prim);
       //function_local_static_prim.vtbl[Geometry::GTY_SPHERE_POINT] = SphereNiIntersectors<4>();
@@ -57,6 +58,7 @@ namespace embree
       AddVirtualCurvePointInterector4v(function_local_static_prim);
       AddVirtualCurveLinearCurveInterector4v(function_local_static_prim);
       AddVirtualCurveBezierCurveInterector4v(function_local_static_prim);
+      AddVirtualCurveBSplineCurveInterector4v(function_local_static_prim);
       AddVirtualCurveHermiteCurveInterector4v(function_local_static_prim);
       AddVirtualCurveCatmullRomCurveInterector4v(function_local_static_prim);
       //function_local_static_prim.vtbl[Geometry::GTY_SPHERE_POINT] = SphereNiIntersectors<4>();
@@ -91,6 +93,7 @@ namespace embree
       AddVirtualCurvePointInterector4iMB(function_local_static_prim);
       AddVirtualCurveLinearCurveInterector4iMB(function_local_static_prim);
       AddVirtualCurveBezierCurveInterector4iMB(function_local_static_prim);
+      AddVirtualCurveBSplineCurveInterector4iMB(function_local_static_prim);
       AddVirtualCurveHermiteCurveInterector4iMB(function_local_static_prim);
       AddVirtualCurveCatmullRomCurveInterector4iMB(function_local_static_prim);
       //function_local_static_prim.vtbl[Geometry::GTY_SPHERE_POINT] = SphereNiMBIntersectors<4>();
