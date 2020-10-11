@@ -18,6 +18,27 @@ Porting was done using similar approach by Martin Chang's https://mightynotes.wo
 
 Embree-aarch64 can also be used for x86-64 target. x86-64 code path should be mostly identical to original Intel Embree, and has a more easy-to-embed feature to your Application.
 
+How to build on native AARCH64 Linux
+----------------------------------
+
+We recommend to use clang. gcc compilation is too slow on gcc-8 or later(guess its related to C++ templates) and consumes lots of memory. If you still need to use gcc-8 or later, you may need to reduce NJOBS in make(e.g. 8 NJOBS in Jetson AGX(16 GB mem) results in out-of-memory).
+
+```
+$ cd $EMBREE_AARCH64_REPO
+$ ./scripts/bootstrap-aarch64-linux.sh
+$ cd build-aarch64
+$ make -j4
+```
+
+You can enable AVX2 emulation(Using 2 NEONs). But this build may not give better performance on current generation ARM64/AARCH64 CPU designs except for Apple Sllicon.
+
+```
+$ cd $EMBREE_AARCH64_REPO
+$ ./scripts/bootstrap-aarch64-linux-avx2-emu.sh.sh
+$ cd build-aarch64-neon-x2/
+$ make -j4
+```
+
 How to cross-compile for AARCH64 Linux(gcc)
 ----------------------------------
 
