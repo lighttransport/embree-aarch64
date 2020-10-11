@@ -2,7 +2,7 @@
 ## SPDX-License-Identifier: Apache-2.0
 
 SET(EMBREE_VERSION_MAJOR 3)
-SET(EMBREE_VERSION_MINOR 11)
+SET(EMBREE_VERSION_MINOR 12)
 SET(EMBREE_VERSION_PATCH 0)
 SET(EMBREE_VERSION_NOTE "")
 
@@ -95,6 +95,13 @@ SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/common/cmake ${CMAKE_MODULE_PA
 IF (BUILD_TESTING)
   INCLUDE(test)
 ENDIF()
+
+set(BUILD_DOC OFF CACHE INTERNAL "build documentation (internal only)")
+IF (BUILD_DOC)
+  ADD_SUBDIRECTORY(doc)
+ENDIF()
+
+OPTION(EMBREE_TUTORIALS    "Enable to build Embree tutorials" ON)
 
 ##############################################################
 # Embree configuration

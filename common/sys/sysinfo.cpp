@@ -51,6 +51,8 @@ namespace embree
     return "Mac OS X (32bit)";
 #elif defined(__MACOSX__) && defined(__X86_64__)
     return "Mac OS X (64bit)";
+#elif defined(__UNIX__) && defined(__aarch64__)
+    return "Unix (aarch64)";
 #elif defined(__UNIX__) && !defined(__X86_64__)
     return "Unix (32bit)";
 #elif defined(__UNIX__) && defined(__X86_64__)
