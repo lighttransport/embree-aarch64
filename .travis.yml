@@ -3,6 +3,9 @@
 #
 language: cpp
 
+# Use ubuntu 20.04
+dist: focal
+
 arch:
   - arm64
 
