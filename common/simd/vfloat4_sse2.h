@@ -451,16 +451,12 @@ namespace embree
   __forceinline vfloat4 nmsub(const vfloat4& a, const vfloat4& b, const vfloat4& c) {
     return vnegq_f32(vfmaq_f32(c,a, b));
   }
-  __forceinline vfloat4 msub (const vfloat4& a, const vfloat4& b, const vfloat4& c) {
-      return vfloat4(vfmaq_f32(vnegq_f32(c),a,b));
-  
-  }
 #else
   __forceinline vfloat4 madd (const vfloat4& a, const vfloat4& b, const vfloat4& c) { return a*b+c; }
   __forceinline vfloat4 nmadd(const vfloat4& a, const vfloat4& b, const vfloat4& c) { return -a*b+c;}
   __forceinline vfloat4 nmsub(const vfloat4& a, const vfloat4& b, const vfloat4& c) { return -a*b-c; }
-  __forceinline vfloat4 msub (const vfloat4& a, const vfloat4& b, const vfloat4& c) { return a*b-c; }
 #endif
+  __forceinline vfloat4 msub (const vfloat4& a, const vfloat4& b, const vfloat4& c) { return a*b-c; }
 
 #endif
 
