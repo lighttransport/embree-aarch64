@@ -1,0 +1,19 @@
+# 
+# Build on ARM64 only
+#
+language: cpp
+
+arch:
+  - arm64
+
+compiler:
+  - gcc
+  - clang
+
+install: skip
+
+script:
+  - ./scripts/bootstrap-aarch64-travis.sh
+  - cd build-aarch64
+  - cmake --build .
+  - ./verify
