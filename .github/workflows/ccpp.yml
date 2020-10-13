@@ -6,31 +6,32 @@ on: [push, pull_request]
 # https://github.com/lighttransport/embree-aarch64/issues/18
 
 jobs:
-  # Build Embree on qemu-emulated aarch64 Ubuntu
-  build-native-aarch64:
+  # Disable qemu build since we've migrated arm64 build to Travis.
+  ## Build Embree on qemu-emulated aarch64 Ubuntu
+  #build-native-aarch64:
 
-    runs-on: ubuntu-18.04
-    name: Build on native aarch64
+  #  runs-on: ubuntu-18.04
+  #  name: Build on native aarch64
 
-    steps:
-    - uses: actions/checkout@v1
-    - uses: uraimo/run-on-arch-action@v1.0.5
-      id: aarch64-build-on-qemu-aarch64
-      with:
-        architecture: aarch64
-        distribution: ubuntu18.04
-        # TODO(LTE): Run test in separate step
-        run: |
-          apt-get update
-          apt-get install -y cmake gcc g++
-          ./scripts/bootstrap-aarch64-linux.sh
-          cd build-aarch64
-          make VERBOSE=1
-          #./verify
-          cd ..
-          cd test/curve
-          make EXTRA_CXXFLAGS="-fsanitize=address" EXTRA_LDFLAGS="-fsanitize=address" EMBREE_LIB_PATH=../../build-aarch64
-          ./run.sh ../../build-aarch64 > /dev/null
+  #  steps:
+  #  - uses: actions/checkout@v1
+  #  - uses: uraimo/run-on-arch-action@v1.0.5
+  #    id: aarch64-build-on-qemu-aarch64
+  #    with:
+  #      architecture: aarch64
+  #      distribution: ubuntu18.04
+  #      # TODO(LTE): Run test in separate step
+  #      run: |
+  #        apt-get update
+  #        apt-get install -y cmake gcc g++
+  #        ./scripts/bootstrap-aarch64-linux.sh
+  #        cd build-aarch64
+  #        make VERBOSE=1
+  #        #./verify
+  #        cd ..
+  #        cd test/curve
+  #        make EXTRA_CXXFLAGS="-fsanitize=address" EXTRA_LDFLAGS="-fsanitize=address" EMBREE_LIB_PATH=../../build-aarch64
+  #        ./run.sh ../../build-aarch64 > /dev/null
 
   # Cross-compile Embree using gcc for aarch64 target
   build-cross-aarch64-gcc:

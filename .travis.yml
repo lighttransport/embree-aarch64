@@ -13,7 +13,7 @@ compiler:
 install: skip
 
 script:
-  - ./scripts/bootstrap-arm64-travis.sh
+  - sh ./scripts/bootstrap-arm64-travis.sh
   - cd build-aarch64
   - cmake --build .
   - ./verify
