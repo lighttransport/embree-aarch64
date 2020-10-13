@@ -28,7 +28,7 @@ IF (WIN32)
     IF (EMBREE_ADDRESS_SANITIZER)
       INCLUDE(CheckCXXCompilerFlag)
 
-      set(_CLANG_ASAN_CXX_FLAGS "-fsanitize-address ")
+      set(_CLANG_ASAN_CXX_FLAGS "-fsanitize=address ")
 
       check_cxx_compiler_flag("-fsanitize-address-use-after-scope" HAS_SANITIZE_ADDRESS_USE_AFTER_SCOPE)
       if (HAS_SANITIZE_ADDRESS_USE_AFTER_SCOPE)
@@ -164,7 +164,7 @@ ELSE()
   IF (EMBREE_ADDRESS_SANITIZER)
     INCLUDE(CheckCXXCompilerFlag)
 
-    set(_CLANG_ASAN_CXX_FLAGS "-fsanitize-address ")
+    set(_CLANG_ASAN_CXX_FLAGS "-fsanitize=address ")
 
     check_cxx_compiler_flag("-fsanitize-address-use-after-scope" HAS_SANITIZE_ADDRESS_USE_AFTER_SCOPE)
     if (HAS_SANITIZE_ADDRESS_USE_AFTER_SCOPE)
