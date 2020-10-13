@@ -12,6 +12,7 @@ cd build-aarch64
 # CC and CXX are set by Travis
 
 $CMAKE_BIN \
+  -G Ninja \
   -DCMAKE_BUILD_TYPE=RelWithDebInfo \
   -DEMBREE_ARM=On \
   -DEMBREE_ADDRESS_SANITIZER=On \

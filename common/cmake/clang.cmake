@@ -26,7 +26,16 @@ IF (WIN32)
   IF (MINGW) # Assume llvm-mingw
 
     IF (EMBREE_ADDRESS_SANITIZER)
-      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize-address-use-after-scope -fno-omit-frame-pointer -fno-optimize-sibling-calls")
+      INCLUDE(CheckCXXCompilerFlag)
+
+      set(_CLANG_ASAN_CXX_FLAGS "-fsanitize-address ")
+
+      check_cxx_compiler_flag("-fsanitize-address-use-after-scope" HAS_SANITIZE_ADDRESS_USE_AFTER_SCOPE)
+      if (HAS_SANITIZE_ADDRESS_USE_AFTER_SCOPE)
+        string(APPEND _CLANG_ASAN_CXX_FLAGS " -fsanitize-address-use-after-scope ")
+      endif()
+
+      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${_CLANG_ASAN_CXX_FLAGS} -fno-omit-frame-pointer -fno-optimize-sibling-calls")
     ENDIF()
 
 
@@ -153,7 +162,16 @@ ELSE()
   OPTION(EMBREE_ADDRESS_SANITIZER "Enabled CLANG address sanitizer." OFF)
 
   IF (EMBREE_ADDRESS_SANITIZER)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize-address-use-after-scope -fno-omit-frame-pointer -fno-optimize-sibling-calls")
+    INCLUDE(CheckCXXCompilerFlag)
+
+    set(_CLANG_ASAN_CXX_FLAGS "-fsanitize-address ")
+
+    check_cxx_compiler_flag("-fsanitize-address-use-after-scope" HAS_SANITIZE_ADDRESS_USE_AFTER_SCOPE)
+    if (HAS_SANITIZE_ADDRESS_USE_AFTER_SCOPE)
+      string(APPEND _CLANG_ASAN_CXX_FLAGS " -fsanitize-address-use-after-scope ")
+    endif()
+
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${_CLANG_ASAN_CXX_FLAGS} -fno-omit-frame-pointer -fno-optimize-sibling-calls")
   ENDIF()
 
   if (EMBREE_USE_PARENT_PROJECT_COMPILER_FLAGS)
