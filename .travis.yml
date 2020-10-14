@@ -30,6 +30,8 @@ addons:
 install: skip
 
 script:
+  - cat /proc/meminfo
+  - cat /proc/cpuinfo
   - /bin/bash ./scripts/bootstrap-arm64-travis.sh
   - cd build-aarch64
   - cmake --build .
