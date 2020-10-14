@@ -13,6 +13,13 @@ compiler:
   - gcc
   - clang
 
+# envs are used in ./scripts/bootstrap-arm64-travis.sh
+env:
+  - ENV_MAX_ISA=SSE2 ENV_RAY_PACKETS=Off
+  - ENV_MAX_ISA=SSE2 ENV_RAY_PACKETS=On
+  - ENV_MAX_ISA=AVX2 ENV_RAY_PACKETS=Off ENV_NEON_AVX2_EMULATION=On
+  - ENV_MAX_ISA=AVX2 ENV_RAY_PACKETS=On ENV_NEON_AVX2_EMULATION=On
+
 
 before_install:
   - sudo apt-get -y install ninja-build
@@ -23,7 +30,11 @@ addons:
 install: skip
 
 script:
-  - sh ./scripts/bootstrap-arm64-travis.sh
+  - /bin/bash ./scripts/bootstrap-arm64-travis.sh
   - cd build-aarch64
   - cmake --build .
   - ./verify
+  - cd ../test/curve
+  - make EXTRA_CXXFLAGS="-fsanitize=address" EXTRA_LDFLAGS="-fsanitize=address" EMBREE_LIB_PATH=../../build-aarch64
+  - ./run.sh ../../build-aarch64 > /dev/null
+
