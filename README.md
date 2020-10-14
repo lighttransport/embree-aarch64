@@ -3,6 +3,8 @@
 
 [![Actions Status](https://github.com/lighttransport/embree-aarch64/workflows/BuildCI/badge.svg)](https://github.com/lighttransport/embree-aarch64/actions)
 
+[![Build Status](https://travis-ci.org/lighttransport/embree-aarch64.svg?branch=master)](https://travis-ci.org/lighttransport/embree-aarch64)
+
 Embree on AARCH64(ARM64) status
 ===============================
 
