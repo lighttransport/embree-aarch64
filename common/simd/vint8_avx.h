@@ -71,8 +71,13 @@ namespace embree
     static __forceinline void store (void* ptr, const vint8& f) { _mm256_store_ps((float*)ptr,_mm256_castsi256_ps(f)); }
     static __forceinline void storeu(void* ptr, const vint8& f) { _mm256_storeu_ps((float*)ptr,_mm256_castsi256_ps(f)); }
     
+#if !defined(__aarch64__)
     static __forceinline void store (const vboolf8& mask, void* ptr, const vint8& f) { _mm256_maskstore_ps((float*)ptr,(__m256i)mask,_mm256_castsi256_ps(f)); }
     static __forceinline void storeu(const vboolf8& mask, void* ptr, const vint8& f) { _mm256_maskstore_ps((float*)ptr,(__m256i)mask,_mm256_castsi256_ps(f)); }
+#else
+    static __forceinline void store (const vboolf8& mask, void* ptr, const vint8& f) { _mm256_maskstore_ps((float*)ptr,(__m256i)mask.v,_mm256_castsi256_ps(f)); }
+    static __forceinline void storeu(const vboolf8& mask, void* ptr, const vint8& f) { _mm256_maskstore_ps((float*)ptr,(__m256i)mask.v,_mm256_castsi256_ps(f)); }
+#endif
 
     static __forceinline void store_nt(void* ptr, const vint8& v) {
       _mm256_stream_ps((float*)ptr,_mm256_castsi256_ps(v));
@@ -186,7 +191,7 @@ namespace embree
 
   __forceinline vint8 operator +(const vint8& a) { return a; }
   __forceinline vint8 operator -(const vint8& a) { return vint8(_mm_sub_epi32(_mm_setzero_si128(), a.vl), _mm_sub_epi32(_mm_setzero_si128(), a.vh)); }
-  __forceinline vint8 abs       (const vint8& a) { return vint8(_mm_abs_epi32(a.vl), _mm_abs_epi32(a.vh)); }
+  __forceinline vint8 abs       (const vint8& a) { return vint8((__m128i)_mm_abs_epi32((__m128)a.vl), (__m128i)_mm_abs_epi32((__m128)a.vh)); }
 
   ////////////////////////////////////////////////////////////////////////////////
   /// Binary Operators
