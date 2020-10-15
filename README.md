@@ -8,12 +8,7 @@
 Embree on AARCH64(ARM64) status
 ===============================
 
-Production grade(when `EMBREE_RAY_PACKETS=Off`). embree-aarch64 gives mostly identical result compared to x86-64 version.
-
-Some knwon issue exists:
-
-* Embree crashes when `EMBREE_MAX_ISA=AVX2, -DEMBREE_NEON_AVX2_EMULATION=ON, EMBREE_RAY_PACKETS=On`: https://github.com/lighttransport/embree-aarch64/issues/42
-* watertight test https://github.com/lighttransport/embree-aarch64/issues/28 , but it would be neglible in most production environment.
+Production grade. embree-aarch64 gives mostly identical result compared to x86-64 version.
 
 
 Embree-aarch64 Overview
