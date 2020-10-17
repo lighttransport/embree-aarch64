@@ -191,7 +191,7 @@ namespace embree
 
   __forceinline vint8 operator +(const vint8& a) { return a; }
   __forceinline vint8 operator -(const vint8& a) { return vint8(_mm_sub_epi32(_mm_setzero_si128(), a.vl), _mm_sub_epi32(_mm_setzero_si128(), a.vh)); }
-  __forceinline vint8 abs       (const vint8& a) { return vint8((__m128i)_mm_abs_epi32((__m128)a.vl), (__m128i)_mm_abs_epi32((__m128)a.vh)); }
+  __forceinline vint8 abs       (const vint8& a) { return vint8(_mm_abs_epi32(a.vl), _mm_abs_epi32(a.vh)); }
 
   ////////////////////////////////////////////////////////////////////////////////
   /// Binary Operators
