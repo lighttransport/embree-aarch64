@@ -1,0 +1,95 @@
+name: Build for Windows
+
+on: [push, pull_request]
+
+jobs:
+  
+   # Windows(x64) + Visual Studio 2019 build
+  build-windows-x64-msvc:
+    runs-on: windows-latest
+    name: windows-x64-avx2-msvc
+    # Use system installed cmake
+    # https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+        
+      - name: Configure
+        shell: powershell
+        run: |
+          Remove-Item -LiteralPath "build" -Force -Recurse -ErrorAction Ignore
+        
+          cmake -G "Visual Studio 16 2019" -A x64 `
+          -DCMAKE_BUILD_TYPE=Release `
+          -DEMBREE_ISPC_SUPPORT=Off `
+          -DEMBREE_TASKING_SYSTEM=Internal `
+          -DEMBREE_TUTORIALS=Off `
+          -DEMBREE_MAX_ISA=AVX2 `
+          -DEMBREE_RAY_PACKETS=On `
+          -B ./build/ `
+          -S ./
+          
+      - name: Print Cache
+        run: cmake -L -N -B ./build/ 
+          
+      - name: Build
+        run: cmake --build build --config Release
+  
+  # Windows(x64) + Ninja + ClangCL
+  build-windows-x64-clangcl:
+    runs-on: windows-latest
+    name: windows-x64-avx2-clangcl
+    # Use system installed cmake
+    # https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+        
+      - name: Install ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+        
+      - name: Setup MSVC command prompt
+        uses: ilammy/msvc-dev-cmd@v1
+        
+      - name: Configure
+        shell: powershell
+        run: |
+        
+          Remove-Item -LiteralPath "build" -Force -Recurse -ErrorAction Ignore
+        
+          # Determine MSC_VER, see https://docs.microsoft.com/en-us/cpp/preprocessor/predefined-macros?view=vs-2019
+          $m = cmd /c cl /? '2>&1'
+          $regex = '(?<=Compiler Version )\d\d\.\d\d'
+          $v = $m | select-string -Pattern $regex  | % { $_.Matches } | % { $_.Value } 
+          $v = $v -replace '\.',''
+          echo "Detected _MSC_VER=$v"
+          
+          # Setup Clang
+          $env:LLVM_DIR="C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/Llvm/x64/bin/"
+          $env:PATH="$env:LLVM_DIR;$env:PATH"
+          $env:CC="clang-cl.exe"
+          $env:CXX="clang-cl.exe"
+          $env:CFLAGS="-fmsc-version=$v"
+          $env:CXXFLAGS="-fmsc-version=$v"
+          
+          # Configure CMake
+          # DCMAKE_NINJA_CMCLDEPS_RC=0 solves a weird problem with a .res file.
+          cmake -G "Ninja" `
+          -DCMAKE_BUILD_TYPE=Release `
+          -DCMAKE_INSTALL_PREFIX=install/ `
+          -DEMBREE_ISPC_SUPPORT=Off `
+          -DEMBREE_TASKING_SYSTEM=Internal `
+          -DEMBREE_TUTORIALS=Off `
+          -DEMBREE_MAX_ISA=AVX2 `
+          -DEMBREE_RAY_PACKETS=On `
+          -DCMAKE_NINJA_CMCLDEPS_RC=0 `
+          -B ./build/ `
+          -S ./
+              
+      - name: Print Cache
+        run: cmake -L -N -B ./build/ 
+              
+      - name: Build
+        run: cmake --build build --config Release
