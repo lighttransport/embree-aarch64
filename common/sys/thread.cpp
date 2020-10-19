@@ -247,9 +247,9 @@ namespace embree
     CPU_SET(threadID, &cset);
 
     pthread_setaffinity_np(pthread_self(), sizeof(cset), &cset);
+#endif
   }
 }
-#endif
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////

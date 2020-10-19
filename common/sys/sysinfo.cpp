@@ -272,7 +272,7 @@ namespace embree
       cpu_features |= CPU_FEATURE_YMM_ENABLED;
       cpu_features |= CPU_FEATURE_SSE41 | CPU_FEATURE_RDRAND | CPU_FEATURE_F16C;
       cpu_features |= CPU_FEATURE_POPCNT;
-      cpu_features |= CPU_FEATURE_AVX | CPU_FEATURE_PSEUDO_HIFREQ256BIT;
+      cpu_features |= CPU_FEATURE_AVX;
       cpu_features |= CPU_FEATURE_AVX2;
       cpu_features |= CPU_FEATURE_FMA3;
       cpu_features |= CPU_FEATURE_LZCNT;
