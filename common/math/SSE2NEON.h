@@ -1728,9 +1728,9 @@ FORCE_INLINE __m128 _mm_msub_ps(__m128 a, __m128 b, __m128 c)
     return vmlsq_f32(c, a, b);
 }
 
-FORCE_INLINE __m128 _mm_abs_epi32(__m128 a)
+FORCE_INLINE __m128i _mm_abs_epi32(__m128i a)
 {
-    return vreinterpretq_f32_s32(vabsq_s32(vreinterpretq_s32_f32(a)));
+  return vabsq_s32(a);
 }
 #endif  //defined(__aarch64__)
 
