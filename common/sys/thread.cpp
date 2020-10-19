@@ -246,11 +246,10 @@ namespace embree
     size_t threadID = mapThreadID(affinity);
     CPU_SET(threadID, &cset);
 
-    if (pthread_setaffinity_np(pthread_self(), sizeof(cset), &cset) != 0)
-      WARNING("pthread_setaffinity_np failed to set affinity to thread "+std::to_string(threadID)); // on purpose only a warning
-#endif
+    pthread_setaffinity_np(pthread_self(), sizeof(cset), &cset);
   }
 }
+#endif
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -270,8 +269,7 @@ namespace embree
     CPU_ZERO(&cset);
     CPU_SET(affinity, &cset);
 
-    if (pthread_setaffinity_np(pthread_self(), sizeof(cset), &cset) != 0)
-      WARNING("pthread_setaffinity_np failed"); // on purpose only a warning
+    pthread_setaffinity_np(pthread_self(), sizeof(cset), &cset);
   }
 }
 #endif
@@ -365,16 +363,14 @@ namespace embree
       CPU_ZERO(&cset);
       threadID = mapThreadID(threadID);
       CPU_SET(threadID, &cset);
-      if (pthread_setaffinity_np(*tid, sizeof(cset), &cset))
-        WARNING("pthread_setaffinity_np failed to set affinity to thread "+std::to_string(threadID)); // on purpose only a warning
+      pthread_setaffinity_np(*tid, sizeof(cset), &cset);
     }
 #elif defined(__FreeBSD__)
     if (threadID >= 0) {
       cpuset_t cset;
       CPU_ZERO(&cset);
       CPU_SET(threadID, &cset);
-      if (pthread_setaffinity_np(*tid, sizeof(cset), &cset))
-        WARNING("pthread_setaffinity_np failed"); // on purpose only a warning
+      pthread_setaffinity_np(*tid, sizeof(cset), &cset);
     }
 #endif
 

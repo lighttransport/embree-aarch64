@@ -3,7 +3,7 @@
 
 SET(EMBREE_VERSION_MAJOR 3)
 SET(EMBREE_VERSION_MINOR 12)
-SET(EMBREE_VERSION_PATCH 0)
+SET(EMBREE_VERSION_PATCH 1)
 SET(EMBREE_VERSION_NOTE "")
 
 SET(EMBREE_VERSION ${EMBREE_VERSION_MAJOR}.${EMBREE_VERSION_MINOR}.${EMBREE_VERSION_PATCH})
@@ -475,8 +475,8 @@ IF (APPLE AND EMBREE_STATIC_LIB)
 
   IF (NUMISA GREATER 1)
     IF (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
-      IF (${CMAKE_CXX_COMPILER_VERSION} MATCHES "^9\\..*")
-        MESSAGE(FATAL_ERROR "Using Embree as static library is not supported with AppleClang 9.X when multiple ISAs are selected. Please either build a shared library or enable only one ISA.")
+      IF (${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "9.0.0" OR ${CMAKE_CXX_COMPILER_VERSION} VERSION_EQUAL "9.0.0")
+        MESSAGE(FATAL_ERROR "Using Embree as static library is not supported with AppleClang >= 9.0 when multiple ISAs are selected. Please either build a shared library or enable only one ISA.")
       ENDIF()
     ENDIF()
   ENDIF()

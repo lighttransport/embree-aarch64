@@ -21,11 +21,13 @@ ispc2cpp:
 	@./ispc2cpp.sh point_geometry/point_geometry_device.isph point_geometry/point_geometry_device.h
 	@./ispc2cpp.sh point_geometry/point_geometry_device.ispc point_geometry/point_geometry_device.cpp
 	@./ispc2cpp.sh dynamic_scene/dynamic_scene_device.ispc dynamic_scene/dynamic_scene_device.cpp
+	@./ispc2cpp.sh user_geometry/user_geometry_device.isph user_geometry/user_geometry_device.h
 	@./ispc2cpp.sh user_geometry/user_geometry_device.ispc user_geometry/user_geometry_device.cpp
 	@./ispc2cpp.sh viewer/viewer_device.isph viewer/viewer_device.h
 	@./ispc2cpp.sh viewer/viewer_device.ispc viewer/viewer_device.cpp
 	@./ispc2cpp.sh viewer_stream/viewer_stream_device.ispc viewer_stream/viewer_stream_device.cpp
 	@./ispc2cpp.sh viewer_anim/viewer_anim_device.ispc viewer_anim/viewer_anim_device.cpp
+	@./ispc2cpp.sh instanced_geometry/instanced_geometry_device.isph instanced_geometry/instanced_geometry_device.h
 	@./ispc2cpp.sh instanced_geometry/instanced_geometry_device.ispc instanced_geometry/instanced_geometry_device.cpp
 	@./ispc2cpp.sh intersection_filter/intersection_filter_device.isph intersection_filter/intersection_filter_device.h
 	@./ispc2cpp.sh intersection_filter/intersection_filter_device.ispc intersection_filter/intersection_filter_device.cpp

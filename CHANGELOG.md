@@ -1,6 +1,13 @@
 Version History
 ---------------
 
+### Embree 3.12.1
+
+-   Changed default frequency level to SIMD128 for Skylake, Cannon Lake, Comet Lake and Tiger Lake CPUs.
+    This change typically improves performance for renderers that just use SSE by maintaining higher
+    CPU frequencies. In case your renderer is AVX optimized you can get higher ray tracing performance
+    by configuring the frequency level to simd256 through passing frequency_level=simd256 to rtcNewDevice.
+
 ### Embree 3.12.0
 
 -   Added linear cone curve geometry support. In this mode a real geometric surface for curves

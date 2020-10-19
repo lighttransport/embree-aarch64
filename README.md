@@ -1,4 +1,4 @@
-% Embree: High Performance Ray Tracing Kernels 3.12.0
+% Embree: High Performance Ray Tracing Kernels 3.12.1
 % Intel Corporation
 
 [![Actions Status](https://github.com/lighttransport/embree-aarch64/workflows/BuildCI/badge.svg)](https://github.com/lighttransport/embree-aarch64/actions)
@@ -284,7 +284,7 @@ Windows MSI Installer
 ---------------------
 
 You can install the Embree library using the Windows MSI installer
-[embree-3.12.0-x64.vc14.msi](https://github.com/embree/embree/releases/download/v3.12.0/embree-3.12.0.x64.vc14.msi). This
+[embree-3.12.1-x64.vc14.msi](https://github.com/embree/embree/releases/download/v3.12.1/embree-3.12.1.x64.vc14.msi). This
 will install the 64-bit Embree version by default in `Program
 Files\Intel\Embree3`.
 
@@ -299,13 +299,13 @@ Files\Intel\Embree3`.
 To uninstall Embree, open `Programs and Features` by clicking the
 `Start button`, clicking `Control Panel`, clicking `Programs`, and
 then clicking `Programs and Features`. Select `Embree
-3.12.0 x64` and uninstall it.
+3.12.1 x64` and uninstall it.
 
 Windows ZIP File
 -----------------
 
 Embree linked against Visual Studio 2015 are provided as a ZIP file
-[embree-3.12.0.x64.vc14.windows.zip](https://github.com/embree/embree/releases/download/v3.12.0/embree-3.12.0.x64.vc14.windows.zip). After
+[embree-3.12.1.x64.vc14.windows.zip](https://github.com/embree/embree/releases/download/v3.12.1/embree-3.12.1.x64.vc14.windows.zip). After
 unpacking this ZIP file, you should set the path to the `lib` folder
 manually to your `PATH` environment variable for applications to find
 Embree. To compile applications with Embree, you also have to set the
@@ -319,13 +319,13 @@ Linux tar.gz Files
 ------------------
 
 The Linux version of Embree is also delivered as a `tar.gz` file:
-[embree-3.12.0.x86_64.linux.tar.gz](https://github.com/embree/embree/releases/download/v3.12.0/embree-3.12.0.x86_64.linux.tar.gz). Unpack
+[embree-3.12.1.x86_64.linux.tar.gz](https://github.com/embree/embree/releases/download/v3.12.1/embree-3.12.1.x86_64.linux.tar.gz). Unpack
 this file using `tar` and source the provided `embree-vars.sh` (if you
 are using the bash shell) or `embree-vars.csh` (if you are using the C
 shell) to set up the environment properly:
 
-    tar xzf embree-3.12.0.x86_64.linux.tar.gz
-    source embree-3.12.0.x86_64.linux/embree-vars.sh
+    tar xzf embree-3.12.1.x86_64.linux.tar.gz
+    source embree-3.12.1.x86_64.linux/embree-vars.sh
 
 If you want to ship Embree with your application, best use the Embree
 version provided in the `tar.gz` file.
@@ -338,7 +338,7 @@ macOS PKG Installer
 
 To install the Embree library on your macOS system use the
 provided package installer inside
-[embree-3.12.0.x86_64.pkg](https://github.com/embree/embree/releases/download/v3.12.0/embree-3.12.0.x86_64.pkg). This
+[embree-3.12.1.x86_64.pkg](https://github.com/embree/embree/releases/download/v3.12.1/embree-3.12.1.x86_64.pkg). This
 will install Embree by default into `/opt/local/lib` and
 `/opt/local/include` directories. The Embree tutorials are installed
 into the `/Applications/Embree3` directory.
@@ -360,13 +360,13 @@ macOS ZIP file
 -----------------
 
 The macOS version of Embree is also delivered as a ZIP file:
-[embree-3.12.0.x86_64.macosx.zip](https://github.com/embree/embree/releases/download/v3.12.0/embree-3.12.0.x86_64.macosx.zip). Unpack
+[embree-3.12.1.x86_64.macosx.zip](https://github.com/embree/embree/releases/download/v3.12.1/embree-3.12.1.x86_64.macosx.zip). Unpack
 this file using `tar` and source the provided `embree-vars.sh` (if you
 are using the bash shell) or `embree-vars.csh` (if you are using the C
 shell) to set up the environment properly:
 
-    unzip embree-3.12.0.x64.macosx.zip
-    source embree-3.12.0.x64.macosx/embree-vars.sh
+    unzip embree-3.12.1.x64.macosx.zip
+    source embree-3.12.1.x64.macosx/embree-vars.sh
 
 If you want to ship Embree with your application, please use the Embree
 library of the provided ZIP file. The library name of that Embree
@@ -533,9 +533,15 @@ ISPC, make sure to download an ISPC version from
 compatible with your Visual Studio version. After installation, put
 the path to `ispc.exe` permanently into your `PATH` environment
 variable or you need to correctly set the `ISPC_EXECUTABLE` variable
-during CMake configuration. We have tested ISPC version 1.9.1. If you
-do not want to use ISPC then you can disable `EMBREE_ISPC_SUPPORT` in
-CMake.
+during CMake configuration. If you do not want to use ISPC then you
+can disable `EMBREE_ISPC_SUPPORT` in CMake.
+
+We have tested Embree with the following ISPC versions:
+
+  - ISPC 1.14.1
+  - ISPC 1.13.0
+  - ISPC 1.12.0
+  - ISPC 1.9.2
 
 You additionally have to install [CMake](http://www.cmake.org/download/)
 (version 2.8.11 or higher). Note that you need a native Windows CMake
@@ -1370,18 +1376,20 @@ The following configuration is supported:
 
 -   `frequency_level=[simd128,simd256,simd512]`: Specifies the
     frequency level the application want to run on, which can be
-    either: a) simd128 for apps that do not use AVX instructions, b)
-    simd256 for apps that use heavy AVX instruction, c) simd512 for
-    apps that use heavy AVX-512 instructions. When some frequency level
-    is specified, Embree will avoid doing optimizations that may reduce
-    the frequency level below the level specified. E.g. if your app
-    does not use AVX instructions setting "frequency\_level=simd128"
-    will cause some CPUs to run at highest frequency, which may result
-    in higher application performance. However, this will prevent
-    Embree from using AVX optimizations to achieve higher ray tracing
-    performance, thus applications that trace many rays may still
-    perform better with the default setting of simd256, even though
-    this reduces frequency on some CPUs.
+    either:
+
+a)  simd128 to run at highest frequency
+b)  simd256 to run at AVX2-heavy frequency level
+c)  simd512 to run at heavy AVX512 frequency level. When some frequency
+    level is specified, Embree will avoid doing optimizations that may
+    reduce the frequency level below the level specified. E.g. if your
+    app does not use AVX instructions setting
+    "frequency\_level=simd128" will cause some CPUs to run at highest
+    frequency, which may result in higher application performance if
+    you do much shading. If you application heavily uses AVX code, you
+    should best set the frequency level to simd256. Per default Embree
+    tries to avoid reducing the frequency of the CPU by setting the
+    simd256 level only when the CPU has no significant down clocking.
 
 Different configuration options should be separated by commas, e.g.:
 
@@ -1580,7 +1588,7 @@ Possible properties to query are:
     0.  internal tasking system
     1.  Intel Threading Building Blocks (TBB)
     2.  Parallel Patterns Library (PPL)
--   `RTC_DEVICE_PROPERTY_COMMIT_JOIN_SUPPORTED`: Queries whether
+-   `RTC_DEVICE_PROPERTY_JOIN_COMMIT_SUPPORTED`: Queries whether
     `rtcJoinCommitScene` is supported. This is not the case when Embree
     is compiled with PPL or older versions of TBB.
 

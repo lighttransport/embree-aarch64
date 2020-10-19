@@ -43,7 +43,33 @@ namespace embree
       throw_RTCError(RTC_ERROR_UNSUPPORTED_CPU,"CPU does not support " ISA_STR);
     }
 
+    /* set default frequency level for detected CPU */
+    switch (getCPUModel()) {
+    case CPU::UNKNOWN:         frequency_level = FREQUENCY_SIMD256; break;
+    case CPU::XEON_ICE_LAKE:   frequency_level = FREQUENCY_SIMD256; break;
+    case CPU::CORE_ICE_LAKE:   frequency_level = FREQUENCY_SIMD256; break;
+    case CPU::CORE_TIGER_LAKE: frequency_level = FREQUENCY_SIMD128; break;
+    case CPU::CORE_COMET_LAKE: frequency_level = FREQUENCY_SIMD128; break;
+    case CPU::CORE_CANNON_LAKE:frequency_level = FREQUENCY_SIMD128; break;
+    case CPU::CORE_KABY_LAKE:  frequency_level = FREQUENCY_SIMD128; break;
+    case CPU::XEON_SKY_LAKE:   frequency_level = FREQUENCY_SIMD128; break;
+    case CPU::CORE_SKY_LAKE:   frequency_level = FREQUENCY_SIMD128; break;
+    case CPU::XEON_BROADWELL:  frequency_level = FREQUENCY_SIMD256; break;
+    case CPU::CORE_BROADWELL:  frequency_level = FREQUENCY_SIMD256; break;
+    case CPU::XEON_HASWELL:    frequency_level = FREQUENCY_SIMD256; break;
+    case CPU::CORE_HASWELL:    frequency_level = FREQUENCY_SIMD256; break;
+    case CPU::XEON_IVY_BRIDGE: frequency_level = FREQUENCY_SIMD256; break;
+    case CPU::CORE_IVY_BRIDGE: frequency_level = FREQUENCY_SIMD256; break;
+    case CPU::SANDY_BRIDGE:    frequency_level = FREQUENCY_SIMD256; break;
+    case CPU::NEHALEM:         frequency_level = FREQUENCY_SIMD128; break;
+    case CPU::CORE2:           frequency_level = FREQUENCY_SIMD128; break;
+    case CPU::CORE1:           frequency_level = FREQUENCY_SIMD128; break;
+    }
+
     /* initialize global state */
+#if defined(EMBREE_CONFIG)
+    State::parseString(EMBREE_CONFIG);
+#endif
     State::parseString(cfg);
     if (!ignore_config_files && FileName::executableFolder() != FileName(""))
       State::parseFile(FileName::executableFolder()+FileName(".embree" TOSTRING(RTC_VERSION_MAJOR)));
@@ -81,7 +107,7 @@ namespace embree
       //exceptions &= ~_MM_MASK_INEXACT;
       _MM_SET_EXCEPTION_MASK(exceptions);
     }
-
+    
     /* print info header */
     if (State::verbosity(1))
       print();

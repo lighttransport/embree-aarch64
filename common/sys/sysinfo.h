@@ -70,18 +70,32 @@
 
 namespace embree
 {
-  enum CPUModel {
-    CPU_UNKNOWN,
-    CPU_CORE1,
-    CPU_CORE2,
-    CPU_CORE_NEHALEM,
-    CPU_CORE_SANDYBRIDGE,
-    CPU_HASWELL,
-    CPU_KNIGHTS_LANDING,
-    CPU_SKYLAKE_SERVER,
-    CPU_ARM
+  enum class CPU
+  {
+    XEON_ICE_LAKE,
+    CORE_ICE_LAKE,
+    CORE_TIGER_LAKE,
+    CORE_COMET_LAKE,
+    CORE_CANNON_LAKE,
+    CORE_KABY_LAKE,
+    XEON_SKY_LAKE,
+    CORE_SKY_LAKE,
+    XEON_PHI_KNIGHTS_MILL,
+    XEON_PHI_KNIGHTS_LANDING,
+    XEON_BROADWELL,
+    CORE_BROADWELL,
+    XEON_HASWELL,
+    CORE_HASWELL,
+    XEON_IVY_BRIDGE,
+    CORE_IVY_BRIDGE,
+    SANDY_BRIDGE,
+    NEHALEM,
+    CORE2,
+    CORE1,
+    ARM,
+    UNKNOWN,
   };
-
+  
   /*! get the full path to the running executable */
   std::string getExecutableFileName();
 
@@ -95,10 +109,10 @@ namespace embree
   std::string getCPUVendor();
 
   /*! get microprocessor model */
-  CPUModel getCPUModel();
+  CPU getCPUModel(); 
 
   /*! converts CPU model into string */
-  std::string stringOfCPUModel(CPUModel model);
+  std::string stringOfCPUModel(CPU model);
 
   /*! CPU features */
   static const int CPU_FEATURE_SSE    = 1 << 0;
@@ -131,8 +145,6 @@ namespace embree
   static const int CPU_FEATURE_NEON = 1 << 28;
   static const int CPU_FEATURE_NEON_2X = 1 << 29;
 
-  static const int CPU_FEATURE_PSEUDO_HIFREQ256BIT = 1 << 30;
-
   /*! get CPU features */
   int getCPUFeatures();
 
@@ -156,9 +168,6 @@ namespace embree
   static const int AVX512SKX = AVX2 | CPU_FEATURE_AVX512F | CPU_FEATURE_AVX512DQ | CPU_FEATURE_AVX512CD | CPU_FEATURE_AVX512BW | CPU_FEATURE_AVX512VL | CPU_FEATURE_ZMM_ENABLED;
   static const int NEON = CPU_FEATURE_NEON | CPU_FEATURE_SSE | CPU_FEATURE_SSE2;
   static const int NEON_2X = CPU_FEATURE_NEON_2X | AVX2;
-
-  static const int AVX_FAST = AVX | CPU_FEATURE_PSEUDO_HIFREQ256BIT;
-  static const int AVX2_FAST = AVX2 | CPU_FEATURE_PSEUDO_HIFREQ256BIT;
 
   /*! converts ISA bitvector into a string */
   std::string stringOfISA(int features);
