@@ -29,12 +29,13 @@ addons:
 
 install: skip
 
+# limit the number of build jobs(--parallel) trying to avoid build timeout for AVX2 target.
 script:
   - cat /proc/meminfo
   - cat /proc/cpuinfo
   - /bin/bash ./scripts/bootstrap-arm64-travis.sh
   - cd build-aarch64
-  - cmake --build .
+  - cmake --build . --parallel 4
   - ./verify
   - cd ../test/curve
   - make EXTRA_CXXFLAGS="-fsanitize=address" EXTRA_LDFLAGS="-fsanitize=address" EMBREE_LIB_PATH=../../build-aarch64
