@@ -125,6 +125,18 @@ $ make
 
 `EMBREE_TASKING_SYSTEM=TASKING_GCD` is provided for iOS platform.
 
+How to compile for M1 macOS
+----------------------------------
+
+You'll need arm64e build of cmake(e.g. compile from source code, use MacPorts), otherwise built binary cannot run(https://github.com/lighttransport/embree-aarch64/issues/48).
+
+```
+$ cd $EMBREE_AARCH64_REPO
+$ ./scripts/bootstrap-arm64-macos.sh
+$ cd build-arm64-macos
+$ make
+```
+
 Build monolithc embree with TBB(experimental)
 ---------------------------------------------
 
