@@ -128,7 +128,7 @@ $ make
 How to compile for M1 macOS
 ----------------------------------
 
-You'll need arm64e build of cmake(e.g. compile from source code, use MacPorts), otherwise built binary cannot run(https://github.com/lighttransport/embree-aarch64/issues/48).
+You'll need arm64 build of cmake(e.g. compile from source code, use MacPorts), otherwise built binary cannot run(https://github.com/lighttransport/embree-aarch64/issues/48).
 
 ```
 $ cd $EMBREE_AARCH64_REPO
