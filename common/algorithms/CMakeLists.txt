@@ -14,6 +14,10 @@ ADD_LIBRARY(algorithms OBJECT
  parallel_filter.cpp
 )
 
+if (TASKING_TBB)
+  TARGET_LINK_LIBRARIES(algorithms PUBLIC TBB::tbb TBB::tbbmalloc)
+endif()
+
 SET_PROPERTY(TARGET algorithms PROPERTY FOLDER common)
 SET_PROPERTY(TARGET algorithms APPEND PROPERTY COMPILE_FLAGS " ${FLAGS_LOWEST}")
 

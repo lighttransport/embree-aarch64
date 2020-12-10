@@ -764,7 +764,7 @@ namespace embree
   }
 
   void errorFunc(int error, const char* description) {
-    throw std::runtime_error(std::string("Error: ")+description);
+    std::cout << "GLFW Error: " << description << "\n";
   }
 
 #if defined(USE_GLFW)

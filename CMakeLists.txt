@@ -566,9 +566,6 @@ IF (TASKING_TBB)
   else (EMBREE_USE_EMBEDDED_TBB)
     FIND_PACKAGE(TBB REQUIRED)
   endif (EMBREE_USE_EMBEDDED_TBB)
-  INCLUDE_DIRECTORIES(${TBB_INCLUDE_DIRS})
-  message(STATUS "TBB inc: " ${TBB_INCLUDE_DIRS})
-  message(STATUS "TBB lib: " ${TBB_LIBRARIES})
 ENDIF()
 
 ##############################################################

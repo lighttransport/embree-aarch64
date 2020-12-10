@@ -70,12 +70,14 @@ MACRO (ISPC_COMPILE)
   SET(ISPC_ADDITIONAL_ARGS "")
 
   SET(ISPC_TARGET_EXT ${CMAKE_CXX_OUTPUT_EXTENSION})
+  # Set to sse2,sse4,avx,avx2 somewhere in the tutorials I can't find...
   STRING(REPLACE ";" "," ISPC_TARGET_ARGS "${ISPC_TARGETS}")
+  SET(ISPC_TARGETS "neon-i32x4")
 
   IF (CMAKE_SIZEOF_VOID_P EQUAL 8)
-    SET(ISPC_ARCHITECTURE "x86-64")
+    SET(ISPC_ARCHITECTURE "aarch64")
   ELSE()
-    SET(ISPC_ARCHITECTURE "x86")
+    SET(ISPC_ARCHITECTURE "armv7")
   ENDIF()
 
   SET(ISPC_TARGET_DIR ${CMAKE_CURRENT_BINARY_DIR})
@@ -145,7 +147,7 @@ MACRO (ISPC_COMPILE)
       --arch=${ISPC_ARCHITECTURE}
       --addressing=${EMBREE_ISPC_ADDRESSING}
       ${ISPC_OPT_FLAGS}
-      --target=${ISPC_TARGET_ARGS}
+      --target=${ISPC_TARGETS}
       --woff
       --opt=fast-math
       ${ISPC_ADDITIONAL_ARGS}
