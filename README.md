@@ -137,6 +137,61 @@ $ cd build-arm64-macos
 $ make
 ```
 
+Compiling for M1 macOS with TBB and ISPC
+----------------------------------------
+
+First you'll need to build and install TBB. Grab the source from [the TBB Github](https://github.com/oneapi-src/oneTBB)
+and build and install it with CMake. For TBB, use the CMake command below.
+It's also recommended to set an install prefix to install it locally, `-DCMAKE_INSTALL_PREFIX=<path to install>`
+
+```
+$ mkdir build && cd build
+$ cmake -DCMAKE_BUILD_TYPE=Release \
+   -DCMAKE_CXX_OSX_DEPLOYMENT_TARGET_FLAG=-mmacosx-version-min=11 \
+   -DCMAKE_C_OSX_DEPLOYMENT_TARGET_FLAG=-mmacosx-version-min=11 \
+   -DTBB_STRICT=OFF \
+   -DTBB_TEST=OFF \
+   ..
+$ make install
+```
+
+For ISPC support you'll need to build ISPC, either from the fork https://github.com/Twinklebear/ispc
+enabling the macOS + arm/neon target, or from the main repo if the pull request https://github.com/ispc/ispc/pull/1943
+has been merged. ISPC should be built using their provided build script by running `scripts/build.sh`
+from the root directory of the ISPC repo. On M1 you can pass `-j 8` to use all 8 cores when building ISPC.
+The ISPC compiler will be installed under `<ispc repo>/install/bin/`, which you'll want to add to your path.
+
+Finally, you can build Embree. If you're building with ISPC support, you'll also pass `-DEMBREE_ISPC_SUPPORT=ON`,
+If you have GLFW installed you can also set `-DEMBREE_TUTORIALS_GLFW=ON` to build the interactive tutorials.
+It's also recommended to set an install prefix to install embree locally, `-DCMAKE_INSTALL_PREFIX=<path to install>`
+
+```
+$ mkdir build && cd build
+$ cmake \
+   -DCMAKE_BUILD_TYPE=Release \
+   -DEMBREE_ARM=ON \
+   -DEMBREE_IOS=ON \
+   -DEMBREE_TASKING_SYSTEM=TBB \
+   -DEMBREE_TUTORIALS=ON \
+   -DEMBREE_RAY_PACKETS=ON \
+   -DEMBREE_MAX_ISA=AVX2 \
+   -DEMBREE_NEON_AVX2_EMULATION=ON \
+   -DAS_MAC=ON \
+   -DCMAKE_OSX_ARCHITECTURES=arm64 \
+   -DCMAKE_OSX_DEPLOYMENT_TARGET=11 \
+   -DTBB_DIR=<tbb install dir>/lib/cmake/TBB/ \
+   -DEMBREE_ISPC_SUPPORT=ON \
+   ..
+$ make install
+```
+
+To avoid warnings about failing to set thread affinity with TBB, run the tutorials with `--set_affinity 0`,
+and when creating the embree device in your code, pass `set_affinity=0` to `rtcNewDevice`:
+
+```c
+RTCDevice device = rtcNewDevice("set_affinity=0");
+```
+
 Build monolithc embree with TBB(experimental)
 ---------------------------------------------
 
