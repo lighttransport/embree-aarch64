@@ -1,4 +1,4 @@
-## Copyright 2009-2020 Intel Corporation
+## Copyright 2009-2021 Intel Corporation
 ## SPDX-License-Identifier: Apache-2.0
 
 INCLUDE(GNUInstallDirs)
@@ -115,18 +115,22 @@ ELSE()
   ENDIF()
 ENDIF()
 
-IF (WIN32 OR EMBREE_ZIP_MODE OR ANDROID)
+#IF (WIN32 OR EMBREE_ZIP_MODE OR ANDROID)
   # for local "installs" and on Windows we want the cmake config files placed
   # in the install root, such that users can point the CMake variable
   # embree_DIR just to the install folder
-  SET(EMBREE_CMAKECONFIG_DIR ".")
-  SET(EMBREE_CMAKEEXPORT_DIR "cmake")
-  SET(EMBREE_RELATIV_ROOT_DIR ".")
+#  SET(EMBREE_CMAKECONFIG_DIR ".")
+#  SET(EMBREE_CMAKEEXPORT_DIR "cmake")
+#  SET(EMBREE_RELATIVE_ROOT_DIR ".")
+#ELSE()
+SET(EMBREE_CMAKECONFIG_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/embree-${EMBREE_VERSION}")
+SET(EMBREE_CMAKEEXPORT_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/embree-${EMBREE_VERSION}")
+IF (WIN32)
+  SET(EMBREE_RELATIVE_ROOT_DIR "../../../")
 ELSE()
-  SET(EMBREE_CMAKECONFIG_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/embree-${EMBREE_VERSION}")
-  SET(EMBREE_CMAKEEXPORT_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/embree-${EMBREE_VERSION}")
-  FILE(RELATIVE_PATH EMBREE_RELATIV_ROOT_DIR "/${EMBREE_CMAKECONFIG_DIR}" "/")
+  FILE(RELATIVE_PATH EMBREE_RELATIVE_ROOT_DIR "/${EMBREE_CMAKECONFIG_DIR}" "/")
 ENDIF()
+#ENDIF()
 
 CONFIGURE_FILE(common/cmake/embree-config.cmake embree-config-install.cmake @ONLY)
 CONFIGURE_FILE(common/cmake/embree-config-version.cmake embree-config-version.cmake @ONLY)

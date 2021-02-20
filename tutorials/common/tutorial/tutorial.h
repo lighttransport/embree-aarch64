@@ -1,4 +1,4 @@
-// Copyright 2009-2020 Intel Corporation
+// Copyright 2009-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 #pragma once
@@ -55,7 +55,8 @@ namespace embree
           num++;
         }
       }
-      return sum/Ty(num);
+      if (num == 0) return 0;
+      else return sum/Ty(num);
     }
 
     std::deque<std::pair<double,Ty>> values;

@@ -1,4 +1,4 @@
-// Copyright 2009-2020 Intel Corporation
+// Copyright 2009-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 #pragma once
@@ -145,7 +145,7 @@ namespace embree
       const vfloat<K> lclipMaxZ = (node->upper_z[i] - ray.org.z) * ray.rdir.z;
   #endif
 
-  #if defined(__AVX512F__) && !defined(__AVX512ER__) // SKX
+  #if defined(__AVX512F__) // SKX
       if (K == 16)
       {
         /* use mixed float/int min/max */
@@ -160,7 +160,7 @@ namespace embree
       {
         const vfloat<K> lnearP = maxi(mini(lclipMinX, lclipMaxX), mini(lclipMinY, lclipMaxY), mini(lclipMinZ, lclipMaxZ));
         const vfloat<K> lfarP  = mini(maxi(lclipMinX, lclipMaxX), maxi(lclipMinY, lclipMaxY), maxi(lclipMinZ, lclipMaxZ));
-  #if defined(__AVX512F__) && !defined(__AVX512ER__) // SKX
+  #if defined(__AVX512F__) // SKX
         const vbool<K> lhit    = asInt(maxi(lnearP, ray.tnear)) <= asInt(mini(lfarP, ray.tfar));
   #else
         const vbool<K> lhit    = maxi(lnearP, ray.tnear) <= mini(lfarP, ray.tfar);
@@ -232,7 +232,7 @@ namespace embree
       const vfloat<K> lclipMaxZ = (vupper_z - ray.org.z) * ray.rdir.z;
 #endif
 
-#if defined(__AVX512F__) && !defined(__AVX512ER__) // SKX
+#if defined(__AVX512F__) // SKX
       if (K == 16)
       {
         /* use mixed float/int min/max */
@@ -247,7 +247,7 @@ namespace embree
       {
         const vfloat<K> lnearP = maxi(mini(lclipMinX, lclipMaxX), mini(lclipMinY, lclipMaxY), mini(lclipMinZ, lclipMaxZ));
         const vfloat<K> lfarP  = mini(maxi(lclipMinX, lclipMaxX), maxi(lclipMinY, lclipMaxY), maxi(lclipMinZ, lclipMaxZ));
-#if defined(__AVX512F__) && !defined(__AVX512ER__) // SKX
+#if defined(__AVX512F__) // SKX
         const vbool<K> lhit    = asInt(maxi(lnearP, ray.tnear)) <= asInt(mini(lfarP, ray.tfar));
 #else
         const vbool<K> lhit    = maxi(lnearP, ray.tnear) <= mini(lfarP, ray.tfar);
@@ -282,7 +282,7 @@ namespace embree
       const float round_up   = 1.0f+3.0f*float(ulp);
       const float round_down = 1.0f-3.0f*float(ulp);
 
-#if defined(__AVX512F__) && !defined(__AVX512ER__) // SKX
+#if defined(__AVX512F__) // SKX
       if (K == 16)
       {
         const vfloat<K> lnearP = round_down*maxi(min(lclipMinX, lclipMaxX), min(lclipMinY, lclipMaxY), min(lclipMinZ, lclipMaxZ));
@@ -511,7 +511,7 @@ namespace embree
       const vfloat<K> lclipMaxZ = (upper_z[i] - ray.org.z) * ray.rdir.z;
   #endif
 
-  #if defined(__AVX512F__) && !defined(__AVX512ER__) // SKX
+  #if defined(__AVX512F__) // SKX
       if (K == 16)
       {
         /* use mixed float/int min/max */
@@ -526,7 +526,7 @@ namespace embree
       {
         const vfloat<K> lnearP = maxi(mini(lclipMinX, lclipMaxX), mini(lclipMinY, lclipMaxY), mini(lclipMinZ, lclipMaxZ));
         const vfloat<K> lfarP  = mini(maxi(lclipMinX, lclipMaxX), maxi(lclipMinY, lclipMaxY), maxi(lclipMinZ, lclipMaxZ));
-  #if defined(__AVX512F__) && !defined(__AVX512ER__) // SKX
+  #if defined(__AVX512F__) // SKX
         const vbool<K> lhit    = asInt(maxi(lnearP, ray.tnear)) <= asInt(mini(lfarP, ray.tfar));
   #else
         const vbool<K> lhit    = maxi(lnearP, ray.tnear) <= mini(lfarP, ray.tfar);
@@ -573,12 +573,12 @@ namespace embree
     {
         assert(movemask(node->validMask()) & ((size_t)1 << i));
 
-        const vfloat<K> lower_x = node->dequantizeLowerX(i,time);
-        const vfloat<K> upper_x = node->dequantizeUpperX(i,time);
-        const vfloat<K> lower_y = node->dequantizeLowerY(i,time);
-        const vfloat<K> upper_y = node->dequantizeUpperY(i,time);
-        const vfloat<K> lower_z = node->dequantizeLowerZ(i,time);
-        const vfloat<K> upper_z = node->dequantizeUpperZ(i,time);
+        const vfloat<K> lower_x = node->template dequantizeLowerX<K>(i,time);
+        const vfloat<K> upper_x = node->template dequantizeUpperX<K>(i,time);
+        const vfloat<K> lower_y = node->template dequantizeLowerY<K>(i,time);
+        const vfloat<K> upper_y = node->template dequantizeUpperY<K>(i,time);
+        const vfloat<K> lower_z = node->template dequantizeLowerZ<K>(i,time);
+        const vfloat<K> upper_z = node->template dequantizeUpperZ<K>(i,time);
         
 #if defined(__aarch64__)
         const vfloat<K> lclipMinX = madd(lower_x, ray.rdir.x, ray.neg_org_rdir.x);
@@ -617,12 +617,12 @@ namespace embree
     {
         assert(movemask(node->validMask()) & ((size_t)1 << i));
 
-        const vfloat<K> lower_x = node->dequantizeLowerX(i,time);
-        const vfloat<K> upper_x = node->dequantizeUpperX(i,time);
-        const vfloat<K> lower_y = node->dequantizeLowerY(i,time);
-        const vfloat<K> upper_y = node->dequantizeUpperY(i,time);
-        const vfloat<K> lower_z = node->dequantizeLowerZ(i,time);
-        const vfloat<K> upper_z = node->dequantizeUpperZ(i,time);
+        const vfloat<K> lower_x = node->template dequantizeLowerX<K>(i,time);
+        const vfloat<K> upper_x = node->template dequantizeUpperX<K>(i,time);
+        const vfloat<K> lower_y = node->template dequantizeLowerY<K>(i,time);
+        const vfloat<K> upper_y = node->template dequantizeUpperY<K>(i,time);
+        const vfloat<K> lower_z = node->template dequantizeLowerZ<K>(i,time);
+        const vfloat<K> upper_z = node->template dequantizeUpperZ<K>(i,time);
 
         const vfloat<K> lclipMinX = (lower_x - ray.org.x) * ray.rdir.x;
         const vfloat<K> lclipMinY = (lower_y - ray.org.y) * ray.rdir.y;

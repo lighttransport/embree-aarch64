@@ -1,7 +1,15 @@
-// Copyright 2009-2020 Intel Corporation
+// Copyright 2009-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 #pragma once
+
+#define vboolf vboolf_impl
+#define vboold vboold_impl
+#define vint vint_impl
+#define vuint vuint_impl
+#define vllong vllong_impl
+#define vfloat vfloat_impl
+#define vdouble vdouble_impl
 
 namespace embree
 {
@@ -251,7 +259,19 @@ namespace embree
     }
   };
 
+  ////////////////////////////////////////////////////////////////////////////////
+  /// Load/Store
+  ////////////////////////////////////////////////////////////////////////////////
 
+  template<> struct mem<vfloat4>
+  {
+    static __forceinline vfloat4 load (const vboolf4& mask, const void* ptr) { return vfloat4::load (mask,ptr); }
+    static __forceinline vfloat4 loadu(const vboolf4& mask, const void* ptr) { return vfloat4::loadu(mask,ptr); }
+    
+    static __forceinline void store (const vboolf4& mask, void* ptr, const vfloat4& v) { vfloat4::store (mask,ptr,v); }
+    static __forceinline void storeu(const vboolf4& mask, void* ptr, const vfloat4& v) { vfloat4::storeu(mask,ptr,v); }
+  };
+    
   ////////////////////////////////////////////////////////////////////////////////
   /// Unary Operators
   ////////////////////////////////////////////////////////////////////////////////
@@ -718,12 +738,9 @@ namespace embree
   template<> __forceinline float extract<3>(const vfloat4& b) {
       return b[3];
   }
-#elif defined (__SSE4_1__) && !defined(__GNUC__)
-  template<int i> __forceinline float extract(const vfloat4& a) { return _mm_cvtss_f32(_mm_extract_ps(a,i)); }
-  template<> __forceinline float extract<0>(const vfloat4& a) { return _mm_cvtss_f32(a); }
 #else
-  template<int i> __forceinline float extract(const vfloat4& a) { return _mm_cvtss_f32(shuffle<i,i,i,i>(a)); }
-  template<> __forceinline float extract<0>(const vfloat4& a) { return _mm_cvtss_f32(a); }
+  template<int i> __forceinline float extract   (const vfloat4& a) { return _mm_cvtss_f32(shuffle<i>(a)); }
+  template<>      __forceinline float extract<0>(const vfloat4& a) { return _mm_cvtss_f32(a); }
 #endif
 
 
@@ -923,3 +940,11 @@ namespace embree
   }
 
 }
+
+#undef vboolf
+#undef vboold
+#undef vint
+#undef vuint
+#undef vllong
+#undef vfloat
+#undef vdouble

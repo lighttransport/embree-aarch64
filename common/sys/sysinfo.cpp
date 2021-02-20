@@ -1,4 +1,4 @@
-// Copyright 2009-2020 Intel Corporation
+// Copyright 2009-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 #include "sysinfo.h"
@@ -406,8 +406,7 @@ namespace embree
     if (isa == SSE42) return "SSE4.2";
     if (isa == AVX) return "AVX";
     if (isa == AVX2) return "AVX2";
-    if (isa == AVX512KNL) return "AVX512KNL";
-    if (isa == AVX512SKX) return "AVX512SKX";
+    if (isa == AVX512) return "AVX512";
     if (isa == NEON) return "NEON";    
     if (isa == NEON_2X) return "2xNEON";
     return "UNKNOWN";
@@ -429,8 +428,7 @@ namespace embree
     if (hasISA(features,AVX)) v += "AVX ";
     if (hasISA(features,AVXI)) v += "AVXI ";
     if (hasISA(features,AVX2)) v += "AVX2 ";
-    if (hasISA(features,AVX512KNL)) v += "AVX512KNL ";
-    if (hasISA(features,AVX512SKX)) v += "AVX512SKX ";
+    if (hasISA(features,AVX512)) v += "AVX512 ";
     if (hasISA(features,NEON)) v += "NEON ";
     if (hasISA(features,NEON_2X)) v += "2xNEON ";
     return v;

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## Copyright 2009-2020 Intel Corporation
+## Copyright 2009-2021 Intel Corporation
 ## SPDX-License-Identifier: Apache-2.0
 
 # to make sure we do not include nor link against wrong TBB
@@ -66,8 +66,7 @@ cmake \
 -D EMBREE_ISA_SSE42=ON \
 -D EMBREE_ISA_AVX=ON \
 -D EMBREE_ISA_AVX2=ON \
--D EMBREE_ISA_AVX512KNL=ON \
--D EMBREE_ISA_AVX512SKX=ON \
+-D EMBREE_ISA_AVX512=ON \
 -D EMBREE_TUTORIALS_OPENIMAGEIO=OFF \
 -D EMBREE_TUTORIALS_LIBJPEG=OFF \
 -D EMBREE_TUTORIALS_LIBPNG=OFF \

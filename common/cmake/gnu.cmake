@@ -1,4 +1,4 @@
-## Copyright 2009-2020 Intel Corporation
+## Copyright 2009-2021 Intel Corporation
 ## SPDX-License-Identifier: Apache-2.0
 
 MACRO(_SET_IF_EMPTY VAR VALUE)
@@ -14,8 +14,7 @@ ELSE ()
   _SET_IF_EMPTY(FLAGS_SSE42 "-msse4.2")
   _SET_IF_EMPTY(FLAGS_AVX   "-mavx")
   _SET_IF_EMPTY(FLAGS_AVX2  "-mf16c -mavx2 -mfma -mlzcnt -mbmi -mbmi2")
-  _SET_IF_EMPTY(FLAGS_AVX512KNL "-mavx512f -mavx512pf -mavx512er -mavx512cd -mf16c -mavx2 -mfma -mlzcnt -mbmi -mbmi2")
-  _SET_IF_EMPTY(FLAGS_AVX512SKX "-mavx512f -mavx512dq -mavx512cd -mavx512bw -mavx512vl -mf16c -mavx2 -mfma -mlzcnt -mbmi -mbmi2 -mprefer-vector-width=256")
+  _SET_IF_EMPTY(FLAGS_AVX512 "-mavx512f -mavx512dq -mavx512cd -mavx512bw -mavx512vl -mf16c -mavx2 -mfma -mlzcnt -mbmi -mbmi2 -mprefer-vector-width=256") 
 ENDIF ()
 
 OPTION(EMBREE_IGNORE_CMAKE_CXX_FLAGS "When enabled Embree ignores default CMAKE_CXX_FLAGS." OFF)

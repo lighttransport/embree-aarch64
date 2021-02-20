@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-## Copyright 2009-2020 Intel Corporation
+## Copyright 2009-2021 Intel Corporation
 ## SPDX-License-Identifier: Apache-2.0
 
 import sys
@@ -212,10 +212,8 @@ def runConfig(config):
     else                 : conf.append("-D EMBREE_ISA_AVX=OFF")
     if "AVX2"      in isa: conf.append("-D EMBREE_ISA_AVX2=ON")
     else                 : conf.append("-D EMBREE_ISA_AVX2=OFF")
-    if "AVX512KNL" in isa: conf.append("-D EMBREE_ISA_AVX512KNL=ON")
-    else                 : conf.append("-D EMBREE_ISA_AVX512KNL=OFF")
-    if "AVX512SKX" in isa: conf.append("-D EMBREE_ISA_AVX512SKX=ON")
-    else                 : conf.append("-D EMBREE_ISA_AVX512SKX=OFF")
+    if "AVX512" in isa: conf.append("-D EMBREE_ISA_AVX512=ON")
+    else                 : conf.append("-D EMBREE_ISA_AVX512=OFF")
 
   if "tasking" in config:
     tasking  = config["tasking"]
@@ -392,19 +390,11 @@ def runConfig(config):
     cmd = ""
     for e in env: cmd += e + " && "
     cmd += ctest+"\n"
-    if OS == "windows":
-      try:
-        subprocess.check_call(cmd, stderr=subprocess.STDOUT, shell=True)
-      except subprocess.CalledProcessError as e:
-        sys.stderr.write("windows test invokation failed with return code "+str(e.returncode))
-        sys.exit(1)
-    else:
-      # need to use bash shell as we configured environment modules only for bash
-      process = subprocess.Popen(['bash','-l'], stdin=subprocess.PIPE)
-      process.communicate(input=cmd.encode("utf-8"))
-      if process.returncode != 0:
-        sys.stderr.write("test invokation failed with return code "+str(process.returncode))
-        sys.exit(1)
+    try:
+      subprocess.check_call(cmd, stderr=subprocess.STDOUT, shell=True)
+    except subprocess.CalledProcessError as e:
+      sys.stderr.write("test invokation failed with return code "+str(e.returncode))
+      sys.exit(1)
     
 def parseCommandLine(argv):
   global g_cdash

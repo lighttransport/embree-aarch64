@@ -1,4 +1,4 @@
-// Copyright 2009-2020 Intel Corporation
+// Copyright 2009-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 #include "library.h"
@@ -27,7 +27,11 @@ namespace embree
 
   /* returns address of a symbol from the library */
   void* getSymbol(lib_t lib, const std::string& sym) {
+<<<<<<< HEAD
     return reinterpret_cast<void *>(GetProcAddress(HMODULE(lib),sym.c_str()));
+=======
+    return (void*)GetProcAddress(HMODULE(lib),sym.c_str());
+>>>>>>> v3.12.2
   }
 
   /* closes the shared library */

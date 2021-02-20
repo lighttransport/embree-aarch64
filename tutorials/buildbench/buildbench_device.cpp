@@ -1,4 +1,4 @@
-// Copyright 2009-2020 Intel Corporation
+// Copyright 2009-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 #include "../common/tutorial/tutorial_device.h"
@@ -204,6 +204,7 @@ namespace embree {
     else
       FATAL("unknown flags");
 
+    if (iterations == 0) iterations = 1;
     std::cout << primitives << " primitives, " << objects << " objects, "
               << time/iterations << " s, "
               << 1.0 / (time/iterations) * primitives / 1000000.0 << " Mprims/s" << std::endl;
@@ -244,6 +245,7 @@ namespace embree {
     else
       FATAL("unknown flags");
 
+    if (iterations == 0) iterations = 1;
     std::cout << primitives << " primitives, " << objects << " objects, "
               << time/iterations << " s, "
               << 1.0 / (time/iterations) * primitives / 1000000.0 << " Mprims/s" << std::endl;
@@ -295,6 +297,7 @@ namespace embree {
     else
       FATAL("unknown flags");
 
+    if (iterations == 0) iterations = 1;
     std::cout << primitives << " primitives, " << objects << " objects, "
               << time/iterations << " s, "
               << 1.0 / (time/iterations) * primitives / 1000000.0 << " Mprims/s" << std::endl;
@@ -353,6 +356,8 @@ namespace embree {
         time += t1 - t0;
         iterations++;
       }
+
+      if (iterations == 0) iterations = 1;
       std::cout << primitives << " primitives, " << objects << " objects, "
                 << time/iterations << " s, "
                 << 1.0 / (time/iterations) * primitives / 1000000.0 << " Mprims/s" << std::endl;
@@ -380,6 +385,7 @@ namespace embree {
     else
       FATAL("unknown flags");
 
+    if (iterations == 0) iterations = 1;
     std::cout << primitives << " primitives, " << objects << " objects, "
               << time/iterations << " s, "
               << 1.0 / (time/iterations) * primitives / 1000000.0 << " Mprims/s" << std::endl;

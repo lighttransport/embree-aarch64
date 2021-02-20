@@ -1,4 +1,4 @@
-// Copyright 2009-2020 Intel Corporation
+// Copyright 2009-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 
 #pragma once
@@ -20,7 +20,7 @@
 #endif
 
 #if defined(__WIN32__) && !defined(__MINGW32__)
-#if (__MSV_VER <= 1700)
+#if defined(_MSC_VER) && (_MSC_VER <= 1700)
 namespace std
 {
   __forceinline bool isinf ( const float x ) { return _finite(x) == 0; }
@@ -146,7 +146,7 @@ namespace embree
 #endif
   }
 
-#if defined(__WIN32__) && (__MSC_VER <= 1700) && !defined(__MINGW32__)
+#if defined(__WIN32__) && defined(_MSC_VER) && (_MSC_VER <= 1700) && !defined(__MINGW32__)
   __forceinline float nextafter(float x, float y) { if ((x<y) == (x>0)) return x*(1.1f+float(ulp)); else return x*(0.9f-float(ulp)); }
   __forceinline double nextafter(double x, double y) { return _nextafter(x, y); }
   __forceinline int roundf(float f) { return (int)(f + 0.5f); }
@@ -372,6 +372,17 @@ __forceinline float nmsub ( const float a, const float b, const float c) { retur
 #endif
   }
 
+  /*  load/store */
+  template<typename Ty> struct mem;
+ 
+  template<> struct mem<float> {
+    static __forceinline float load (bool mask, const void* ptr) { return mask ? *(float*)ptr : 0.0f; }
+    static __forceinline float loadu(bool mask, const void* ptr) { return mask ? *(float*)ptr : 0.0f; }
+  
+    static __forceinline void store (bool mask, void* ptr, const float v) { if (mask) *(float*)ptr = v; }
+    static __forceinline void storeu(bool mask, void* ptr, const float v) { if (mask) *(float*)ptr = v; }
+  };
+  
   /*! bit reverse operation */
   template<class T>
     __forceinline T bitReverse(const T& vin)

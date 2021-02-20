@@ -1,4 +1,4 @@
-## Copyright 2009-2020 Intel Corporation
+## Copyright 2009-2021 Intel Corporation
 ## SPDX-License-Identifier: Apache-2.0
 
 MACRO(_SET_IF_EMPTY VAR VALUE)
@@ -15,8 +15,7 @@ ELSE ()
   _SET_IF_EMPTY(FLAGS_SSE42 "-msse4.2")
   _SET_IF_EMPTY(FLAGS_AVX   "-mavx")
   _SET_IF_EMPTY(FLAGS_AVX2  "-mf16c -mavx2 -mfma -mlzcnt -mbmi -mbmi2")
-  _SET_IF_EMPTY(FLAGS_AVX512KNL "-march=knl")
-  _SET_IF_EMPTY(FLAGS_AVX512SKX "-march=skx")
+  _SET_IF_EMPTY(FLAGS_AVX512 "-march=skx")
 ENDIF ()
 
 IF (WIN32)
