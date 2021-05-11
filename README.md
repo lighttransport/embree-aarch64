@@ -1,3 +1,9 @@
+# ⚠️Warning!
+
+Thanks to Intel Embree starting to support ARM(aarch64) from v3.13.0, embree-aarch64 development will be discontinued in the near future(2021 Fall expected).
+
+embree-aarch64 users are encouraged to migrate from embree-aarch64 to Intel Embree.
+
 % Embree: High Performance Ray Tracing Kernels 3.12.1
 % Intel Corporation
 
