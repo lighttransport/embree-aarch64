@@ -1,8 +1,10 @@
 # ⚠️Warning!
 
-Thanks to Intel Embree starting to support ARM(aarch64) from v3.13.0, embree-aarch64 development will be discontinued in the near future(2021 Fall expected).
+Thanks to Intel Embree starting to support ARM(aarch64) from v3.13.0, embree-aarch64 development was basically discontinued in Fall 2021.
 
 embree-aarch64 users are encouraged to migrate from embree-aarch64 to Intel Embree.
+
+Paid support(from $10,000 USD) of maintaining and embedding Intel Embree for Android and iOS(e.g. add raytraced shadow for Photo app, photo realistic rendering of Avatar(including subsurface and hair)), and emerging architecture(e.g. RISC-V + SIMD op) are available through us. Please contact us(https://keybase.io/lighttransport chat recommended) if you want paid support.
 
 % Embree: High Performance Ray Tracing Kernels 3.12.1
 % Intel Corporation
